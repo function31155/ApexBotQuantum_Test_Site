@@ -88,8 +88,6 @@
         }
         /* General disabled style, overridden for register/next-btn specifically */
         button:disabled {
-            /* This general disabled style will be used for branch/day/time buttons
-               if they were disabled by attribute, but register/next-btn have specific styles */
             background-color: #333; /* Darker gray for other disabled buttons */
             color: #777;
             cursor: not-allowed;
@@ -289,7 +287,7 @@
             const daysInMonth = new Date(specificYear, specificMonth + 1, 0).getDate(); // Get last day of the month
 
             for (let i = 1; i <= daysInMonth; i++) {
-                const dayString = `${i} Jul`; // Display as "1 Jul", "2 Jul", etc.
+                const dayString = `${i}`; // Display only the day number
                 dayContainer.innerHTML += `<button class="MuiPickersDay-root day-button">${dayString}</button>`;
             }
             const dayButtons = dayContainer.querySelectorAll('.day-button');
@@ -362,7 +360,7 @@
             if (e.target.classList.contains('day-button') && !e.target.classList.contains('Mui-disabled')) {
                 document.querySelectorAll('.day-button').forEach(b => b.classList.remove('selected'));
                 e.target.classList.add('selected');
-                selections.date = e.target.textContent.trim();
+                selections.date = e.target.textContent.trim(); // Just the day number
                 const nextBtn = document.querySelector('#page-date .next-btn');
                 nextBtn.disabled = false;
                 nextBtn.classList.add('enabled'); // Enable and make green
