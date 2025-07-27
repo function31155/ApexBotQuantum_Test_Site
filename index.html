@@ -230,6 +230,7 @@
         const pages = document.querySelectorAll('.page');
         const selections = { branch: null, date: null, time: null };
         let startTime; // Variable to store the start time of the test
+        let isCountdownFinished = false; // New: Tracks if countdown is complete
 
         function showPage(pageId) {
             pages.forEach(page => page.classList.remove('active'));
@@ -248,6 +249,7 @@
             // Set initial state for the register button (gray and disabled)
             registerBtn.disabled = true;
             registerBtn.classList.remove('enabled'); 
+            isCountdownFinished = false; // Reset countdown status
             
             countdownText.style.display = 'block';
             timerSpan.textContent = seconds;
@@ -259,6 +261,7 @@
                     countdownText.style.display = 'none';
                     registerBtn.disabled = false;
                     registerBtn.classList.add('enabled'); // Add enabled class to make it green
+                    isCountdownFinished = true; // Set countdown as finished
                 }
             }, 1000);
         }
@@ -329,7 +332,14 @@
 
         // --- Event Listeners ---
         // Register button listener - now enabled via class 'enabled'
-        document.querySelector('#page-register .register').addEventListener('click', () => showPage('page-branch'));
+        document.querySelector('#page-register .register').addEventListener('click', () => {
+            // Only proceed if countdown is truly finished
+            if (isCountdownFinished) {
+                showPage('page-branch');
+            } else {
+                console.log("Register button not active yet. Countdown not finished.");
+            }
+        });
         
         // Next button listener for Branch selection
         document.querySelector('#page-branch .next-btn').addEventListener('click', () => showPage('page-date'));
@@ -418,6 +428,7 @@
             const registerBtn = document.querySelector('#page-register .register');
             registerBtn.classList.remove('enabled'); // Remove green styling on reset
             registerBtn.disabled = true; // Ensure it's disabled for countdown
+            isCountdownFinished = false; // Reset countdown status on reset
 
             finalConfirmBtn.style.display = 'none';
             finalConfirmBtn.classList.remove('enabled'); // Remove green from final confirm
