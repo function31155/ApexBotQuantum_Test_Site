@@ -15,7 +15,7 @@
             min-height: 100vh;
             margin: 0;
             text-align: center;
-            overflow: hidden; /* Added for cleaner look */
+            overflow: hidden;
         }
         .container {
             background-color: #16213e;
@@ -44,7 +44,7 @@
         
         /* Register button specific styles */
         button.register {
-            background-color: #888; /* Gray when disabled */
+            background-color: #888; /* Gray when disabled - Initial state */
             color: #ccc;
             cursor: not-allowed;
             border: none;
@@ -52,7 +52,7 @@
             margin: 8px;
             border-radius: 8px;
             font-size: 16px;
-            transition: background-color 0.5s ease;
+            transition: background-color 0.5s ease, color 0.5s ease; /* Added color transition */
         }
         button.register.enabled {
             background-color: #28a745; /* Green when enabled */
@@ -73,6 +73,13 @@
             cursor: not-allowed;
             opacity: 0.5;
         }
+        /* Specific override for disabled register button to keep its gray color */
+        button.register:disabled {
+            background-color: #888;
+            color: #ccc;
+            opacity: 1; /* Keep full opacity for the initial gray state */
+        }
+
         .branch-item.is_full, .day-button.Mui-disabled, .timeButtons.disabledTime {
             background-color: #444;
             color: #888;
@@ -212,8 +219,10 @@
             const countdownText = document.getElementById('countdown-text');
             const registerBtn = document.querySelector('#page-register .register');
             
+            // Set initial state for the register button (gray and disabled)
             registerBtn.disabled = true;
-            registerBtn.classList.remove('enabled'); // Ensure it starts disabled and gray
+            registerBtn.classList.remove('enabled'); 
+            
             countdownText.style.display = 'block';
             timerSpan.textContent = seconds;
             countdownInterval = setInterval(() => {
@@ -223,7 +232,7 @@
                     clearInterval(countdownInterval);
                     countdownText.style.display = 'none';
                     registerBtn.disabled = false;
-                    registerBtn.classList.add('enabled'); // Add enabled class for green style
+                    registerBtn.classList.add('enabled'); // Add enabled class to make it green
                 }
             }, 1000);
         }
@@ -246,13 +255,6 @@
             const dayContainer = document.getElementById('day-container');
             dayContainer.innerHTML = '';
             // Generate dates for current month (July 2025)
-            // Assuming current year and month for a realistic test environment.
-            // In a real app, this would dynamically generate dates for the current or next few months.
-            const today = new Date();
-            const currentMonth = today.getMonth(); // 0-indexed
-            const currentYear = today.getFullYear();
-
-            // To make it relevant for the current time, let's generate dates for July 2025
             const specificMonth = 6; // July is 6 (0-indexed)
             const specificYear = 2025;
             const daysInMonth = new Date(specificYear, specificMonth + 1, 0).getDate(); // Get last day of the month
