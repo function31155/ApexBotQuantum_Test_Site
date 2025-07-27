@@ -52,7 +52,7 @@
             margin: 8px;
             border-radius: 8px;
             font-size: 16px;
-            transition: background-color 0.5s ease, color 0.5s ease; /* Added color transition */
+            transition: background-color 0.5s ease, color 0.5s ease;
         }
         button.register.enabled {
             background-color: #28a745; /* Green when enabled */
@@ -63,12 +63,34 @@
             background-color: #218838;
         }
 
+        /* Next/Confirm button specific styles */
+        button.next-btn {
+            background-color: #888; /* Gray when disabled - Initial state */
+            color: #ccc;
+            cursor: not-allowed;
+            padding: 10px 15px; /* Adjust padding if different from general button */
+            font-size: 14px; /* Adjust font-size if different from general button */
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        button.next-btn.enabled {
+            background-color: #28a745; /* Green when enabled */
+            color: white;
+            cursor: pointer;
+        }
+        button.next-btn.enabled:hover {
+            background-color: #218838;
+        }
+
         .selected {
             background-color: #e94560;
             box-shadow: 0 0 10px #e94560;
         }
+        /* General disabled style, overridden for register/next-btn specifically */
         button:disabled {
-            background-color: #333;
+            /* This general disabled style will be used for branch/day/time buttons
+               if they were disabled by attribute, but register/next-btn have specific styles */
+            background-color: #333; /* Darker gray for other disabled buttons */
             color: #777;
             cursor: not-allowed;
             opacity: 0.5;
@@ -79,6 +101,13 @@
             color: #ccc;
             opacity: 1; /* Keep full opacity for the initial gray state */
         }
+        /* Specific override for disabled next-btn to keep its gray color */
+        button.next-btn:disabled {
+            background-color: #888;
+            color: #ccc;
+            opacity: 1; /* Keep full opacity for the initial gray state */
+        }
+
 
         .branch-item.is_full, .day-button.Mui-disabled, .timeButtons.disabledTime {
             background-color: #444;
@@ -302,10 +331,16 @@
         }
 
         // --- Event Listeners ---
+        // Register button listener - now enabled via class 'enabled'
         document.querySelector('#page-register .register').addEventListener('click', () => showPage('page-branch'));
+        
+        // Next button listener for Branch selection
         document.querySelector('#page-branch .next-btn').addEventListener('click', () => showPage('page-date'));
+        
+        // Next button listener for Date selection
         document.querySelector('#page-date .next-btn').addEventListener('click', () => showPage('page-time'));
         
+        // Confirm button listener for Time selection
         document.querySelector('#page-time .next-btn').addEventListener('click', () => {
             document.getElementById('summary-branch').textContent = selections.branch;
             document.getElementById('summary-date').textContent = selections.date;
@@ -318,7 +353,9 @@
                 document.querySelectorAll('.branch-item').forEach(b => b.classList.remove('selected'));
                 e.target.classList.add('selected');
                 selections.branch = e.target.textContent.replace(' (Full)', '').trim();
-                document.querySelector('#page-branch .next-btn').disabled = false;
+                const nextBtn = document.querySelector('#page-branch .next-btn');
+                nextBtn.disabled = false;
+                nextBtn.classList.add('enabled'); // Enable and make green
             }
         });
         document.getElementById('day-container').addEventListener('click', (e) => {
@@ -326,7 +363,9 @@
                 document.querySelectorAll('.day-button').forEach(b => b.classList.remove('selected'));
                 e.target.classList.add('selected');
                 selections.date = e.target.textContent.trim();
-                document.querySelector('#page-date .next-btn').disabled = false;
+                const nextBtn = document.querySelector('#page-date .next-btn');
+                nextBtn.disabled = false;
+                nextBtn.classList.add('enabled'); // Enable and make green
             }
         });
         document.getElementById('time-container').addEventListener('click', (e) => {
@@ -334,7 +373,9 @@
                 document.querySelectorAll('.timeButtons').forEach(b => b.classList.remove('selected'));
                 e.target.classList.add('selected');
                 selections.time = e.target.textContent.replace(' (Full)', '').trim();
-                document.querySelector('#page-time .next-btn').disabled = false;
+                const nextBtn = document.querySelector('#page-time .next-btn');
+                nextBtn.disabled = false;
+                nextBtn.classList.add('enabled'); // Enable and make green
             }
         });
 
@@ -348,9 +389,11 @@
                 setTimeout(() => {
                     cloudflareCheck.style.display = 'none';
                     finalConfirmBtn.style.display = 'inline-block';
+                    finalConfirmBtn.classList.add('enabled'); // Make final confirm button green
                 }, 3000); // Simulate 3 second check
             } else {
                 finalConfirmBtn.style.display = 'none';
+                finalConfirmBtn.classList.remove('enabled'); // Remove green if unchecked
                 cloudflareCheck.style.display = 'none'; // Hide if unchecked
             }
         });
@@ -368,12 +411,27 @@
 
         // --- Reset Logic ---
         function resetTest() {
-            document.querySelectorAll('.next-btn').forEach(btn => btn.disabled = true);
+            // Disable all next buttons and remove enabled class
+            document.querySelectorAll('.next-btn').forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('enabled');
+            });
+
+            // Reset Register button state
             const registerBtn = document.querySelector('#page-register .register');
             registerBtn.classList.remove('enabled'); // Remove green styling on reset
+            registerBtn.disabled = true; // Ensure it's disabled for countdown
+
             finalConfirmBtn.style.display = 'none';
+            finalConfirmBtn.classList.remove('enabled'); // Remove green from final confirm
             termsCheckbox.checked = false;
             cloudflareCheck.style.display = 'none'; // Ensure cloudflare check is hidden on reset
+
+            // Clear selections
+            selections.branch = null;
+            selections.date = null;
+            selections.time = null;
+
             randomizeAvailability();
             showPage('page-register');
             startCountdown();
