@@ -29,7 +29,7 @@
         .page.active { display: block; }
         h2 { color: #e94560; }
 
-        /* General button styles and overridden by more specific ones below */
+        /* General button styles for selected items and common properties */
         button, .branch-item, .day-button, .timeButtons {
             background-color: #533483;
             color: white;
@@ -41,12 +41,23 @@
             font-size: 14px;
             transition: background-color 0.3s, opacity 0.3s;
         }
-        
+        .selected {
+            background-color: #e94560;
+            box-shadow: 0 0 10px #e94560;
+        }
+
+        /* Styles for disabled buttons (general fallback) */
+        button:disabled {
+            background-color: #333; /* Darker gray for other disabled buttons */
+            color: #777;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
         /* Register button specific styles */
         button.register {
             background-color: #888; /* Gray when disabled - Initial state */
             color: #ccc;
-            cursor: not-allowed;
             border: none;
             padding: 12px 20px;
             margin: 8px;
@@ -62,6 +73,13 @@
         button.register.enabled:hover {
             background-color: #218838;
         }
+        /* Override for disabled register button to keep its specific gray color */
+        button.register:disabled {
+            background-color: #888;
+            color: #ccc;
+            opacity: 1; /* Keep full opacity for the initial gray state */
+        }
+
 
         /* Next/Confirm button specific styles */
         button.next-btn {
@@ -72,7 +90,6 @@
             font-size: 14px; /* Adjust font-size if different from general button */
             transition: background-color 0.3s, color 0.3s;
         }
-
         button.next-btn.enabled {
             background-color: #28a745; /* Green when enabled */
             color: white;
@@ -81,25 +98,7 @@
         button.next-btn.enabled:hover {
             background-color: #218838;
         }
-
-        .selected {
-            background-color: #e94560;
-            box-shadow: 0 0 10px #e94560;
-        }
-        /* General disabled style, overridden for register/next-btn specifically */
-        button:disabled {
-            background-color: #333; /* Darker gray for other disabled buttons */
-            color: #777;
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-        /* Specific override for disabled register button to keep its gray color */
-        button.register:disabled {
-            background-color: #888;
-            color: #ccc;
-            opacity: 1; /* Keep full opacity for the initial gray state */
-        }
-        /* Specific override for disabled next-btn to keep its gray color */
+        /* Override for disabled next-btn to keep its specific gray color */
         button.next-btn:disabled {
             background-color: #888;
             color: #ccc;
