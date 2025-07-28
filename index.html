@@ -2,378 +2,916 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Bot Test Page (Interactive with Modals)</title>
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>JXS Booking Flow</title>
     <style>
-        body { font-family: sans-serif; background-color: #1a1a2e; color: #e0e0e0; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; text-align: center; overflow: hidden; }
-        .container { background-color: #16213e; padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); width: 90%; max-width: 800px; position: relative; } /* Added position: relative for modals */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            background-color: #000000;
+            margin: 0;
+            font-family: sans-serif;
+            padding: 0;
+        }
 
-        /* Styles for Steps content within step-container */
+        .header-banner {
+            text-align: center;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            background: linear-gradient(to right, #4f46e5, #6366f1);
+            font-size: 28px;
+            font-weight: bold;
+            color: white; /* เพิ่มสีข้อความ */
+        }
+
         .step-content {
             opacity: 0;
             transform: translateY(20px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            transition: all 0.4s ease;
         }
+
         .step-content.visible {
             opacity: 1;
             transform: translateY(0);
         }
 
-        h2 { color: #e94560; }
-        button, .branch-item, .MuiPickersDay-root, .timeButtons { background-color: #533483; color: white; border: none; padding: 10px 15px; margin: 5px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: background-color 0.3s; }
-        .selected, .clicked { background-color: #e94560; box-shadow: 0 0 10px #e94560; }
-        .branch-item.is_full, .MuiPickersDay-root.Mui-disabled, .timeButtons.disabledTime { background-color: #444; color: #888; cursor: not-allowed; }
-        
-        button.register, button.next-btn { background-color: #888; color: #ccc; cursor: not-allowed; transition: background-color 0.5s ease; }
-        button.register.enabled, button.next-btn.enabled { background-color: #28a745; color: white; cursor: pointer; }
-
-        button:disabled { background-color: #888; color: #ccc; cursor: not-allowed; opacity: 0.7; }
-        .grid-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
-        #countdown-text { color: #e94560; font-size: 18px; margin-top: 20px; }
-        .summary-info { background-color: #1a1a2e; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; }
-        .summary-info p { margin: 8px 0; font-size: 16px; }
-        .summary-info span { color: #e94560; font-weight: bold; }
-        .checkbox-container { margin: 20px 0; display: flex; justify-content: center; align-items: center; gap: 10px; }
-        #cloudflare-check { display: none; align-items: center; justify-content: center; gap: 10px; margin: 20px 0; font-size: 16px; }
-        .spinner { width: 24px; height: 24px; border: 3px solid #533483; border-top-color: #e94560; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        #success-popup { background-color: #1e1e2e; border: 1px solid #e94560; padding: 20px; margin-top: 20px; border-radius: 10px; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-
-        /* Modal Styles */
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1000; /* Sit on top */
-            left: 0;
-            top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background-color: #16213e;
-            margin: auto;
-            padding: 30px;
-            border: 1px solid #888;
-            border-radius: 15px;
-            width: 80%;
-            max-width: 600px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            position: relative;
-        }
-        .modal-content h2 { margin-top: 0; }
-        .modal-content .close {
-            color: #aaa;
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            font-size: 28px;
+        button {
+            padding: 10px 16px;
+            border-radius: 8px;
+            margin: 6px;
+            border: none;
+            background-color: #475569;
+            color: white;
             font-weight: bold;
             cursor: pointer;
         }
-        .modal-content .close:hover,
-        .modal-content .close:focus {
-            color: #e94560;
-            text-decoration: none;
+
+        button:disabled {
+            background-color: #334155;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            top: 0;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 30px 20px;
+            z-index: 1000;
+            animation: slideUpFull 0.4s ease-out;
+            overflow-y: auto;
+            border-radius: 0;
+        }
+
+        @keyframes slideUpFull {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .close {
+            float: right;
+            font-size: 24px;
             cursor: pointer;
         }
-        .branchButtons, #dateList, #timeList {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 20px;
-            max-height: 400px; /* Limit height for scroll */
-            overflow-y: auto; /* Enable scroll for many items */
-            padding-right: 10px; /* Space for scrollbar */
+
+        .modal ul,
+        .modal div {
+            padding: 0;
+            list-style: none;
+            margin-top: 10px;
         }
-        .branch-item, .MuiPickersDay-root, .timeButtons {
-            flex-grow: 1; /* Allow items to grow */
+
+        .modal li,
+        .modal button.date-btn,
+        .modal button.time-btn {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        .modal li.full {
+            color: #999;
+            background: #f3f3f3;
+            pointer-events: none;
+        }
+
+        .modal li.selected,
+        .modal button.selected {
+            background-color: #e0e7ff;
+            font-weight: bold;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .branchButtons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .branch-item {
+            background-color: #f3f3f3;
+            padding: 12px;
+            border-radius: 10px;
             text-align: center;
-            min-width: 80px; /* Minimum width for buttons */
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent;
         }
-        .modal .next-btn {
-            margin-top: 20px;
-            padding: 12px 25px;
+
+        .branch-item:hover {
+            background-color: #e0e0e0;
+        }
+
+        .branch-item.selected {
+            background-color: #22c55e;
+            color: white;
+            border-color: #16a34a;
+        }
+
+        button.register {
+            color: #333;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            cursor: not-allowed;
+            transition: all 0.3s ease-in-out;
+            background-color: rgb(222, 222, 222);
+        }
+
+        button.register.enabled { /* เปลี่ยนจาก :enabled */
+            background-color: #22c55e;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+        }
+
+        button.next-btn {
+            color: #ec7474;
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: not-allowed;
+            transition: background-color 0.3s ease;
+        }
+
+        button.next-btn.enabled { /* เปลี่ยนจาก :enabled */
+            background-color: #3b82f6;
+            color: white; /* เพิ่มสีขาว */
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+        }
+
+        button.next-btn.enabled:hover { /* เปลี่ยนจาก :enabled */
+            background-color: #2563eb;
+        }
+
+        .clicked {
+            background-color: #1976d2 !important;
+            color: white !important; /* เพิ่มสีขาว */
+        }
+
+        .selected {
+            background-color: #22c55e;
+            color: white;
+        }
+
+        .disabledTime {
+            background-color: #ccc !important;
+            color: #666 !important;
+            pointer-events: none;
+        }
+
+        .Next.center-text-btn {
+            color: #000;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
             font-size: 16px;
-            width: 100%; /* Full width in modal */
+            cursor: not-allowed;
+            transition: background-color 0.3s;
         }
-        .center-text-btn { /* for datetime modal confirm button */
+
+        .Next.center-text-btn.enabled { /* เปลี่ยนจาก :not(:disabled) */
+            background-color: #22c55e;
+            color: white; /* เพิ่มสีขาว */
+            cursor: pointer;
+        }
+
+        .mobile-container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1e293b;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Responsive adjustments from old style.css */
+        .mobile-container {
+            display: flex;
+            justify-content: center;
+            padding-top: 10px;
+        }
+
+        .warning-banner {
+            background-color: red;
+            color: white;
+            padding: 10px;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+            border-radius: 6px;
+        }
+
+        .box {
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background: #fef2f2;
+            border-radius: 12px;
+        }
+
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .open-text {
+            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .register-btn {
+            background-color: #ccc;
+            border: none;
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: not-allowed;
+        }
+
+        .register-btn.enabled {
+            background-color: #22c55e;
+            color: white;
+            cursor: pointer;
+        }
+
+        .main-info {
+            display: flex;
+            align-items: center;
+            background: #fce7f3;
+            padding: 10px;
+            border-radius: 10px;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .banner-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .event-title {
+            font-weight: bold;
+            font-size: 18px;
+            color: #111;
+            line-height: 1.4;
+        }
+
+        .countdown-container {
+            text-align: center;
+            font-size: 28px;
+            color: red;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        /* Modern Gradient Header */
+        .header-banner {
+            background: linear-gradient(135deg, #3b82f6, #9333ea);
+            color: white;
+            font-size: 32px;
+            font-weight: 700;
+            padding: 20px 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .header-banner:hover {
+            transform: scale(1.02);
+        }
+
+        /* Update .mobile-container shadow for modern glassy look */
+        .mobile-container {
+            background-color: #1e293b;
+            border-radius: 16px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            max-width: 500px;
+            margin: 20px auto;
+        }
+
+        /* Optional: Smooth fade-in for entire layout */
+        .main-container,
+        .mobile-container {
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ปรับ header ให้ใกล้ container และกลาง */
+        .header-banner {
+            margin-bottom: 12px;
+            margin-top: 24px;
+            text-align: center;
+            background: linear-gradient(135deg, #3b82f6, #9333ea);
+            color: white;
+            font-size: 28px;
+            padding: 16px 24px;
+            border-radius: 14px;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+            transition: 0.3s;
+        }
+
+        /* ลดความสูง container */
+        .mobile-container {
+            min-height: auto;
+            padding: 24px 20px;
+            background: #1e293b;
+            border-radius: 16px;
+            box-shadow: 0 0 24px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        /* กล่องหลักตรงกลางจอ */
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* เพิ่ม card สวย ๆ สำหรับ content แต่ละขั้น */
+        .step-card {
+            background: #334155;
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin-bottom: 16px;
+            width: 100%; /* เพิ่มให้เต็มความกว้างของ mobile-container */
+            max-width: 420px; /* กำหนด max-width ให้สอดคล้อง */
+        }
+
+        .step-card h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .step-card p {
+            font-size: 14px;
+            color: #cbd5e1;
+        }
+
+        /* Modal specific styles */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            overflow-y: auto;
+            animation: fadeInModal 0.3s ease;
+        }
+
+        @keyframes fadeInModal {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background-color: #1e293b;
+            color: white;
+            margin: 80px auto;
+            padding: 24px 20px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 420px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(40px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 12px;
             display: block;
-            margin-left: auto;
-            margin-right: auto;
+            text-align: center;
+            color: rgb(143, 141, 141); /* ปรับสี */
         }
+
+        .modal .close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 24px;
+            color: #838181;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .modal .close:hover {
+            color: #f87171;
+        }
+
+        #branchList .branch-item, /* แก้ไข Selector ให้ตรงกับ .branch-item */
+        .modal button.date-btn,
+        .modal button.time-btn {
+            background: #334155;
+            border: none;
+            color: rgb(167, 166, 166); /* ปรับสี */
+            padding: 12px; /* เพิ่ม padding */
+            margin: 6px; /* ปรับ margin */
+            border-radius: 999px; /* ปรับให้กลม */
+            transition: background 0.2s;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        #branchList .branch-item:hover,
+        .modal button.date-btn:hover,
+        .modal button.time-btn:hover {
+            background-color: #475569;
+        }
+
+        #branchList .branch-item.is_full { /* เปลี่ยนจาก li.full */
+            background: #475569;
+            color: #61666d;
+            pointer-events: none;
+        }
+
+        #branchList .branch-item.selected { /* เปลี่ยนจาก li.selected */
+            background-color: #22c55e;
+            color: white; /* ปรับสี */
+        }
+        
+        #dateList button, #timeList button {
+             /* Reuse common button styles or specific ones as needed */
+            background-color: #334155; /* Darker background for buttons */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            margin: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #dateList button.clicked, #timeList button.clicked {
+            background-color: #1976d2 !important;
+        }
+        #dateList button.disabledTime, #timeList button.disabledTime {
+            background-color: #666 !important;
+            color: #aaa !important;
+            cursor: not-allowed;
+        }
+
+
+        .Next.center-text-btn {
+            background-color: #3b82f6; /* Apply enabled style directly */
+            color: white;
+            font-size: 16px;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            width: 100%;
+            margin-top: 20px;
+            cursor: not-allowed;
+            opacity: 0.5;
+            transition: 0.3s;
+        }
+
+        .Next.center-text-btn.enabled { /* เปลี่ยนจาก :not(:disabled) */
+            cursor: pointer;
+            opacity: 1;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+        }
+
+        .Next.center-text-btn.enabled:hover {
+            background-color: #2563eb;
+        }
+
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+
+        .summary-info {
+            background-color: #334155; /* Darker background */
+            color: #cbd5e1; /* Lighter text color */
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .summary-info p {
+            margin: 8px 0;
+            font-size: 16px;
+        }
+        .summary-info span {
+            color: #22c55e; /* Green for highlights */
+            font-weight: bold;
+        }
+        .checkbox-container {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            color: white; /* Ensure label is visible */
+        }
+        #cloudflare-check {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            font-size: 16px;
+            color: #cbd5e1; /* Lighter text color */
+        }
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #6366f1; /* Purple */
+            border-top-color: #3b82f6; /* Blue */
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #success-popup {
+            background-color: #334155; /* Darker background */
+            border: 1px solid #22c55e; /* Green border */
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+            color: white; /* Ensure text is visible */
+        }
+        #success-popup h3 {
+            color: #22c55e; /* Green for heading */
+        }
+
+        /* Styles from original Bot Test Page */
+        body { font-family: sans-serif; background-color: #1a1a2e; color: #e0e0e0; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; text-align: center; overflow: hidden; }
+        .container { background-color: #16213e; padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); width: 90%; max-width: 800px; }
+        .page, .hidden { display: none; }
+        .page.active { display: block; }
+        h2 { color: #e94560; }
+        
+        .branch-item, .day-button, .timeButtons { background-color: #533483; color: white; border: none; padding: 10px 15px; margin: 5px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: background-color 0.3s; }
+        .branch-item.selected, .day-button.selected, .timeButtons.selected { background-color: #e94560; box-shadow: 0 0 10px #e94560; }
+        .branch-item.is_full, .day-button.Mui-disabled, .timeButtons.disabledTime { background-color: #444; color: #888; cursor: not-allowed; }
+        
+        .grid-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+        #countdown-text { color: #e94560; font-size: 18px; margin-top: 20px; }
+        .summary-info p { margin: 8px 0; font-size: 16px; }
+        .summary-info span { color: #e94560; font-weight: bold; }
+        
+        #enable-bot-prompt { background-color: #16213e; padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
-    <div id="main-container" class="container hidden">
-        <div id="step-container">
+    <div class="main-container">
+        <div class="header-banner">JXS Register</div>
+        <div class="step-card">
+            <h2>ไปกันต่อ</h2>
+            <p>ระบบลงทะเบียนของคุณพร้อมแล้ว</p>
+            
+            <div id="step-area">
+                <div id="page-register" class="page active step-content visible">
+                    <div class="countdown-container">
+                        <span id="countdown">00:00:05</span>
+                    </div>
+                    <button class="register" id="registerBtn" disabled>ลงทะเบียน</button>
+                </div>
+
+                <div id="page-terms" class="page step-content">
+                    <label style="color: white; display: block; margin-bottom: 15px;">
+                        <input class="ant-checkbox-input" name="acceptTermsAndConditions" type="checkbox">
+                        ยอมรับเงื่อนไข
+                    </label>
+
+                    <div id="cloudflare-check-simulated" style="display: none; align-items: center; justify-content: center; gap: 10px; margin: 20px 0; font-size: 16px; color: #cbd5e1;">
+                        <div class="spinner"></div><span>กำลังตรวจสอบเบราว์เซอร์ของคุณ...</span>
+                    </div>
+
+                    <button class="next-btn" id="finalConfirm" type="submit" disabled>ยืนยันขั้นสุดท้าย</button>
+                </div>
+
+                <div id="page-success-final" class="page step-content">
+                    <h2 style="color:#22c55e; margin-bottom:15px;">🎉 Booking Success!</h2>
+                    <div class="summary-info">
+                        <h3>รายละเอียดการจองของคุณ</h3>
+                        <p>สาขา: <span id="final-summary-branch"></span></p>
+                        <p>วันที่: <span id="final-summary-date"></span></p>
+                        <p>เวลา: <span id="final-summary-time"></span></p>
+                    </div>
+                    <button onclick="resetTest()">จองอีกครั้ง</button>
+                </div>
             </div>
+        </div>
     </div>
 
     <div id="branchModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Select Branch</h2>
-            <div id="branchList"></div>
-            </div>
+            <span class="modal-title">เลือกสาขา</span>
+            <span class="close">×</span>
+            <div id="branchList">
+                </div>
+        </div>
     </div>
 
     <div id="datetimeModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Select Date & Time</h2>
-            <h3>Date:</h3>
-            <div id="dateList" class="grid-container"></div>
-            <h3>Time:</h3>
-            <div id="timeList" class="grid-container"></div>
+            <span class="modal-title">เลือกวันและเวลา</span>
+            <span class="close">×</span>
+            <div id="dateList"></div>
+            <div id="timeList"></div>
+            <div class="step-group datePicketButSection visible">
+                <button class="Next center-text-btn" id="dateTimeConfirmBtn" disabled>ยืนยัน</button>
             </div>
-    </div>
-
-    <div id="enable-bot-prompt" class="container">
-        <h2>Please Enable DPbot Extension</h2>
-        <p>This test page requires the DPbot extension to be active.</p>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
     <script>
         let currentStep = 0;
-        const maxStep = 4;
+        const maxStep = 4; // Total steps: 0, 1 (branch), 2 (datetime), 3 (terms/captcha), 4 (success)
         let captchaPassed = false;
-        let selections = { branch: null, date: null, time: null }; // Global selections object
-        let startTime; // To track elapsed time
+        let selections = { branch: null, date: null, time: null };
+        let startTime; // For tracking booking time
 
-        // This replaces the individual 'page-x' divs and `showPage` logic
-        async function loadStep(step) {
-            if (step > maxStep) return;
+        const pages = {
+            0: 'page-register',
+            1: 'page-branch', // This will be handled by modal
+            2: 'page-date-time', // This will be handled by modal
+            3: 'page-terms',
+            4: 'page-success-final'
+        };
 
-            // Simulate fetching HTML for each step
-            let htmlContent = '';
-            if (step === 0) {
-                htmlContent = `
-                    <div class="step-content">
-                        <h2>Welcome to DPbot Test Rocket</h2>
-                        <p id="countdown-text">Register button will be active in <span id="countdown">5</span>s</p>
-                        <button id="registerBtn" class="register" disabled>Register</button>
-                    </div>
-                `;
-            } else if (step === 1) { // Branch selection, handled by modal. This step is a placeholder for flow
-                 // This step won't display content directly, it will trigger the modal
-            } else if (step === 2) { // Date/Time selection, handled by modal. This step is a placeholder for flow
-                 // This step won't display content directly, it will trigger the modal
-            } else if (step === 3) {
-                htmlContent = `
-                    <div class="step-content">
-                        <h2>Booking Summary</h2>
-                        <div class="summary-info">
-                            <p>Branch: <span id="summary-branch">${selections.branch || 'N/A'}</span></p>
-                            <p>Date: <span id="summary-date">${selections.date || 'N/A'}</span></p>
-                            <p>Time: <span id="summary-time">${selections.time || 'N/A'}</span></p>
-                        </div>
-                        <div class="checkbox-container">
-                            <input type="checkbox" id="terms-checkbox" name="acceptTermsAndConditions">
-                            <label for="terms-checkbox">I accept the terms and conditions</label>
-                        </div>
-                        <div id="cloudflare-check" style="display: none;"><div class="spinner"></div><span>Verifying your browser...</span></div>
-                        <button id="finalConfirm" class="next-btn" disabled>Confirm Booking</button>
-                    </div>
-                `;
-            } else if (step === 4) {
-                 htmlContent = `
-                    <div class="step-content">
-                        <h2>Confirm Final Booking</h2>
-                        <div class="summary-info">
-                            <p>Branch: <span id="confirm-summary-branch">${selections.branch || 'N/A'}</span></p>
-                            <p>Date: <span id="confirm-summary-date">${selections.date || 'N/A'}</span></p>
-                            <p>Time: <span id="confirm-summary-time">${selections.time || 'N/A'}</span></p>
-                        </div>
-                        <div class="checkbox-container">
-                            <input type="checkbox" name="acceptTermsAndConditions" id="confirmTermsCheckbox">
-                            <label for="confirmTermsCheckbox">I accept the terms and conditions</label>
-                        </div>
-                        <div class="cf-turnstile" data-sitekey="0x4AAAAAABh0BOjMe3Fn3FMt" data-theme="dark"></div>
-                        <button id="confirmBtn" class="next-btn" disabled>Confirm Booking</button>
-                    </div>
-                `;
-            } else if (step === 5) { // Success step
-                const endTime = new Date();
-                const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
-                htmlContent = `
-                    <div class="step-content">
-                        <h2 style="font-size: 28px; color: #28a745;">Booking Successful!</h2>
-                        <div id="success-popup" class="summary-info">
-                            <h3>Your Booking Details</h3>
-                            <p>Branch: <span id="final-summary-branch">${selections.branch}</span></p>
-                            <p>Date: <span id="final-summary-date">${selections.date}</span></p>
-                            <p>Time: <span id="final-summary-time">${selections.time}</span></p>
-                            <p>Total Time: <span id="final-summary-elapsed">${elapsedTime}</span> seconds</p>
-                        </div>
-                        <button onclick="resetTest()">Run Again</button>
-                    </div>
-                `;
+        // Function to show a specific page
+        function showPage(stepId) {
+            const allPages = document.querySelectorAll('.page');
+            allPages.forEach(page => {
+                page.classList.remove('active');
+                page.classList.remove('visible'); // Remove visible for transitions
+            });
+            const currentPage = document.getElementById(pages[stepId]);
+            if (currentPage) {
+                currentPage.classList.add('active');
+                setTimeout(() => currentPage.classList.add('visible'), 50); // Add transition effect
             }
+        }
 
-
-            const container = document.getElementById("step-container");
-            container.innerHTML = htmlContent;
-
-            const content = container.querySelector(".step-content");
-            if (content) {
-                setTimeout(() => content.classList.add("visible"), 50);
-            }
+        // --- Main Logic from script.js ---
+        async function loadStepUI(step) { // Renamed to avoid confusion with showPage
+            // This function now *prepares* the UI for a step, or shows a static page
+            // Modals will still be opened directly.
 
             if (step === 0) {
-                startTime = new Date(); // Start timing from step 0
+                showPage(0);
                 const countdownEl = document.getElementById("countdown");
                 const registerBtn = document.getElementById("registerBtn");
                 let secondsLeft = 5;
+                registerBtn.disabled = true;
+                registerBtn.classList.remove('enabled');
+                countdownEl.textContent = `00:00:0${secondsLeft}`;
+
+                startTime = new Date(); // Start timer when register page loads
+
                 const timer = setInterval(() => {
                     if (secondsLeft <= 0) {
                         clearInterval(timer);
                         countdownEl.textContent = "เปิดแล้ว!";
                         registerBtn.disabled = false;
-                        registerBtn.classList.add("enabled"); // Add enabled class for styling
+                        registerBtn.classList.add('enabled');
                     } else {
-                        countdownEl.textContent = `${String(Math.floor(secondsLeft / 60)).padStart(2, '0')}:${String(secondsLeft % 60).padStart(2, '0')}`;
+                        countdownEl.textContent = `00:00:0${secondsLeft}`;
                         secondsLeft--;
                     }
                 }, 1000);
-                registerBtn.addEventListener("click", () => {
-                    openBranchModal();
-                });
-            }
+            } else if (step === 3) {
+                showPage(3);
+                const checkbox = document.querySelector("#page-terms input[name='acceptTermsAndConditions']");
+                const nextBtn = document.getElementById("finalConfirm");
+                const cloudflareSimulated = document.getElementById("cloudflare-check-simulated");
 
-            if (step === 3) {
-                const termsCheckbox = document.getElementById('terms-checkbox');
-                const cloudflareCheck = document.getElementById('cloudflare-check');
-                const finalConfirm = document.getElementById("finalConfirm"); // Changed from finalConfirmBtn
-
-                if (termsCheckbox && finalConfirm) {
-                    finalConfirm.disabled = true; // Initially disabled
-
-                    termsCheckbox.addEventListener('change', () => {
-                        if (termsCheckbox.checked) {
-                            cloudflareCheck.style.display = 'flex';
-                            setTimeout(() => {
-                                cloudflareCheck.style.display = 'none';
-                                finalConfirm.disabled = false;
-                                finalConfirm.classList.add('enabled');
-                            }, 3000);
-                        } else {
-                            finalConfirm.disabled = true;
-                            finalConfirm.classList.remove('enabled');
-                            cloudflareCheck.style.display = 'none';
-                        }
-                    });
-
-                    finalConfirm.addEventListener("click", () => {
-                        if (!finalConfirm.disabled) {
-                            currentStep = 4;
-                            loadStep(currentStep);
-                        }
-                    });
-                }
-            }
-
-
-            if (step === 4) {
-                const confirmBookingBtn = document.getElementById("confirmBtn");
-                const checkbox = document.getElementById("confirmTermsCheckbox"); // Use specific ID for step 4 checkbox
-
-                if (typeof turnstile !== 'undefined') {
-                    const tsDiv = document.querySelector('.cf-turnstile');
-                    if (tsDiv) {
-                        turnstile.render(tsDiv, {
-                            sitekey: '0x4AAAAAABh0BOjMe3Fn3FMt', // This is a dummy sitekey for demonstration
-                            theme: 'dark',
-                            callback: onCaptchaSuccess
-                        });
-                    }
-                }
-
-                if (checkbox && confirmBookingBtn) {
-                    confirmBookingBtn.disabled = true; // Disable until conditions met
-
-                    // Initial check
-                    confirmBookingBtn.disabled = !(checkbox.checked && captchaPassed);
+                if (checkbox && nextBtn) {
+                    nextBtn.disabled = true; // ปิดไว้ก่อนจนกว่าเงื่อนไขครบ
+                    nextBtn.classList.remove('enabled');
+                    cloudflareSimulated.style.display = 'none';
+                    checkbox.checked = false; // Reset checkbox on step 3 load
 
                     checkbox.addEventListener("change", () => {
-                        confirmBookingBtn.disabled = !(checkbox.checked && captchaPassed);
+                        if (checkbox.checked) {
+                            cloudflareSimulated.style.display = 'flex';
+                            nextBtn.disabled = true;
+                            nextBtn.classList.remove('enabled');
+                            setTimeout(() => {
+                                cloudflareSimulated.style.display = 'none';
+                                captchaPassed = true; // Simulate captcha passed
+                                nextBtn.disabled = !(checkbox.checked && captchaPassed);
+                                if (!nextBtn.disabled) nextBtn.classList.add('enabled');
+                            }, 3000); // Simulate 3 seconds for captcha check
+                        } else {
+                            cloudflareSimulated.style.display = 'none';
+                            nextBtn.disabled = true;
+                            nextBtn.classList.remove('enabled');
+                            captchaPassed = false;
+                        }
                     });
 
-                    confirmBookingBtn.addEventListener("click", (e) => {
-                        e.preventDefault();
-                        if (!confirmBookingBtn.disabled) {
-                            // Proceed to final success page (step 5)
-                            currentStep = 5;
-                            loadStep(currentStep);
-                            launchConfetti();
+                    nextBtn.addEventListener("click", () => {
+                        if (checkbox.checked && captchaPassed) {
+                            currentStep = 4;
+                            loadStepUI(currentStep);
                         }
                     });
                 }
+            } else if (step === 4) {
+                showPage(4);
+                const endTime = new Date();
+                const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+
+                document.getElementById('final-summary-branch').textContent = selections.branch;
+                document.getElementById('final-summary-date').textContent = selections.date;
+                document.getElementById('final-summary-time').textContent = selections.time;
+                // document.getElementById('final-summary-elapsed').textContent = elapsedTime; // If you want to show elapsed time
+
+                launchConfetti();
+                // showSuccessPopup("🎉 Booking Success!"); // This is a floating popup, not a page
             }
         }
 
+        // --- Modal Functions from script.js ---
         function openBranchModal() {
             const modal = document.getElementById("branchModal");
             const closeBtn = modal.querySelector(".close");
             const list = modal.querySelector("#branchList");
-            modal.style.display = "flex"; // Use flex to center content
-            
+            modal.style.display = "block";
             closeBtn.onclick = () => { modal.style.display = "none"; };
 
-            // Randomize availability for branches
-            list.innerHTML = ""; // Clear before adding new branches
-
-            const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld",
+            const branches = [
+                "Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld",
                 "MEGABANGNA", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square",
                 "Central Westgate", "Central Chiangmai", "Icon Siam"
             ];
-            const branchesToMakeFull = Math.floor(Math.random() * 2) + 1; // 1 or 2 branches full
-            let shuffledBranches = [...branches].sort(() => 0.5 - Math.random());
-            let fullBranches = shuffledBranches.slice(0, branchesToMakeFull);
 
-            let selectedBranchItem = null; // To track the currently selected element
+            list.innerHTML = ""; // Clear existing content
+
+            const container = document.createElement("div");
+            container.className = "branchButtons";
+            container.id = "branch-container-modal"; // Renamed ID to avoid conflict
+
+            let selected = null;
 
             const nextBtn = document.createElement("button");
             nextBtn.textContent = "Next";
             nextBtn.className = "next-btn";
             nextBtn.disabled = true;
+            nextBtn.classList.remove('enabled'); // Ensure it starts disabled
+            nextBtn.style.marginTop = "20px";
             nextBtn.onclick = () => {
                 modal.style.display = "none";
-                currentStep = 2; // Move to date/time selection step
                 openDateTimeModal();
             };
 
             branches.forEach(b => {
                 const div = document.createElement("div");
                 div.className = "branch-item";
-                const isFull = fullBranches.includes(b);
+                div.textContent = b;
+                // Simulate some branches as full, as in the original Bot Test Page
+                const isFull = Math.random() < 0.2; // 20% chance to be full
                 if (isFull) {
-                    div.classList.add("is_full");
-                    div.textContent = b + " (Full)";
-                } else {
-                    div.textContent = b;
+                    div.classList.add('is_full');
+                    div.textContent += ' (เต็ม)';
                 }
-                
+
                 div.onclick = () => {
-                    if (isFull) return; // Do nothing if branch is full
-                    if (selectedBranchItem) {
-                        selectedBranchItem.classList.remove("selected");
-                    }
+                    if (div.classList.contains('is_full')) return; // Cannot select full branches
+                    container.querySelectorAll(".branch-item").forEach(el => el.classList.remove("selected"));
                     div.classList.add("selected");
-                    selectedBranchItem = div;
-                    selections.branch = b; // Store selected branch
+                    selected = b;
+                    selections.branch = selected; // Store selection
                     nextBtn.disabled = false;
                     nextBtn.classList.add('enabled');
                 };
-                list.appendChild(div);
+                container.appendChild(div);
             });
 
-            // Append next button
+            list.appendChild(container);
             list.appendChild(nextBtn);
         }
 
@@ -382,96 +920,86 @@
             const closeBtn = modal.querySelector(".close");
             const dateList = modal.querySelector("#dateList");
             const timeList = modal.querySelector("#timeList");
-            modal.style.display = "flex"; // Use flex to center content
+            const confirmBtn = modal.querySelector("#dateTimeConfirmBtn"); // Get the confirm button
+
+            modal.style.display = "block";
             closeBtn.onclick = () => { modal.style.display = "none"; };
 
             const dates = Array.from({ length: 31 }, (_, i) => i + 1);
             const times = [
                 "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30",
                 "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30",
-                "20:00", "20:30" // Removed 21:00, 21:30, 22:00, 22:30 to match original time list
+                "20:00", "20:30", "21:00", "21:30", "22:00", "22:30"
             ];
+            const disabledTimes = ["12:30", "20:00"]; // Example disabled times
 
             dateList.innerHTML = "";
             timeList.innerHTML = "";
 
-            let selectedDateElement = null;
-            let selectedTimeElement = null;
+            let selectedDate = null;
+            let selectedTime = null;
 
-            // Dates - Randomize disabled days
-            const dayButtonsArray = [];
-            for (let i = 1; i <= 31; i++) {
+            // 📅 วันที่
+            dates.forEach(d => {
                 const btn = document.createElement("button");
-                btn.className = "MuiPickersDay-root"; // Used MuiPickersDay-root as per original CSS
-                btn.textContent = i;
-                dayButtonsArray.push(btn); // Store for random disabling
-                dateList.appendChild(btn);
-            }
+                btn.className = "MuiButtonBase-root MuiPickersDay-root MuiPickersDay-dayWithMargin date-btn"; // Added date-btn for consistency
+                btn.textContent = d;
+                // Simulate some dates as disabled randomly
+                const isDisabledDate = Math.random() < 0.1; // 10% chance
+                if (isDisabledDate) {
+                    btn.classList.add('disabledTime'); // Use disabledTime for consistency
+                    btn.disabled = true;
+                }
 
-            const daysToDisable = Math.floor(Math.random() * 2) + 1; // 1 or 2 days disabled
-            let shuffledDates = [...dayButtonsArray].sort(() => 0.5 - Math.random());
-            for (let i = 0; i < daysToDisable; i++) {
-                shuffledDates[i].classList.add('Mui-disabled');
-            }
-
-
-            dayButtonsArray.forEach(btn => {
                 btn.onclick = () => {
-                    if (btn.classList.contains('Mui-disabled')) return;
-                    if (selectedDateElement) {
-                        selectedDateElement.classList.remove("selected"); // Use "selected" for consistency
-                    }
-                    btn.classList.add("selected");
-                    selectedDateElement = btn;
-                    selections.date = btn.textContent; // Store selected date
+                    if (btn.disabled) return;
+                    selectedDate = d;
+                    selections.date = d; // Store selection
+                    dateList.querySelectorAll(".date-btn").forEach(b => b.classList.remove("clicked"));
+                    btn.classList.add("clicked");
                     checkDateTimeValid();
                 };
+                dateList.appendChild(btn);
             });
 
-            // Times - Randomize disabled times
-            const timeButtonsArray = [];
+            // ⏰ เวลา
             times.forEach(t => {
                 const btn = document.createElement("button");
                 btn.className = "timeButtons";
                 btn.textContent = t;
-                timeButtonsArray.push(btn); // Store for random disabling
+
+                const isDisabledTime = disabledTimes.includes(t) || Math.random() < 0.1; // Add more random disabled times
+                if (isDisabledTime) {
+                    btn.classList.add("disabledTime");
+                    btn.disabled = true;
+                    btn.textContent += ' (เต็ม)';
+                }
+
+                btn.onclick = () => {
+                    if (btn.disabled) return;
+                    selectedTime = t;
+                    selections.time = t; // Store selection
+                    timeList.querySelectorAll(".timeButtons").forEach(b => b.classList.remove("clicked"));
+                    btn.classList.add("clicked");
+                    checkDateTimeValid();
+                };
+
                 timeList.appendChild(btn);
             });
 
-            const timesToDisable = Math.floor(Math.random() * 2) + 1; // 1 or 2 times disabled
-            let shuffledTimes = [...timeButtonsArray].sort(() => 0.5 - Math.random());
-            for (let i = 0; i < timesToDisable; i++) {
-                shuffledTimes[i].classList.add('disabledTime');
-                shuffledTimes[i].textContent += ' (Full)';
-            }
-
-
-            timeButtonsArray.forEach(btn => {
-                btn.onclick = () => {
-                    if (btn.classList.contains('disabledTime')) return;
-                    if (selectedTimeElement) {
-                        selectedTimeElement.classList.remove("selected"); // Use "selected" for consistency
-                    }
-                    btn.classList.add("selected");
-                    selectedTimeElement = btn;
-                    selections.time = btn.textContent.replace(' (Full)', '').trim(); // Store selected time
-                    checkDateTimeValid();
-                };
-            });
-
-            const confirmBtn = document.createElement("button");
-            confirmBtn.className = "next-btn center-text-btn";
-            confirmBtn.textContent = "Confirm";
             confirmBtn.disabled = true;
+            confirmBtn.classList.remove('enabled');
+
             confirmBtn.onclick = () => {
-                modal.style.display = "none";
-                currentStep = 3; // Move to summary step
-                loadStep(currentStep);
+                if (!confirmBtn.disabled) {
+                    modal.style.display = "none";
+                    currentStep = 3; // Go to terms/captcha page
+                    loadStepUI(currentStep); // Load the terms and conditions page
+                }
             };
-            timeList.parentElement.appendChild(confirmBtn); // Append after timeList
 
             function checkDateTimeValid() {
-                if (selectedDateElement && selectedTimeElement) {
+                if (selectedDate && selectedTime) {
                     confirmBtn.disabled = false;
                     confirmBtn.classList.add('enabled');
                 } else {
@@ -505,41 +1033,31 @@
             })();
         }
 
-        // Modified to fit the success page
-        function showSuccessPopup(message = "Booking Success!") {
-            // No longer creating a separate popup, directly updating the success page content
-            // The success message is now part of step 5 HTML content
-        }
-
-        function onCaptchaSuccess(token) {
-            captchaPassed = true;
-            const checkbox = document.getElementById("confirmTermsCheckbox"); // Specific checkbox for step 4
-            const confirmBtn = document.getElementById("confirmBtn");
-
-            if (checkbox && checkbox.checked) {
-                confirmBtn.disabled = false;
-                confirmBtn.classList.add('enabled');
-            }
-        }
-
+        // --- Reset function from Bot Test Page ---
         window.resetTest = function() {
             currentStep = 0;
+            selections = { branch: null, date: null, time: null };
             captchaPassed = false;
-            selections = { branch: null, date: null, time: null }; // Reset selections
-            loadStep(currentStep); // Restart the process
+
+            const finalConfirmBtn = document.getElementById("finalConfirm");
+            finalConfirmBtn.disabled = true;
+            finalConfirmBtn.classList.remove('enabled');
+            document.querySelector("#page-terms input[name='acceptTermsAndConditions']").checked = false;
+
+            // Re-initialize the first step countdown
+            loadStepUI(currentStep);
         }
 
-        const mainContainer = document.getElementById('main-container');
-        const enableBotPrompt = document.getElementById('enable-bot-prompt');
+        // Initial load of the first step when the page is ready
+        document.addEventListener("DOMContentLoaded", () => {
+            loadStepUI(currentStep);
+        });
 
-        const checkForBot = setInterval(() => {
-            if (document.body.dataset.dpbotEnabled === 'true') {
-                clearInterval(checkForBot);
-                enableBotPrompt.classList.add('hidden');
-                mainContainer.classList.remove('hidden');
-                loadStep(currentStep); // Load initial step
-            }
-        }, 500);
+        // Event Listeners for main page buttons
+        document.getElementById("registerBtn").addEventListener("click", () => {
+            openBranchModal();
+        });
+
     </script>
 </body>
 </html>
