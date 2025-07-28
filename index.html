@@ -1,256 +1,256 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <title>Bot Test Page (Final Interactive)</title>
-    <style>
-        body { font-family: sans-serif; background-color: #1a1a2e; color: #e0e0e0; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; text-align: center; overflow: hidden; }
-        .container { background-color: #16213e; padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); width: 90%; max-width: 800px; }
-        .page, .hidden { display: none; }
-        .page.active { display: block; }
-        h2 { color: #e94560; }
-        button, .branch-item, .day-button, .timeButtons { background-color: #533483; color: white; border: none; padding: 10px 15px; margin: 5px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: background-color 0.3s; }
-        .selected { background-color: #e94560; box-shadow: 0 0 10px #e94560; }
-        .branch-item.is_full, .day-button.Mui-disabled, .timeButtons.disabledTime { background-color: #444; color: #888; cursor: not-allowed; }
-        button.register, button.next-btn { background-color: #888; color: #ccc; cursor: not-allowed; transition: background-color 0.5s ease; }
-        button.register.enabled, button.next-btn.enabled { background-color: #28a745; color: white; cursor: pointer; }
-        button:disabled { background-color: #888; color: #ccc; cursor: not-allowed; opacity: 0.7; }
-        .grid-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
-        #countdown-text { color: #e94560; font-size: 18px; margin-top: 20px; }
-        .summary-info { background-color: #1a1a2e; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; }
-        .summary-info p { margin: 8px 0; font-size: 16px; }
-        .summary-info span { color: #e94560; font-weight: bold; }
-        .checkbox-container { margin: 20px 0; display: flex; justify-content: center; align-items: center; gap: 10px; }
-        #cloudflare-check { display: none; align-items: center; justify-content: center; gap: 10px; margin: 20px 0; font-size: 16px; }
-        .spinner { width: 24px; height: 24px; border: 3px solid #533483; border-top-color: #e94560; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        #success-popup { background-color: #1e1e2e; border: 1px solid #e94560; padding: 20px; margin-top: 20px; border-radius: 10px; }
-    </style>
+    <meta charset="UTF-8">
+    <title>Bot Test Page (Final Interactive)</title>
+    <style>
+        body { font-family: sans-serif; background-color: #1a1a2e; color: #e0e0e0; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; text-align: center; overflow: hidden; }
+        .container { background-color: #16213e; padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); width: 90%; max-width: 800px; }
+        .page, .hidden { display: none; }
+        .page.active { display: block; }
+        h2 { color: #e94560; }
+        button, .branch-item, .day-button, .timeButtons { background-color: #533483; color: white; border: none; padding: 10px 15px; margin: 5px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: background-color 0.3s; }
+        .selected { background-color: #e94560; box-shadow: 0 0 10px #e94560; }
+        .branch-item.is_full, .day-button.Mui-disabled, .timeButtons.disabledTime { background-color: #444; color: #888; cursor: not-allowed; }
+        button.register, button.next-btn { background-color: #888; color: #ccc; cursor: not-allowed; transition: background-color 0.5s ease; }
+        button.register.enabled, button.next-btn.enabled { background-color: #28a745; color: white; cursor: pointer; }
+        button:disabled { background-color: #888; color: #ccc; cursor: not-allowed; opacity: 0.7; }
+        .grid-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+        #countdown-text { color: #e94560; font-size: 18px; margin-top: 20px; }
+        .summary-info { background-color: #1a1a2e; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; }
+        .summary-info p { margin: 8px 0; font-size: 16px; }
+        .summary-info span { color: #e94560; font-weight: bold; }
+        .checkbox-container { margin: 20px 0; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        #cloudflare-check { display: none; align-items: center; justify-content: center; gap: 10px; margin: 20px 0; font-size: 16px; }
+        .spinner { width: 24px; height: 24px; border: 3px solid #533483; border-top-color: #e94560; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #success-popup { background-color: #1e1e2e; border: 1px solid #e94560; padding: 20px; margin-top: 20px; border-radius: 10px; }
+    </style>
 </head>
 <body>
-    <div id="main-container" class="container hidden">
-        <div id="page-register" class="page active">
-            <h2>Welcome to DPbot Test Rocket</h2>
-            <p id="countdown-text">Register button will be active in <span id="countdown-timer">5</span>s</p>
-            <button class="register" disabled>Register</button>
-        </div>
-        <div id="page-branch" class="page">
-            <h2>Select Branch</h2>
-            <div id="branch-container" class="grid-container"></div>
-            <button class="next-btn" disabled>Next</button>
-        </div>
-        <div id="page-date" class="page">
-            <h2>Select Date</h2>
-            <div id="day-container" class="grid-container"></div>
-            <button class="next-btn" disabled>Next</button>
-        </div>
-        <div id="page-time" class="page">
-            <h2>Select Time</h2>
-            <div id="time-container" class="grid-container"></div>
-            <button class="next-btn" disabled>Confirm</button>
-        </div>
-        <div id="page-summary" class="page">
-            <h2>Booking Summary</h2>
-            <div class="summary-info"><p>Branch: <span id="summary-branch"></span></p><p>Date: <span id="summary-date"></span></p><p>Time: <span id="summary-time"></span></p></div>
-            <div class="checkbox-container"><input type="checkbox" id="terms-checkbox"><label for="terms-checkbox">I accept the terms and conditions</label></div>
-            <div id="cloudflare-check"><div class="spinner"></div><span>Verifying your browser...</span></div>
-            <button id="final-confirm-btn" class="next-btn" style="display: none;">Confirm Booking</button>
-        </div>
-        <div id="page-success" class="page">
-            <h2 style="font-size: 28px; color: #28a745;">Booking Successful!</h2>
-            <div id="success-popup" class="summary-info"><h3>Your Booking Details</h3><p>Branch: <span id="final-summary-branch"></span></p><p>Date: <span id="final-summary-date"></span></p><p>Time: <span id="final-summary-time"></span></p><p>Total Time: <span id="final-summary-elapsed"></span> seconds</p></div>
-            <button onclick="resetTest()">Run Again</button>
-        </div>
-    </div>
-    <div id="enable-bot-prompt" class="container">
-        <h2>Please Enable DPbot Extension</h2>
-        <p>This test page requires the DPbot extension to be active.</p>
-    </div>
+    <div id="main-container" class="container hidden">
+        <div id="page-register" class="page active">
+            <h2>Welcome to DPbot Test Rocket</h2>
+            <p id="countdown-text">Register button will be active in <span id="countdown-timer">5</span>s</p>
+            <button class="register" disabled>Register</button>
+        </div>
+        <div id="page-branch" class="page">
+            <h2>Select Branch</h2>
+            <div id="branch-container" class="grid-container"></div>
+            <button class="next-btn" disabled>Next</button>
+        </div>
+        <div id="page-date" class="page">
+            <h2>Select Date</h2>
+            <div id="day-container" class="grid-container"></div>
+            <button class="next-btn" disabled>Next</button>
+        </div>
+        <div id="page-time" class="page">
+            <h2>Select Time</h2>
+            <div id="time-container" class="grid-container"></div>
+            <button class="next-btn" disabled>Confirm</button>
+        </div>
+        <div id="page-summary" class="page">
+            <h2>Booking Summary</h2>
+            <div class="summary-info"><p>Branch: <span id="summary-branch"></span></p><p>Date: <span id="summary-date"></span></p><p>Time: <span id="summary-time"></span></p></div>
+            <div class="checkbox-container"><input type="checkbox" id="terms-checkbox"><label for="terms-checkbox">I accept the terms and conditions</label></div>
+            <div id="cloudflare-check"><div class="spinner"></div><span>Verifying your browser...</span></div>
+            <button id="final-confirm-btn" class="next-btn" style="display: none;">Confirm Booking</button>
+        </div>
+        <div id="page-success" class="page">
+            <h2 style="font-size: 28px; color: #28a745;">Booking Successful!</h2>
+            <div id="success-popup" class="summary-info"><h3>Your Booking Details</h3><p>Branch: <span id="final-summary-branch"></span></p><p>Date: <span id="final-summary-date"></span></p><p>Time: <span id="final-summary-time"></span></p><p>Total Time: <span id="final-summary-elapsed"></span> seconds</p></div>
+            <button onclick="resetTest()">Run Again</button>
+        </div>
+    </div>
+    <div id="enable-bot-prompt" class="container">
+        <h2>Please Enable DPbot Extension</h2>
+        <p>This test page requires the DPbot extension to be active.</p>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-    <script>
-        const mainContainer = document.getElementById('main-container');
-        const enableBotPrompt = document.getElementById('enable-bot-prompt');
-        const pages = document.querySelectorAll('.page');
-        const selections = { branch: null, date: null, time: null };
-        let startTime;
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script>
+        const mainContainer = document.getElementById('main-container');
+        const enableBotPrompt = document.getElementById('enable-bot-prompt');
+        const pages = document.querySelectorAll('.page');
+        const selections = { branch: null, date: null, time: null };
+        let startTime;
 
-        const checkForBot = setInterval(() => {
-            if (document.body.dataset.dpbotEnabled === 'true') {
-                clearInterval(checkForBot);
-                enableBotPrompt.classList.add('hidden');
-                mainContainer.classList.remove('hidden');
-                initializeTestSite();
-            }
-        }, 500);
-        
-        function initializeTestSite() {
-            function showPage(pageId) {
-                pages.forEach(page => page.classList.remove('active'));
-                document.getElementById(pageId).classList.add('active');
-            }
+        const checkForBot = setInterval(() => {
+            if (document.body.dataset.dpbotEnabled === 'true') {
+                clearInterval(checkForBot);
+                enableBotPrompt.classList.add('hidden');
+                mainContainer.classList.remove('hidden');
+                initializeTestSite();
+            }
+        }, 500);
+        
+        function initializeTestSite() {
+            function showPage(pageId) {
+                pages.forEach(page => page.classList.remove('active'));
+                document.getElementById(pageId).classList.add('active');
+            }
 
-            let countdownInterval;
-            function startCountdown() {
-                startTime = new Date();
-                let seconds = 5;
-                const timerSpan = document.getElementById('countdown-timer');
-                const countdownText = document.getElementById('countdown-text');
-                const registerBtn = document.querySelector('#page-register .register');
-                registerBtn.disabled = true;
-                registerBtn.classList.remove('enabled');
-                countdownText.style.display = 'block';
-                timerSpan.textContent = seconds;
-                countdownInterval = setInterval(() => {
-                    seconds--;
-                    timerSpan.textContent = seconds;
-                    if (seconds <= 0) {
-                        clearInterval(countdownInterval);
-                        countdownText.textContent = 'Register is now open!';
-                        registerBtn.disabled = false;
-                        registerBtn.classList.add('enabled');
-                    }
-                }, 1000);
-            }
+            let countdownInterval;
+            function startCountdown() {
+                startTime = new Date();
+                let seconds = 5;
+                const timerSpan = document.getElementById('countdown-timer');
+                const countdownText = document.getElementById('countdown-text');
+                const registerBtn = document.querySelector('#page-register .register');
+                registerBtn.disabled = true;
+                registerBtn.classList.remove('enabled');
+                countdownText.style.display = 'block';
+                timerSpan.textContent = seconds;
+                countdownInterval = setInterval(() => {
+                    seconds--;
+                    timerSpan.textContent = seconds;
+                    if (seconds <= 0) {
+                        clearInterval(countdownInterval);
+                        countdownText.textContent = 'Register is now open!';
+                        registerBtn.disabled = false;
+                        registerBtn.classList.add('enabled');
+                    }
+                }, 1000);
+            }
 
-            function randomizeAvailability() {
-                const branchContainer = document.getElementById('branch-container');
-                branchContainer.innerHTML = '';
-                const branches = ["Terminal 21", "Centralworld", "Central Ladprao", "Fashion Island", "MEGABANGNA", "Siam Center", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai"];
-                const branchesToMakeFull = Math.floor(Math.random() * 2) + 1;
-                let shuffledBranches = [...branches].sort(() => 0.5 - Math.random());
-                let fullBranches = shuffledBranches.slice(0, branchesToMakeFull);
-                branches.forEach(branchName => {
-                    const isFull = fullBranches.includes(branchName);
-                    branchContainer.innerHTML += `<div class="branch-item ${isFull ? 'is_full' : ''}">${branchName} ${isFull ? '(Full)' : ''}</div>`;
-                });
-                
-                const dayContainer = document.getElementById('day-container');
-                dayContainer.innerHTML = '';
-                let dayHTML = '';
-                for (let i = 1; i <= 31; i++) {
-                    dayHTML += `<button class="MuiPickersDay-root day-button">${i}</button>`;
-                }
-                dayContainer.innerHTML = dayHTML;
-                const dayButtons = dayContainer.querySelectorAll('.day-button');
-                const daysToDisable = Math.floor(Math.random() * 2) + 1;
-                for(let i=0; i < daysToDisable; i++) { dayButtons[Math.floor(Math.random() * dayButtons.length)].classList.add('Mui-disabled'); }
+            function randomizeAvailability() {
+                const branchContainer = document.getElementById('branch-container');
+                branchContainer.innerHTML = '';
+                const branches = ["Terminal 21", "Centralworld", "Central Ladprao", "Fashion Island", "MEGABANGNA", "Siam Center", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai"];
+                const branchesToMakeFull = Math.floor(Math.random() * 2) + 1;
+                let shuffledBranches = [...branches].sort(() => 0.5 - Math.random());
+                let fullBranches = shuffledBranches.slice(0, branchesToMakeFull);
+                branches.forEach(branchName => {
+                    const isFull = fullBranches.includes(branchName);
+                    branchContainer.innerHTML += `<div class="branch-item ${isFull ? 'is_full' : ''}">${branchName} ${isFull ? '(Full)' : ''}</div>`;
+                });
+                
+                const dayContainer = document.getElementById('day-container');
+                dayContainer.innerHTML = '';
+                let dayHTML = '';
+                for (let i = 1; i <= 31; i++) {
+                    dayHTML += `<button class="MuiPickersDay-root day-button">${i}</button>`;
+                }
+                dayContainer.innerHTML = dayHTML;
+                const dayButtons = dayContainer.querySelectorAll('.day-button');
+                const daysToDisable = Math.floor(Math.random() * 2) + 1;
+                for(let i=0; i < daysToDisable; i++) { dayButtons[Math.floor(Math.random() * dayButtons.length)].classList.add('Mui-disabled'); }
 
-                const timeContainer = document.getElementById('time-container');
-                timeContainer.innerHTML = '';
-                const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30"];
-                let timeHTML = '';
-                times.forEach(time => { timeHTML += `<div class="timeButtons">${time}</div>`; });
-                timeContainer.innerHTML = timeHTML;
-                const timeButtons = timeContainer.querySelectorAll('.timeButtons');
-                const timesToDisable = Math.floor(Math.random() * 2) + 1;
-                for(let i=0; i < timesToDisable; i++) { 
-                    const randomBtn = timeButtons[Math.floor(Math.random() * timeButtons.length)];
-                    randomBtn.classList.add('disabledTime');
-                    randomBtn.textContent += ' (Full)';
-                }
-            }
+                const timeContainer = document.getElementById('time-container');
+                timeContainer.innerHTML = '';
+                const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30"];
+                let timeHTML = '';
+                times.forEach(time => { timeHTML += `<div class="timeButtons">${time}</div>`; });
+                timeContainer.innerHTML = timeHTML;
+                const timeButtons = timeContainer.querySelectorAll('.timeButtons');
+                const timesToDisable = Math.floor(Math.random() * 2) + 1;
+                for(let i=0; i < timesToDisable; i++) { 
+                    const randomBtn = timeButtons[Math.floor(Math.random() * timeButtons.length)];
+                    randomBtn.classList.add('disabledTime');
+                    randomBtn.textContent += ' (Full)';
+                }
+            }
 
-            function launchConfetti() {
-                const duration = 3 * 1000, animationEnd = Date.now() + duration, defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-                function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-                const interval = setInterval(function() {
-                    const timeLeft = animationEnd - Date.now();
-                    if (timeLeft <= 0) return clearInterval(interval);
-                    const particleCount = 50 * (timeLeft / duration);
-                    confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
-                    confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
-                }, 250);
-            }
+            function launchConfetti() {
+                const duration = 3 * 1000, animationEnd = Date.now() + duration, defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+                function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+                const interval = setInterval(function() {
+                    const timeLeft = animationEnd - Date.now();
+                    if (timeLeft <= 0) return clearInterval(interval);
+                    const particleCount = 50 * (timeLeft / duration);
+                    confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+                    confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+                }, 250);
+            }
 
-            document.querySelector('#page-register .register').addEventListener('click', (e) => { if (!e.target.disabled) showPage('page-branch'); });
-            document.querySelector('#page-branch .next-btn').addEventListener('click', (e) => { if (!e.target.disabled) showPage('page-date'); });
-            document.querySelector('#page-date .next-btn').addEventListener('click', (e) => { if (!e.target.disabled) showPage('page-time'); });
-            document.querySelector('#page-time .next-btn').addEventListener('click', (e) => {
-                if (e.target.disabled) return;
-                document.getElementById('summary-branch').textContent = selections.branch;
-                document.getElementById('summary-date').textContent = selections.date;
-                document.getElementById('summary-time').textContent = selections.time;
-                showPage('page-summary');
-            });
-            
-            document.getElementById('branch-container').addEventListener('click', (e) => {
-                if (e.target.classList.contains('branch-item') && !e.target.classList.contains('is_full')) {
-                    document.querySelectorAll('.branch-item').forEach(b => b.classList.remove('selected'));
-                    e.target.classList.add('selected');
-                    selections.branch = e.target.textContent.replace(' (Full)', '').trim();
-                    const nextBtn = document.querySelector('#page-branch .next-btn');
-                    nextBtn.disabled = false;
-                    nextBtn.classList.add('enabled');
-                }
-            });
-            document.getElementById('day-container').addEventListener('click', (e) => {
-                if (e.target.classList.contains('day-button') && !e.target.classList.contains('Mui-disabled')) {
-                    document.querySelectorAll('.day-button').forEach(b => b.classList.remove('selected'));
-                    e.target.classList.add('selected');
-                    selections.date = e.target.textContent.trim();
-                    const nextBtn = document.querySelector('#page-date .next-btn');
-                    nextBtn.disabled = false;
-                    nextBtn.classList.add('enabled');
-                }
-            });
-            document.getElementById('time-container').addEventListener('click', (e) => {
-                if (e.target.classList.contains('timeButtons') && !e.target.classList.contains('disabledTime')) {
-                    document.querySelectorAll('.timeButtons').forEach(b => b.classList.remove('selected'));
-                    e.target.classList.add('selected');
-                    selections.time = e.target.textContent.replace(' (Full)', '').trim();
-                    const nextBtn = document.querySelector('#page-time .next-btn');
-                    nextBtn.disabled = false;
-                    nextBtn.classList.add('enabled');
-                }
-            });
+            document.querySelector('#page-register .register').addEventListener('click', (e) => { if (!e.target.disabled) showPage('page-branch'); });
+            document.querySelector('#page-branch .next-btn').addEventListener('click', (e) => { if (!e.target.disabled) showPage('page-date'); });
+            document.querySelector('#page-date .next-btn').addEventListener('click', (e) => { if (!e.target.disabled) showPage('page-time'); });
+            document.querySelector('#page-time .next-btn').addEventListener('click', (e) => {
+                if (e.target.disabled) return;
+                document.getElementById('summary-branch').textContent = selections.branch;
+                document.getElementById('summary-date').textContent = selections.date;
+                document.getElementById('summary-time').textContent = selections.time;
+                showPage('page-summary');
+            });
+            
+            document.getElementById('branch-container').addEventListener('click', (e) => {
+                if (e.target.classList.contains('branch-item') && !e.target.classList.contains('is_full')) {
+                    document.querySelectorAll('.branch-item').forEach(b => b.classList.remove('selected'));
+                    e.target.classList.add('selected');
+                    selections.branch = e.target.textContent.replace(' (Full)', '').trim();
+                    const nextBtn = document.querySelector('#page-branch .next-btn');
+                    nextBtn.disabled = false;
+                    nextBtn.classList.add('enabled');
+                }
+            });
+            document.getElementById('day-container').addEventListener('click', (e) => {
+                if (e.target.classList.contains('day-button') && !e.target.classList.contains('Mui-disabled')) {
+                    document.querySelectorAll('.day-button').forEach(b => b.classList.remove('selected'));
+                    e.target.classList.add('selected');
+                    selections.date = e.target.textContent.trim();
+                    const nextBtn = document.querySelector('#page-date .next-btn');
+                    nextBtn.disabled = false;
+                    nextBtn.classList.add('enabled');
+                }
+            });
+            document.getElementById('time-container').addEventListener('click', (e) => {
+                if (e.target.classList.contains('timeButtons') && !e.target.classList.contains('disabledTime')) {
+                    document.querySelectorAll('.timeButtons').forEach(b => b.classList.remove('selected'));
+                    e.target.classList.add('selected');
+                    selections.time = e.target.textContent.replace(' (Full)', '').trim();
+                    const nextBtn = document.querySelector('#page-time .next-btn');
+                    nextBtn.disabled = false;
+                    nextBtn.classList.add('enabled');
+                }
+            });
 
-            const termsCheckbox = document.getElementById('terms-checkbox');
-            const cloudflareCheck = document.getElementById('cloudflare-check');
-            const finalConfirmBtn = document.getElementById('final-confirm-btn');
+            const termsCheckbox = document.getElementById('terms-checkbox');
+            const cloudflareCheck = document.getElementById('cloudflare-check');
+            const finalConfirmBtn = document.getElementById('final-confirm-btn');
 
-            termsCheckbox.addEventListener('change', () => {
-                if (termsCheckbox.checked) {
-                    cloudflareCheck.style.display = 'flex';
-                    setTimeout(() => {
-                        cloudflareCheck.style.display = 'none';
-                        finalConfirmBtn.style.display = 'inline-block';
-                        finalConfirmBtn.classList.add('enabled');
-                    }, 3000);
-                } else {
-                    finalConfirmBtn.style.display = 'none';
-                    finalConfirmBtn.classList.remove('enabled');
-                }
-            });
+            termsCheckbox.addEventListener('change', () => {
+                if (termsCheckbox.checked) {
+                    cloudflareCheck.style.display = 'flex';
+                    setTimeout(() => {
+                        cloudflareCheck.style.display = 'none';
+                        finalConfirmBtn.style.display = 'inline-block';
+                        finalConfirmBtn.classList.add('enabled');
+                    }, 3000);
+                } else {
+                    finalConfirmBtn.style.display = 'none';
+                    finalConfirmBtn.classList.remove('enabled');
+                }
+            });
 
-            finalConfirmBtn.addEventListener('click', () => {
-                const endTime = new Date();
-                const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
-                document.getElementById('final-summary-branch').textContent = selections.branch;
-                document.getElementById('final-summary-date').textContent = selections.date;
-                document.getElementById('final-summary-time').textContent = selections.time;
-                document.getElementById('final-summary-elapsed').textContent = elapsedTime;
-                showPage('page-success');
-                launchConfetti();
-            });
+            finalConfirmBtn.addEventListener('click', () => {
+                const endTime = new Date();
+                const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+                document.getElementById('final-summary-branch').textContent = selections.branch;
+                document.getElementById('final-summary-date').textContent = selections.date;
+                document.getElementById('final-summary-time').textContent = selections.time;
+                document.getElementById('final-summary-elapsed').textContent = elapsedTime;
+                showPage('page-success');
+                launchConfetti();
+            });
 
-            window.resetTest = function() {
-                document.querySelectorAll('.next-btn').forEach(btn => {
-                    btn.disabled = true;
-                    btn.classList.remove('enabled');
-                });
-                const registerBtn = document.querySelector('#page-register .register');
-                registerBtn.classList.remove('enabled');
-                finalConfirmBtn.style.display = 'none';
-                termsCheckbox.checked = false;
-                randomizeAvailability();
-                showPage('page-register');
-                startCountdown();
-            }
+            window.resetTest = function() {
+                document.querySelectorAll('.next-btn').forEach(btn => {
+                    btn.disabled = true;
+                    btn.classList.remove('enabled');
+                });
+                const registerBtn = document.querySelector('#page-register .register');
+                registerBtn.classList.remove('enabled');
+                finalConfirmBtn.style.display = 'none';
+                termsCheckbox.checked = false;
+                randomizeAvailability();
+                showPage('page-register');
+                startCountdown();
+            }
 
-            randomizeAvailability();
-            startCountdown();
-        }
-    </script>
+            randomizeAvailability();
+            startCountdown();
+        }
+    </script>
 </body>
 </html>
