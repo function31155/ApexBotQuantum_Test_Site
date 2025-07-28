@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>JXS Booking Flow</title>
     <style>
-        body { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; background-color: #000000; margin: 0; font-family: sans-serif; padding: 0; }
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #000000; margin: 0; font-family: sans-serif; padding: 0; }
         .main-container { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.6s ease; }
-        .header-banner { text-align: center; padding: 16px 24px; margin-bottom: 12px; margin-top: 24px; border-radius: 14px; background: linear-gradient(135deg, #3b82f6, #9333ea); font-size: 28px; font-weight: 700; color: white; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); }
         .step-card { background: #334155; border-radius: 12px; padding: 20px; color: white; text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); margin-bottom: 16px; width: 100%; max-width: 420px; }
         .page { display: none; }
         .page.active { display: block; }
@@ -32,6 +31,7 @@
         #dateList button.clicked, #timeList .timeButtons.clicked { background-color: #3182ce !important; color: white !important; }
         #cloudflare-simulation { align-items: center; justify-content: center; padding: 20px; background-color: #2d3748; border-radius: 8px; margin: 20px 0; }
         .spinner { width: 24px; height: 24px; border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: #3182ce; border-radius: 50%; animation: spin 1s linear infinite; }
+        #bot-required-overlay { display: flex; align-items: center; justify-content: center; color: #f56565; font-size: 24px; font-weight: bold; text-align: center; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -39,6 +39,10 @@
     </style>
 </head>
 <body>
+    
+    <div id="bot-required-overlay">
+        Please Enable DPbot Extension
+    </div>
 
     <div id="branchModal" class="modal">
         <div class="modal-content">
@@ -58,8 +62,7 @@
         </div>
     </div>
 
-    <div class="main-container">
-        <div class="header-banner">JXS Register</div>
+    <div class="main-container" style="display: none;">
         <div class="step-card">
             <div id="step-area">
                 <div id="page-register" class="page active">
@@ -85,6 +88,7 @@
                         <p>สาขา: <span id="final-summary-branch"></span></p>
                         <p>วันที่: <span id="final-summary-date"></span></p>
                         <p>เวลา: <span id="final-summary-time"></span></p>
+                        <p>เวลาที่ใช้: <span id="final-summary-time-taken"></span> วินาที</p>
                     </div>
                     <button id="resetBtn">จองอีกครั้ง</button>
                 </div>
@@ -95,6 +99,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script>
         const selections = { branch: null, date: null, time: null };
+        let startTime;
 
         function showPage(pageId) {
             document.querySelectorAll('#step-area .page').forEach(p => p.classList.remove('active'));
@@ -113,9 +118,13 @@
 
         function handleSuccess() {
             showPage('page-success');
+            const endTime = new Date();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+
             document.getElementById('final-summary-branch').textContent = selections.branch;
             document.getElementById('final-summary-date').textContent = selections.date;
             document.getElementById('final-summary-time').textContent = selections.time;
+            document.getElementById('final-summary-time-taken').textContent = elapsedTime;
             launchConfetti();
         }
 
@@ -130,18 +139,15 @@
             const checkbox = document.querySelector("input[name='acceptTermsAndConditions']");
             const nextBtn = document.getElementById("finalConfirm");
             const cloudflareSim = document.getElementById("cloudflare-simulation");
-
             nextBtn.disabled = true;
             nextBtn.classList.remove('enabled');
             checkbox.checked = false;
             cloudflareSim.style.display = 'none';
-
             checkbox.onchange = () => {
                 if (checkbox.checked) {
                     nextBtn.disabled = true;
                     nextBtn.classList.remove('enabled');
                     cloudflareSim.style.display = 'flex';
-
                     setTimeout(() => {
                         cloudflareSim.style.display = 'none';
                         if (checkbox.checked) {
@@ -157,6 +163,7 @@
         }
         
         function openBranchModal() {
+            startTime = new Date(); // ### เริ่มจับเวลาเมื่อกดปุ่มลงทะเบียน ###
             const modal = document.getElementById("branchModal");
             const nextBtn = document.getElementById("branchModalNextBtn");
             const list = modal.querySelector("#branchList");
@@ -206,10 +213,7 @@
             };
             Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => {
                 const button = document.createElement("button");
-                
-                // ### แก้ไข: เพิ่ม class ที่ถูกต้องเพื่อให้บอทหาเจอ ###
                 button.className = "MuiPickersDay-root";
-
                 button.textContent = d;
                 button.onclick = () => {
                     dateList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked"));
@@ -243,7 +247,7 @@
         function startCountdown() {
             const countdownEl = document.getElementById("countdown");
             const registerBtn = document.getElementById("registerBtn");
-            let secondsLeft = 3;
+            let secondsLeft = 7; // ### ปรับเวลานับถอยหลังเป็น 7 วินาที ###
             registerBtn.disabled = true;
             registerBtn.classList.remove('enabled');
             const timer = setInterval(() => {
@@ -257,12 +261,27 @@
                 }
             }, 1000);
         }
+        
+        function initializePage() {
+             // ### ตรวจสอบว่าบอททำงานหรือไม่ ###
+            setTimeout(() => {
+                if (document.body.dataset.dpbotEnabled === 'true') {
+                    document.querySelector('.main-container').style.display = 'flex';
+                    document.getElementById('bot-required-overlay').style.display = 'none';
+                    resetFlow();
+                } else {
+                    document.getElementById('bot-required-overlay').style.display = 'flex';
+                    document.querySelector('.main-container').style.display = 'none';
+                }
+            }, 200); // หน่วงเวลาเล็กน้อยเพื่อให้บอทมีเวลาใส่ attribute
+        }
 
+        // --- Event Listeners ---
         document.getElementById("registerBtn").addEventListener("click", openBranchModal);
         document.getElementById("finalConfirm").addEventListener("click", handleSuccess);
         document.getElementById("resetBtn").addEventListener("click", resetFlow);
         
-        document.addEventListener("DOMContentLoaded", resetFlow);
+        document.addEventListener("DOMContentLoaded", initializePage);
     </script>
 </body>
 </html>
