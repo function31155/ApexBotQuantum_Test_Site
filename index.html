@@ -2,452 +2,77 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bot Test Page (Full Flow V2)</title>
+    <title>DPbot Secure Test Environment</title>
     <style>
-        body {
-            font-family: sans-serif;
-            background-color: #1a1a2e;
-            color: #e0e0e0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            text-align: center;
-            overflow: hidden;
-        }
-        .container {
-            background-color: #16213e;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            width: 90%;
-            max-width: 800px;
-        }
-        .page { display: none; }
-        .page.active { display: block; }
+        body { font-family: sans-serif; background-color: #1a1a2e; color: #e0e0e0; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; text-align: center; }
+        .container { background-color: #16213e; padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); width: 90%; max-width: 800px; }
+        .hidden { display: none; }
         h2 { color: #e94560; }
-
-        /* General button styles for selected items and common properties */
-        button, .branch-item, .day-button, .timeButtons {
-            background-color: #533483;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            margin: 5px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s, opacity 0.3s;
-        }
-        .selected {
-            background-color: #e94560;
-            box-shadow: 0 0 10px #e94560;
-        }
-
-        /* Styles for disabled buttons (general fallback) */
-        button:disabled {
-            background-color: #333; /* Darker gray for other disabled buttons */
-            color: #777;
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-
-        /* Register button specific styles */
         button.register {
-            background-color: #888; /* Gray when disabled - Initial state */
+            background-color: #888; /* Gray when disabled */
             color: #ccc;
+            cursor: not-allowed;
             border: none;
             padding: 12px 20px;
             margin: 8px;
             border-radius: 8px;
             font-size: 16px;
-            transition: background-color 0.5s ease, color 0.5s ease;
+            transition: background-color 0.5s ease;
         }
         button.register.enabled {
             background-color: #28a745; /* Green when enabled */
             color: white;
             cursor: pointer;
         }
-        button.register.enabled:hover {
-            background-color: #218838;
-        }
-        /* Override for disabled register button to keep its specific gray color */
-        button.register:disabled {
-            background-color: #888;
-            color: #ccc;
-            opacity: 1; /* Keep full opacity for the initial gray state */
-        }
-
-
-        /* Next/Confirm button specific styles */
-        button.next-btn {
-            background-color: #888; /* Gray when disabled - Initial state */
-            color: #ccc;
-            cursor: not-allowed;
-            padding: 10px 15px; /* Adjust padding if different from general button */
-            font-size: 14px; /* Adjust font-size if different from general button */
-            transition: background-color 0.3s, color 0.3s;
-        }
-        button.next-btn.enabled {
-            background-color: #28a745; /* Green when enabled */
-            color: white;
-            cursor: pointer;
-        }
-        button.next-btn.enabled:hover {
-            background-color: #218838;
-        }
-        /* Override for disabled next-btn to keep its specific gray color */
-        button.next-btn:disabled {
-            background-color: #888;
-            color: #ccc;
-            opacity: 1; /* Keep full opacity for the initial gray state */
-        }
-
-
-        .branch-item.is_full, .day-button.Mui-disabled, .timeButtons.disabledTime {
-            background-color: #444;
-            color: #888;
-            cursor: not-allowed;
-        }
-        .grid-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 5px;
-        }
-        #countdown-text {
-            color: #e94560;
-            font-size: 18px;
-            margin-top: 20px;
-        }
-        .summary-info {
-            background-color: #1a1a2e;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            text-align: left;
-        }
-        .summary-info p { margin: 8px 0; font-size: 16px; }
-        .summary-info span { color: #e94560; font-weight: bold; }
-        .checkbox-container {
-            margin: 20px 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-        #cloudflare-check {
-            display: none;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin: 20px 0;
-            font-size: 16px;
-        }
-        .spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid #533483;
-            border-top-color: #e94560;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        /* New Styles for Success Pop-up */
-        #success-popup {
-            background-color: #1e1e2e;
-            border: 1px solid #e94560;
-            padding: 20px;
-            margin-top: 20px;
-            border-radius: 10px;
-        }
+        #countdown-text { color: #e94560; font-size: 18px; margin-top: 20px; }
     </style>
 </head>
 <body>
-
-    <div class="container">
-        <div id="page-register" class="page active">
-            <h2>Welcome to DPbot Test Rocket</h2>
-            <p id="countdown-text">Register button will be enabled in <span id="countdown-timer">5</span>s</p>
-            <button class="register" disabled>Register Now</button>
+    <div id="main-container" class="container hidden">
+        <h2>Welcome to DPbot Test Rocket</h2>
+        <p id="countdown-text">Register button will be active in <span id="countdown-timer">5</span>s</p>
+        <button class="register" disabled>Register</button>
         </div>
 
-        <div id="page-branch" class="page">
-            <h2>Select Branch</h2>
-            <div id="branch-container" class="grid-container"></div>
-            <button class="next-btn" disabled>Next</button>
-        </div>
-
-        <div id="page-date" class="page">
-            <h2>Select Date</h2>
-            <div id="day-container" class="grid-container"></div>
-            <button class="next-btn" disabled>Next</button>
-        </div>
-
-        <div id="page-time" class="page">
-            <h2>Select Time</h2>
-            <div id="time-container" class="grid-container"></div>
-            <button class="next-btn" disabled>Confirm</button>
-        </div>
-
-        <div id="page-summary" class="page">
-            <h2>Booking Summary</h2>
-            <div class="summary-info">
-                <p>Branch: <span id="summary-branch"></span></p>
-                <p>Date: <span id="summary-date"></span></p>
-                <p>Time: <span id="summary-time"></span></p>
-            </div>
-            <div class="checkbox-container">
-                <input type="checkbox" id="terms-checkbox">
-                <label for="terms-checkbox">I accept the terms and conditions</label>
-            </div>
-            <div id="cloudflare-check">
-                <div class="spinner"></div>
-                <span>Verifying your browser...</span>
-            </div>
-            <button id="final-confirm-btn" class="next-btn" style="display: none;">Confirm Booking</button>
-        </div>
-
-        <div id="page-success" class="page">
-            <h2 style="font-size: 28px; color: #28a745;">Booking Successful!</h2>
-            <div id="success-popup" class="summary-info">
-                <h3>Your Booking Details</h3>
-                <p>Branch: <span id="final-summary-branch"></span></p>
-                <p>Date: <span id="final-summary-date"></span></p>
-                <p>Time: <span id="final-summary-time"></span></p>
-                <p>Total Time: <span id="final-summary-elapsed"></span> seconds</p>
-            </div>
-            <button onclick="resetTest()">Run Again</button>
-        </div>
+    <div id="enable-bot-prompt" class="container">
+        <h2>Please Enable DPbot Extension</h2>
+        <p>This test page requires the DPbot extension to be active. Please turn on the bot from the extension popup.</p>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-
     <script>
-        // --- Page Navigation & State ---
-        const pages = document.querySelectorAll('.page');
-        const selections = { branch: null, date: null, time: null };
-        let startTime; // Variable to store the start time of the test
-        let isCountdownFinished = false; // New: Tracks if countdown is complete
+        const mainContainer = document.getElementById('main-container');
+        const enableBotPrompt = document.getElementById('enable-bot-prompt');
+        const registerBtn = document.querySelector('.register');
+        const countdownText = document.getElementById('countdown-text');
+        const timerSpan = document.getElementById('countdown-timer');
 
-        function showPage(pageId) {
-            pages.forEach(page => page.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-        }
+        // This function repeatedly checks for the bot's "footprint"
+        const checkForBot = setInterval(() => {
+            // The "footprint" is a data attribute that content.js will set
+            if (document.body.dataset.dpbotEnabled === 'true') {
+                clearInterval(checkForBot); // Stop checking
+                enableBotPrompt.classList.add('hidden'); // Hide the prompt
+                mainContainer.classList.remove('hidden'); // Show the main test site
+                startCountdown(); // Start the countdown
+            }
+        }, 500); // Check every half-second
 
-        // --- Countdown Timer Logic ---
-        let countdownInterval;
+        // This function starts the countdown and enables the button
         function startCountdown() {
-            startTime = new Date(); // Start timer when countdown begins
             let seconds = 5;
-            const timerSpan = document.getElementById('countdown-timer');
-            const countdownText = document.getElementById('countdown-text');
-            const registerBtn = document.querySelector('#page-register .register');
-            
-            // Set initial state for the register button (gray and disabled)
-            registerBtn.disabled = true;
-            registerBtn.classList.remove('enabled'); 
-            isCountdownFinished = false; // Reset countdown status
-            
-            countdownText.style.display = 'block';
             timerSpan.textContent = seconds;
-            countdownInterval = setInterval(() => {
+
+            const interval = setInterval(() => {
                 seconds--;
                 timerSpan.textContent = seconds;
                 if (seconds <= 0) {
-                    clearInterval(countdownInterval);
-                    countdownText.style.display = 'none';
+                    clearInterval(interval);
+                    countdownText.textContent = 'Register is now open!';
+                    registerBtn.classList.add('enabled');
                     registerBtn.disabled = false;
-                    registerBtn.classList.add('enabled'); // Add enabled class to make it green
-                    isCountdownFinished = true; // Set countdown as finished
                 }
             }, 1000);
         }
-
-        // --- Content Generation & Randomization ---
-        function randomizeAvailability() {
-            // Branches
-            const branchContainer = document.getElementById('branch-container');
-            branchContainer.innerHTML = '';
-            const branches = ["Terminal 21", "Centralworld", "Central Ladprao", "Fashion Island", "MEGABANGNA", "Siam Center", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai"];
-            const branchesToMakeFull = Math.floor(Math.random() * 2) + 1;
-            let shuffledBranches = [...branches].sort(() => 0.5 - Math.random());
-            let fullBranches = shuffledBranches.slice(0, branchesToMakeFull);
-            branches.forEach(branchName => {
-                const isFull = fullBranches.includes(branchName);
-                branchContainer.innerHTML += `<div class="branch-item ${isFull ? 'is_full' : ''}">${branchName} ${isFull ? '(Full)' : ''}</div>`;
-            });
-            
-            // Days
-            const dayContainer = document.getElementById('day-container');
-            dayContainer.innerHTML = '';
-            // Generate dates for current month (July 2025)
-            const specificMonth = 6; // July is 6 (0-indexed)
-            const specificYear = 2025;
-            const daysInMonth = new Date(specificYear, specificMonth + 1, 0).getDate(); // Get last day of the month
-
-            for (let i = 1; i <= daysInMonth; i++) {
-                const dayString = `${i}`; // Display only the day number
-                dayContainer.innerHTML += `<button class="MuiPickersDay-root day-button">${dayString}</button>`;
-            }
-            const dayButtons = dayContainer.querySelectorAll('.day-button');
-            const daysToDisable = Math.floor(Math.random() * 2) + 1;
-            for(let i=0; i < daysToDisable; i++) {
-                const randomIndex = Math.floor(Math.random() * dayButtons.length);
-                dayButtons[randomIndex].classList.add('Mui-disabled');
-            }
-
-            // Times
-            const timeContainer = document.getElementById('time-container');
-            timeContainer.innerHTML = '';
-            const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30"];
-            times.forEach(time => {
-                timeContainer.innerHTML += `<div class="timeButtons">${time}</div>`;
-            });
-            const timeButtons = timeContainer.querySelectorAll('.timeButtons');
-            const timesToDisable = Math.floor(Math.random() * 2) + 1;
-             for(let i=0; i < timesToDisable; i++) {
-                const randomIndex = Math.floor(Math.random() * timeButtons.length);
-                timeButtons[randomIndex].classList.add('disabledTime');
-                timeButtons[randomIndex].textContent += ' (Full)';
-            }
-        }
-
-        // --- Confetti Effect ---
-        function launchConfetti() {
-            const duration = 3 * 1000;
-            const animationEnd = Date.now() + duration;
-            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-            const interval = setInterval(function() {
-                const timeLeft = animationEnd - Date.now();
-                if (timeLeft <= 0) return clearInterval(interval);
-                const particleCount = 50 * (timeLeft / duration);
-                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
-                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
-            }, 250);
-        }
-
-        // --- Event Listeners ---
-        // Register button listener - now enabled via class 'enabled'
-        document.querySelector('#page-register .register').addEventListener('click', () => {
-            // Only proceed if countdown is truly finished
-            if (isCountdownFinished) {
-                showPage('page-branch');
-            } else {
-                console.log("Register button not active yet. Countdown not finished.");
-            }
-        });
-        
-        // Next button listener for Branch selection
-        document.querySelector('#page-branch .next-btn').addEventListener('click', () => showPage('page-date'));
-        
-        // Next button listener for Date selection
-        document.querySelector('#page-date .next-btn').addEventListener('click', () => showPage('page-time'));
-        
-        // Confirm button listener for Time selection
-        document.querySelector('#page-time .next-btn').addEventListener('click', () => {
-            document.getElementById('summary-branch').textContent = selections.branch;
-            document.getElementById('summary-date').textContent = selections.date;
-            document.getElementById('summary-time').textContent = selections.time;
-            showPage('page-summary');
-        });
-        
-        document.getElementById('branch-container').addEventListener('click', (e) => {
-            if (e.target.classList.contains('branch-item') && !e.target.classList.contains('is_full')) {
-                document.querySelectorAll('.branch-item').forEach(b => b.classList.remove('selected'));
-                e.target.classList.add('selected');
-                selections.branch = e.target.textContent.replace(' (Full)', '').trim();
-                const nextBtn = document.querySelector('#page-branch .next-btn');
-                nextBtn.disabled = false;
-                nextBtn.classList.add('enabled'); // Enable and make green
-            }
-        });
-        document.getElementById('day-container').addEventListener('click', (e) => {
-            if (e.target.classList.contains('day-button') && !e.target.classList.contains('Mui-disabled')) {
-                document.querySelectorAll('.day-button').forEach(b => b.classList.remove('selected'));
-                e.target.classList.add('selected');
-                selections.date = e.target.textContent.trim(); // Just the day number
-                const nextBtn = document.querySelector('#page-date .next-btn');
-                nextBtn.disabled = false;
-                nextBtn.classList.add('enabled'); // Enable and make green
-            }
-        });
-        document.getElementById('time-container').addEventListener('click', (e) => {
-            if (e.target.classList.contains('timeButtons') && !e.target.classList.contains('disabledTime')) {
-                document.querySelectorAll('.timeButtons').forEach(b => b.classList.remove('selected'));
-                e.target.classList.add('selected');
-                selections.time = e.target.textContent.replace(' (Full)', '').trim();
-                const nextBtn = document.querySelector('#page-time .next-btn');
-                nextBtn.disabled = false;
-                nextBtn.classList.add('enabled'); // Enable and make green
-            }
-        });
-
-        const termsCheckbox = document.getElementById('terms-checkbox');
-        const cloudflareCheck = document.getElementById('cloudflare-check');
-        const finalConfirmBtn = document.getElementById('final-confirm-btn');
-
-        termsCheckbox.addEventListener('change', () => {
-            if (termsCheckbox.checked) {
-                cloudflareCheck.style.display = 'flex';
-                setTimeout(() => {
-                    cloudflareCheck.style.display = 'none';
-                    finalConfirmBtn.style.display = 'inline-block';
-                    finalConfirmBtn.classList.add('enabled'); // Make final confirm button green
-                }, 3000); // Simulate 3 second check
-            } else {
-                finalConfirmBtn.style.display = 'none';
-                finalConfirmBtn.classList.remove('enabled'); // Remove green if unchecked
-                cloudflareCheck.style.display = 'none'; // Hide if unchecked
-            }
-        });
-
-        finalConfirmBtn.addEventListener('click', () => {
-            const endTime = new Date();
-            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2); // in seconds
-            document.getElementById('final-summary-branch').textContent = selections.branch;
-            document.getElementById('final-summary-date').textContent = selections.date;
-            document.getElementById('final-summary-time').textContent = selections.time;
-            document.getElementById('final-summary-elapsed').textContent = elapsedTime;
-            showPage('page-success');
-            launchConfetti();
-        });
-
-        // --- Reset Logic ---
-        function resetTest() {
-            // Disable all next buttons and remove enabled class
-            document.querySelectorAll('.next-btn').forEach(btn => {
-                btn.disabled = true;
-                btn.classList.remove('enabled');
-            });
-
-            // Reset Register button state
-            const registerBtn = document.querySelector('#page-register .register');
-            registerBtn.classList.remove('enabled'); // Remove green styling on reset
-            registerBtn.disabled = true; // Ensure it's disabled for countdown
-            isCountdownFinished = false; // Reset countdown status on reset
-
-            finalConfirmBtn.style.display = 'none';
-            finalConfirmBtn.classList.remove('enabled'); // Remove green from final confirm
-            termsCheckbox.checked = false;
-            cloudflareCheck.style.display = 'none'; // Ensure cloudflare check is hidden on reset
-
-            // Clear selections
-            selections.branch = null;
-            selections.date = null;
-            selections.time = null;
-
-            randomizeAvailability();
-            showPage('page-register');
-            startCountdown();
-        }
-
-        // --- Initial Load ---
-        randomizeAvailability();
-        startCountdown();
     </script>
 </body>
 </html>
