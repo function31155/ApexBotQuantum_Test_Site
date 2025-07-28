@@ -7,17 +7,17 @@
     <style>
         body { display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; background-color: #000000; margin: 0; font-family: sans-serif; padding: 0; }
         .main-container { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.6s ease; }
-        .header-banner { text-align: center; padding: 16px 24px; margin-bottom: 12px; margin-top: 24px; border-radius: 14px; background: linear-gradient(135deg, #3b82f6, #9333ea); font-size: 28px; font-weight: 700; color: white; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); transition: transform 0.3s ease; }
+        .header-banner { text-align: center; padding: 16px 24px; margin-bottom: 12px; margin-top: 24px; border-radius: 14px; background: linear-gradient(135deg, #3b82f6, #9333ea); font-size: 28px; font-weight: 700; color: white; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); }
         .step-card { background: #334155; border-radius: 12px; padding: 20px; color: white; text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); margin-bottom: 16px; width: 100%; max-width: 420px; }
         .page { display: none; }
         .page.active { display: block; }
         .countdown-container { text-align: center; font-size: 28px; color: red; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; }
         button { border-radius: 8px; border: none; padding: 10px 16px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; }
+        button:disabled { cursor: not-allowed; opacity: 0.6; }
         button.register { color: #333; font-size: 1.2rem; background-color: rgb(222, 222, 222); }
-        button.register.enabled { background-color: #22c55e; color: white; box-shadow: 0 0 10px rgba(34, 197, 94, 0.5); }
+        button.register.enabled { background-color: #22c55e; color: white; opacity: 1; }
         button.next-btn { background-color: #888; color: #ccc; }
-        button.next-btn.enabled { background-color: #28a745; color: white; box-shadow: 0 0 8px rgba(40, 167, 69, 0.5); }
-        button:disabled { cursor: not-allowed; }
+        button.next-btn.enabled { background-color: #28a745; color: white; opacity: 1; }
         .summary-info { background-color: #2d3748; color: #cbd5e1; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; border: 1px solid #4a5568; }
         .summary-info h3 { color: #e2e8f0; margin-top: 0; }
         .summary-info span { color: #48bb78; font-weight: bold; }
@@ -30,27 +30,26 @@
         #branchList .branch-item.selected { background-color: #22c55e; color: white; }
         #dateList button, #timeList .timeButtons { background-color: #334155; color: #a0aec0; }
         #dateList button.clicked, #timeList .timeButtons.clicked { background-color: #3182ce !important; color: white !important; }
-        #dateList button.Mui-disabled, #timeList .timeButtons.disabledTime { background-color: #4a5568 !important; color: #718096 !important; cursor: not-allowed; pointer-events: none; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        #cloudflare-simulation { align-items: center; justify-content: center; padding: 20px; background-color: #2d3748; border-radius: 8px; margin: 20px 0; }
+        .spinner { width: 24px; height: 24px; border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: #3182ce; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <div id="branchModal" class="modal">
         <div class="modal-content">
-            <span class="modal-title">เลือกสาขา</span>
-            <span class="close">×</span>
+            <span class="modal-title">เลือกสาขา</span><span class="close">×</span>
             <div id="branchList" class="branchButtons"></div>
             <button class="next-btn" id="branchModalNextBtn" disabled style="margin-top: 20px; width: 100%;">Next</button>
         </div>
     </div>
-
     <div id="datetimeModal" class="modal">
         <div class="modal-content">
-            <span class="modal-title">เลือกวันและเวลา</span>
-            <span class="close">×</span>
+            <span class="modal-title">เลือกวันและเวลา</span><span class="close">×</span>
             <div id="dateList" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-bottom: 15px;"></div>
             <div id="timeList" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px;"></div>
             <div class="datePicketButSection" style="margin-top: 20px;">
@@ -64,16 +63,19 @@
         <div class="step-card">
             <div id="step-area">
                 <div id="page-register" class="page active">
-                    <h2>ไปกันต่อ</h2>
-                    <p>ระบบลงทะเบียนของคุณพร้อมแล้ว</p>
+                    <h2>ไปกันต่อ</h2><p>ระบบลงทะเบียนของคุณพร้อมแล้ว</p>
                     <div class="countdown-container"><span id="countdown"></span></div>
                     <button class="register" id="registerBtn" disabled>ลงทะเบียน</button>
                 </div>
                 <div id="page-terms" class="page">
                     <h2>เงื่อนไขและข้อตกลง</h2>
-                    <label style="color: white; display: block; margin: 20px 0;">
-                        <input name="acceptTermsAndConditions" type="checkbox"> ยอมรับเงื่อนไข
+                    <label style="color: white; display: flex; align-items: center; justify-content: center; gap: 10px; margin: 20px 0;">
+                        <input name="acceptTermsAndConditions" type="checkbox" style="width: 18px; height: 18px;"> ยอมรับเงื่อนไข
                     </label>
+                    <div id="cloudflare-simulation" style="display: none;">
+                        <div class="spinner"></div>
+                        <span style="margin-left: 15px;">Verifying you are human...</span>
+                    </div>
                     <button class="next-btn" id="finalConfirm" type="submit" disabled>Confirm Booking</button>
                 </div>
                 <div id="page-success" class="page">
@@ -100,11 +102,11 @@
         }
 
         function launchConfetti() {
-            const duration = 2 * 1000;
-            const end = Date.now() + duration;
+            if (typeof confetti !== 'function') return;
+            const end = Date.now() + (2 * 1000);
             (function frame() {
-                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
-                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+                confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } });
+                confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } });
                 if (Date.now() < end) requestAnimationFrame(frame);
             }());
         }
@@ -127,15 +129,33 @@
             showPage('page-terms');
             const checkbox = document.querySelector("input[name='acceptTermsAndConditions']");
             const nextBtn = document.getElementById("finalConfirm");
+            const cloudflareSim = document.getElementById("cloudflare-simulation");
+
             nextBtn.disabled = true;
             nextBtn.classList.remove('enabled');
             checkbox.checked = false;
+            cloudflareSim.style.display = 'none';
+
             checkbox.onchange = () => {
-                nextBtn.disabled = !checkbox.checked;
-                nextBtn.classList.toggle('enabled', checkbox.checked);
+                if (checkbox.checked) {
+                    nextBtn.disabled = true;
+                    nextBtn.classList.remove('enabled');
+                    cloudflareSim.style.display = 'flex';
+
+                    setTimeout(() => {
+                        cloudflareSim.style.display = 'none';
+                        if (checkbox.checked) {
+                            nextBtn.disabled = false;
+                            nextBtn.classList.add('enabled');
+                        }
+                    }, 2500);
+                } else {
+                    nextBtn.disabled = true;
+                    nextBtn.classList.remove('enabled');
+                }
             };
         }
-
+        
         function openBranchModal() {
             const modal = document.getElementById("branchModal");
             const nextBtn = document.getElementById("branchModalNextBtn");
@@ -145,8 +165,6 @@
             nextBtn.disabled = true;
             nextBtn.classList.remove('enabled');
             list.innerHTML = "";
-
-            // ### คืนค่าสาขาทั้งหมดตามเดิม ###
             const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld", "MEGABANGNA", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai", "Icon Siam"];
             branches.forEach(b => {
                 const button = document.createElement("button");
@@ -180,17 +198,18 @@
             nextBtn.classList.remove('enabled');
             dateList.innerHTML = "";
             timeList.innerHTML = "";
-
             const checkDateTimeValid = () => {
                 if (selections.date && selections.time) {
                     nextBtn.disabled = false;
                     nextBtn.classList.add('enabled');
                 }
             };
-
-            // ### คืนค่าวันที่ 31 วันตามเดิม ###
             Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => {
                 const button = document.createElement("button");
+                
+                // ### แก้ไข: เพิ่ม class ที่ถูกต้องเพื่อให้บอทหาเจอ ###
+                button.className = "MuiPickersDay-root";
+
                 button.textContent = d;
                 button.onclick = () => {
                     dateList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked"));
@@ -200,8 +219,6 @@
                 };
                 dateList.appendChild(button);
             });
-
-            // ### คืนค่าเวลาทั้งหมดตามเดิม ###
             const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00", "22:30"];
             times.forEach(t => {
                 const button = document.createElement("button");
@@ -215,7 +232,6 @@
                 };
                 timeList.appendChild(button);
             });
-            
             nextBtn.onclick = () => {
                 if (selections.date && selections.time) {
                     modal.style.display = "none";
@@ -242,7 +258,6 @@
             }, 1000);
         }
 
-        // --- Event Listeners ---
         document.getElementById("registerBtn").addEventListener("click", openBranchModal);
         document.getElementById("finalConfirm").addEventListener("click", handleSuccess);
         document.getElementById("resetBtn").addEventListener("click", resetFlow);
