@@ -4,12 +4,33 @@
     <meta charset="UTF-8">
     <title>DPbot Secure Test Environment</title>
     <style>
-        body { font-family: sans-serif; background-color: #1a1a2e; color: #e0e0e0; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; text-align: center; }
-        .container { background-color: #16213e; padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); width: 90%; max-width: 800px; }
-        .hidden { display: none; }
-        h2 { color: #e94560; }
+        body {
+            font-family: sans-serif;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .container {
+            background-color: #16213e;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            width: 90%;
+            max-width: 800px;
+        }
+        .hidden {
+            display: none;
+        }
+        h2 {
+            color: #e94560;
+        }
         button.register {
-            background-color: #888; /* Gray when disabled */
+            background-color: #888;
             color: #ccc;
             cursor: not-allowed;
             border: none;
@@ -20,11 +41,18 @@
             transition: background-color 0.5s ease;
         }
         button.register.enabled {
-            background-color: #28a745; /* Green when enabled */
+            background-color: #28a745;
             color: white;
             cursor: pointer;
         }
-        #countdown-text { color: #e94560; font-size: 18px; margin-top: 20px; }
+        button.register.enabled:hover {
+            background-color: #218838;
+        }
+        #countdown-text {
+            color: #e94560;
+            font-size: 18px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -32,7 +60,7 @@
         <h2>Welcome to DPbot Test Rocket</h2>
         <p id="countdown-text">Register button will be active in <span id="countdown-timer">5</span>s</p>
         <button class="register" disabled>Register</button>
-        </div>
+    </div>
 
     <div id="enable-bot-prompt" class="container">
         <h2>Please Enable DPbot Extension</h2>
@@ -48,7 +76,6 @@
 
         // This function repeatedly checks for the bot's "footprint"
         const checkForBot = setInterval(() => {
-            // The "footprint" is a data attribute that content.js will set
             if (document.body.dataset.dpbotEnabled === 'true') {
                 clearInterval(checkForBot); // Stop checking
                 enableBotPrompt.classList.add('hidden'); // Hide the prompt
