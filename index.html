@@ -2,27 +2,22 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Bot Test Page (Full Interactive Flow)</title>
+    <title>Bot Test Page (Final Interactive)</title>
     <style>
         body { font-family: sans-serif; background-color: #1a1a2e; color: #e0e0e0; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; text-align: center; overflow: hidden; }
         .container { background-color: #16213e; padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); width: 90%; max-width: 800px; }
         .page { display: none; }
         .page.active { display: block; }
         h2 { color: #e94560; }
-        button, .branch-item, .day-button, .timeButtons { background-color: #533483; color: white; border: none; padding: 10px 15px; margin: 5px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: background-color 0.3s; }
+        
+        /* General button styles */
+        button, .branch-item, .day-button, .timeButtons {
+            background-color: #533483; color: white; border: none; padding: 10px 15px; margin: 5px;
+            border-radius: 8px; cursor: pointer; font-size: 14px; transition: background-color 0.3s;
+        }
         .selected { background-color: #e94560; box-shadow: 0 0 10px #e94560; }
         .branch-item.is_full, .day-button.Mui-disabled, .timeButtons.disabledTime { background-color: #444; color: #888; cursor: not-allowed; }
-        .grid-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
-        #countdown-text { color: #e94560; font-size: 18px; margin-top: 20px; }
-        .summary-info { background-color: #1a1a2e; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; }
-        .summary-info p { margin: 8px 0; font-size: 16px; }
-        .summary-info span { color: #e94560; font-weight: bold; }
-        .checkbox-container { margin: 20px 0; display: flex; justify-content: center; align-items: center; gap: 10px; }
-        #cloudflare-check { display: none; align-items: center; justify-content: center; gap: 10px; margin: 20px 0; font-size: 16px; }
-        .spinner { width: 24px; height: 24px; border: 3px solid #533483; border-top-color: #e94560; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        #success-popup { background-color: #1e1e2e; border: 1px solid #e94560; padding: 20px; margin-top: 20px; border-radius: 10px; }
-        
+
         /* Styles for stateful buttons (Gray when disabled, Green when enabled) */
         button.register, button.next-btn {
             background-color: #888;
@@ -41,6 +36,17 @@
             cursor: not-allowed;
             opacity: 0.7;
         }
+
+        .grid-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+        #countdown-text { color: #e94560; font-size: 18px; margin-top: 20px; }
+        .summary-info { background-color: #1a1a2e; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; }
+        .summary-info p { margin: 8px 0; font-size: 16px; }
+        .summary-info span { color: #e94560; font-weight: bold; }
+        .checkbox-container { margin: 20px 0; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        #cloudflare-check { display: none; align-items: center; justify-content: center; gap: 10px; margin: 20px 0; font-size: 16px; }
+        .spinner { width: 24px; height: 24px; border: 3px solid #533483; border-top-color: #e94560; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #success-popup { background-color: #1e1e2e; border: 1px solid #e94560; padding: 20px; margin-top: 20px; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -67,31 +73,17 @@
         </div>
         <div id="page-summary" class="page">
             <h2>Booking Summary</h2>
-            <div class="summary-info">
-                <p>Branch: <span id="summary-branch"></span></p>
-                <p>Date: <span id="summary-date"></span></p>
-                <p>Time: <span id="summary-time"></span></p>
-            </div>
-            <div class="checkbox-container">
-                <input type="checkbox" id="terms-checkbox">
-                <label for="terms-checkbox">I accept the terms and conditions</label>
-            </div>
+            <div class="summary-info"><p>Branch: <span id="summary-branch"></span></p><p>Date: <span id="summary-date"></span></p><p>Time: <span id="summary-time"></span></p></div>
+            <div class="checkbox-container"><input type="checkbox" id="terms-checkbox"><label for="terms-checkbox">I accept the terms and conditions</label></div>
             <div id="cloudflare-check"><div class="spinner"></div><span>Verifying your browser...</span></div>
             <button id="final-confirm-btn" class="next-btn" style="display: none;">Confirm Booking</button>
         </div>
         <div id="page-success" class="page">
             <h2 style="font-size: 28px; color: #28a745;">Booking Successful!</h2>
-            <div id="success-popup" class="summary-info">
-                <h3>Your Booking Details</h3>
-                <p>Branch: <span id="final-summary-branch"></span></p>
-                <p>Date: <span id="final-summary-date"></span></p>
-                <p>Time: <span id="final-summary-time"></span></p>
-                <p>Total Time: <span id="final-summary-elapsed"></span> seconds</p>
-            </div>
+            <div id="success-popup" class="summary-info"><h3>Your Booking Details</h3><p>Branch: <span id="final-summary-branch"></span></p><p>Date: <span id="final-summary-date"></span></p><p>Time: <span id="final-summary-time"></span></p><p>Total Time: <span id="final-summary-elapsed"></span> seconds</p></div>
             <button onclick="resetTest()">Run Again</button>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script>
         const pages = document.querySelectorAll('.page');
@@ -140,7 +132,11 @@
             
             const dayContainer = document.getElementById('day-container');
             dayContainer.innerHTML = '';
-            for (let i = 1; i <= 31; i++) { dayContainer.innerHTML += `<button class="MuiPickersDay-root day-button">${i}</button>`; }
+            let dayHTML = '';
+            for (let i = 1; i <= 31; i++) {
+                dayHTML += `<button class="MuiPickersDay-root day-button">${i}</button>`;
+            }
+            dayContainer.innerHTML = dayHTML;
             const dayButtons = dayContainer.querySelectorAll('.day-button');
             const daysToDisable = Math.floor(Math.random() * 2) + 1;
             for(let i=0; i < daysToDisable; i++) { dayButtons[Math.floor(Math.random() * dayButtons.length)].classList.add('Mui-disabled'); }
@@ -148,7 +144,9 @@
             const timeContainer = document.getElementById('time-container');
             timeContainer.innerHTML = '';
             const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30"];
-            times.forEach(time => { timeContainer.innerHTML += `<div class="timeButtons">${time}</div>`; });
+            let timeHTML = '';
+            times.forEach(time => { timeHTML += `<div class="timeButtons">${time}</div>`; });
+            timeContainer.innerHTML = timeHTML;
             const timeButtons = timeContainer.querySelectorAll('.timeButtons');
             const timesToDisable = Math.floor(Math.random() * 2) + 1;
             for(let i=0; i < timesToDisable; i++) { 
