@@ -18,22 +18,46 @@
         button.register.enabled { background-color: #22c55e; color: white; cursor: pointer; box-shadow: 0 0 10px rgba(34, 197, 94, 0.5); }
         button.next-btn { background-color: #888; color: #ccc; cursor: not-allowed; padding: 12px 24px; font-size: 1.1rem; border: none; border-radius: 8px; transition: background-color 0.3s ease; }
         button.next-btn.enabled { background-color: #28a745; color: white; cursor: pointer; box-shadow: 0 0 8px rgba(40, 167, 69, 0.5); }
+        button.next-btn.enabled:hover { background-color: #218838; }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 1000; overflow-y: auto; animation: fadeInModal 0.3s ease; }
         .modal-content { background-color: #1e293b; color: white; margin: 80px auto; padding: 24px 20px; border-radius: 16px; width: 90%; max-width: 420px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); position: relative; animation: slideUp 0.3s ease; }
         .modal-title { font-size: 20px; font-weight: bold; margin-bottom: 12px; display: block; text-align: center; color: rgb(143, 141, 141); }
-        .modal .close { position: absolute; top: 12px; right: 16px; font-size: 24px; color: #838181; cursor: pointer; }
+        .modal .close { position: absolute; top: 12px; right: 16px; font-size: 24px; color: #838181; cursor: pointer; transition: color 0.2s ease; }
         .branchButtons { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 15px; }
         #branchList .branch-item { background: #334155; border: none; color: rgb(167, 166, 166); padding: 12px; margin: 6px; border-radius: 999px; transition: background 0.2s; cursor: pointer; text-align: center; font-weight: 500; font-size: 14px; }
         #branchList .branch-item.selected { background-color: #22c55e; color: white; }
         #dateList button, #timeList .timeButtons { background-color: #334155; color: white; padding: 10px 15px; border: none; border-radius: 8px; margin: 5px; cursor: pointer; transition: background-color 0.3s; }
         #dateList button.clicked, #timeList .timeButtons.clicked { background-color: #1976d2 !important; color: white !important; }
         #dateList button.Mui-disabled, #timeList .timeButtons.disabledTime { background-color: #666 !important; color: #aaa !important; cursor: not-allowed; pointer-events: none; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
+
+    <div id="branchModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-title">เลือกสาขา</span>
+            <span class="close">×</span>
+            <div id="branchList"></div>
+            <button class="next-btn" id="branchModalNextBtn" disabled style="margin-top: 20px; width: 100%;">Next</button>
+        </div>
+    </div>
+
+    <div id="datetimeModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-title">เลือกวันและเวลา</span>
+            <span class="close">×</span>
+            <div id="dateList" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-bottom: 15px;"></div>
+            <div id="timeList" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px;"></div>
+             <div class="datePicketButSection visible" style="margin-top: 20px;">
+                <button class="Next next-btn" id="dateTimeNextBtn" disabled style="width: 100%;">Next</button>
+            </div>
+        </div>
+    </div>
+
+
     <div class="main-container">
         <div class="header-banner">JXS Register</div>
         <div class="step-card">
@@ -54,123 +78,24 @@
         </div>
     </div>
 
-    <div id="branchModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-title">เลือกสาขา</span>
-            <span class="close">×</span>
-            <div id="branchList"></div>
-            </div>
-    </div>
-
-    <div id="datetimeModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-title">เลือกวันและเวลา</span>
-            <span class="close">×</span>
-            <div id="dateList" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-bottom: 15px;"></div>
-            <div id="timeList" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px;"></div>
-            <div class="datePicketButSection" style="margin-top: 20px;">
-                <button class="Next next-btn" id="dateTimeNextBtn" disabled style="width: 100%;">Next</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // --- Main Logic ---
-        function openBranchModal() {
-            const modal = document.getElementById("branchModal");
-            modal.style.display = "block";
-            modal.querySelector(".close").onclick = () => { modal.style.display = "none"; };
+        // --- Global Variables ---
+        const selections = { branch: null, date: null, time: null };
 
-            const list = modal.querySelector("#branchList");
-            list.innerHTML = "";
-            const container = document.createElement("div");
-            container.className = "branchButtons";
-            
-            const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld", "MEGABANGNA", "Siam Square", "Emsphere"];
-            branches.forEach(b => {
-                const div = document.createElement("div");
-                div.className = "branch-item";
-                div.textContent = b;
-                div.onclick = () => {
-                    // 1. บันทึกสาขาที่เลือก
-                    window.selections.branch = b;
-                    
-                    // 2. ปิดหน้าต่างเลือกสาขา
-                    modal.style.display = "none";
-                    
-                    // 3. เปิดหน้าต่างเลือกวัน-เวลาทันที
-                    // การทำแบบนี้จะทำให้บอทข้าม Step 3 ที่เป็นปัญหาไปได้เลย
-                    openDateTimeModal();
-                };
-                container.appendChild(div);
-            });
-            list.appendChild(container);
+        // --- Core Functions ---
+        function showPage(pageId) {
+            document.querySelectorAll('#step-area .page').forEach(p => p.classList.remove('active'));
+            if (document.getElementById(pageId)) {
+                document.getElementById(pageId).classList.add('active');
+            }
         }
 
-        function openDateTimeModal() {
-            window.selections = window.selections || {};
-            const modal = document.getElementById("datetimeModal");
-            const nextBtn = document.getElementById("dateTimeNextBtn");
-            const dateList = modal.querySelector("#dateList");
-            const timeList = modal.querySelector("#timeList");
-            
-            modal.style.display = "block";
-            modal.querySelector(".close").onclick = () => { modal.style.display = "none"; };
-            nextBtn.disabled = true;
-            nextBtn.classList.remove('enabled');
-            dateList.innerHTML = "";
-            timeList.innerHTML = "";
-
-            const checkDateTimeValid = () => {
-                if (window.selections.date && window.selections.time) {
-                    nextBtn.disabled = false;
-                    nextBtn.classList.add('enabled');
-                }
-            };
-
-            // สร้างปุ่มวันที่
-            Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => {
-                const btn = document.createElement("button");
-                btn.className = "MuiPickersDay-root";
-                btn.textContent = d;
-                btn.onclick = () => {
-                    window.selections.date = d;
-                    dateList.querySelectorAll("button").forEach(b => b.classList.remove("clicked"));
-                    btn.classList.add("clicked");
-                    checkDateTimeValid();
-                };
-                dateList.appendChild(btn);
-            });
-
-            // สร้างปุ่มเวลา
-            ["10:00", "11:30", "14:00", "16:30", "19:00"].forEach(t => {
-                const btn = document.createElement("button");
-                btn.className = "timeButtons";
-                btn.textContent = t;
-                btn.onclick = () => {
-                    window.selections.time = t;
-                    timeList.querySelectorAll(".timeButtons").forEach(b => b.classList.remove("clicked"));
-                    btn.classList.add("clicked");
-                    checkDateTimeValid();
-                };
-                timeList.appendChild(btn);
-            });
-            
-            nextBtn.onclick = () => {
-                if (!nextBtn.disabled) {
-                    modal.style.display = "none";
-                    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                    document.getElementById('page-terms').classList.add('active');
-                }
-            };
-        }
-
-        // --- Event Listeners and Initializer ---
-        document.addEventListener("DOMContentLoaded", () => {
-            const registerBtn = document.getElementById("registerBtn");
+        function startCountdown() {
             const countdownEl = document.getElementById("countdown");
+            const registerBtn = document.getElementById("registerBtn");
             let secondsLeft = 3;
             registerBtn.disabled = true;
+            registerBtn.classList.remove('enabled');
             const timer = setInterval(() => {
                 if (secondsLeft <= 0) {
                     clearInterval(timer);
@@ -181,9 +106,123 @@
                     countdownEl.textContent = `00:00:0${secondsLeft--}`;
                 }
             }, 1000);
+        }
 
-            registerBtn.addEventListener("click", openBranchModal);
-        });
+        function handleTermsPage() {
+            showPage('page-terms');
+            const checkbox = document.querySelector("input[name='acceptTermsAndConditions']");
+            const nextBtn = document.getElementById("finalConfirm");
+            nextBtn.disabled = true;
+            nextBtn.classList.remove('enabled');
+            checkbox.checked = false;
+            checkbox.onchange = () => {
+                if (checkbox.checked) {
+                    nextBtn.disabled = false;
+                    nextBtn.classList.add('enabled');
+                } else {
+                    nextBtn.disabled = true;
+                    nextBtn.classList.remove('enabled');
+                }
+            };
+        }
+        
+        // --- Modal Logic ---
+        function openBranchModal() {
+            const modal = document.getElementById("branchModal");
+            const nextBtn = document.getElementById("branchModalNextBtn");
+            modal.style.display = "block";
+            modal.querySelector(".close").onclick = () => { modal.style.display = "none"; };
+            nextBtn.disabled = true;
+            nextBtn.classList.remove('enabled');
+
+            const list = modal.querySelector("#branchList");
+            list.innerHTML = "";
+            const container = document.createElement("div");
+            container.className = "branchButtons";
+            ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island"].forEach(b => {
+                const div = document.createElement("div");
+                div.className = "branch-item";
+                div.textContent = b;
+                div.onclick = () => {
+                    list.querySelectorAll(".branch-item.selected").forEach(el => el.classList.remove("selected"));
+                    div.classList.add("selected");
+                    selections.branch = b;
+                    nextBtn.disabled = false;
+                    nextBtn.classList.add('enabled');
+                };
+                container.appendChild(div);
+            });
+            list.appendChild(container);
+
+            nextBtn.onclick = () => {
+                if (!nextBtn.disabled) {
+                    modal.style.display = "none";
+                    openDateTimeModal();
+                }
+            };
+        }
+
+        function openDateTimeModal() {
+            const modal = document.getElementById("datetimeModal");
+            const nextBtn = document.getElementById("dateTimeNextBtn");
+            const dateList = modal.querySelector("#dateList");
+            const timeList = modal.querySelector("#timeList");
+            modal.style.display = "block";
+            modal.querySelector(".close").onclick = () => { modal.style.display = "none"; };
+            nextBtn.disabled = true;
+            nextBtn.classList.remove('enabled');
+            dateList.innerHTML = "";
+            timeList.innerHTML = "";
+
+            const checkDateTimeValid = () => {
+                if (selections.date && selections.time) {
+                    nextBtn.disabled = false;
+                    nextBtn.classList.add('enabled');
+                }
+            };
+
+            // Dates
+            Array.from({ length: 7 }, (_, i) => i + 1).forEach(d => {
+                const btn = document.createElement("button");
+                btn.className = "MuiPickersDay-root";
+                btn.textContent = d;
+                btn.onclick = () => {
+                    dateList.querySelectorAll("button.clicked").forEach(b => b.classList.remove("clicked"));
+                    btn.classList.add("clicked");
+                    selections.date = d;
+                    checkDateTimeValid();
+                };
+                dateList.appendChild(btn);
+            });
+
+            // Times
+            ["10:00", "11:30", "14:00", "16:30"].forEach(t => {
+                const btn = document.createElement("button");
+                btn.className = "timeButtons";
+                btn.textContent = t;
+                btn.onclick = () => {
+                    timeList.querySelectorAll(".timeButtons.clicked").forEach(b => b.classList.remove("clicked"));
+                    btn.classList.add("clicked");
+                    selections.time = t;
+                    checkDateTimeValid();
+                };
+                timeList.appendChild(btn);
+            });
+            
+            nextBtn.onclick = () => {
+                if (!nextBtn.disabled) {
+                    modal.style.display = "none";
+                    handleTermsPage();
+                }
+            };
+        }
+
+        // --- Event Listeners and Initializer ---
+        document.getElementById("registerBtn").addEventListener("click", openBranchModal);
+        
+        // Final confirmation logic is handled within handleTermsPage via the button's onchange event
+
+        document.addEventListener("DOMContentLoaded", startCountdown);
     </script>
 </body>
 </html>
