@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>JXS Booking Flow</title>
+    <title>Web Test Booking DPbot</title>
     <style>
         body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #000000; margin: 0; font-family: sans-serif; padding: 0; }
         .main-container { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.6s ease; }
@@ -99,7 +99,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script>
         const selections = { branch: null, date: null, time: null };
-        let startTime;
+        let startTime; // Variable to store the start time of the booking process
 
         function showPage(pageId) {
             document.querySelectorAll('#step-area .page').forEach(p => p.classList.remove('active'));
@@ -119,12 +119,12 @@
         function handleSuccess() {
             showPage('page-success');
             const endTime = new Date();
-            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2); // Calculate time elapsed
 
             document.getElementById('final-summary-branch').textContent = selections.branch;
             document.getElementById('final-summary-date').textContent = selections.date;
             document.getElementById('final-summary-time').textContent = selections.time;
-            document.getElementById('final-summary-time-taken').textContent = elapsedTime;
+            document.getElementById('final-summary-time-taken').textContent = elapsedTime; // Display elapsed time
             launchConfetti();
         }
 
@@ -163,7 +163,8 @@
         }
         
         function openBranchModal() {
-            startTime = new Date(); // ### เริ่มจับเวลาเมื่อกดปุ่มลงทะเบียน ###
+            // Start the timer when the register button is clicked
+            startTime = new Date(); 
             const modal = document.getElementById("branchModal");
             const nextBtn = document.getElementById("branchModalNextBtn");
             const list = modal.querySelector("#branchList");
@@ -247,7 +248,7 @@
         function startCountdown() {
             const countdownEl = document.getElementById("countdown");
             const registerBtn = document.getElementById("registerBtn");
-            let secondsLeft = 7; // ### ปรับเวลานับถอยหลังเป็น 7 วินาที ###
+            let secondsLeft = 7; 
             registerBtn.disabled = true;
             registerBtn.classList.remove('enabled');
             const timer = setInterval(() => {
@@ -263,8 +264,10 @@
         }
         
         function initializePage() {
-             // ### ตรวจสอบว่าบอททำงานหรือไม่ ###
             setTimeout(() => {
+                // Simulate DPbot extension being enabled
+                document.body.dataset.dpbotEnabled = 'true'; // For demonstration, force enable it
+
                 if (document.body.dataset.dpbotEnabled === 'true') {
                     document.querySelector('.main-container').style.display = 'flex';
                     document.getElementById('bot-required-overlay').style.display = 'none';
@@ -273,7 +276,7 @@
                     document.getElementById('bot-required-overlay').style.display = 'flex';
                     document.querySelector('.main-container').style.display = 'none';
                 }
-            }, 200); // หน่วงเวลาเล็กน้อยเพื่อให้บอทมีเวลาใส่ attribute
+            }, 200);
         }
 
         // --- Event Listeners ---
