@@ -27,8 +27,10 @@
         .branchButtons { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 15px; }
         #branchList .branch-item { background: #334155; color: #a0aec0; }
         #branchList .branch-item.selected { background-color: #22c55e; color: white; }
+        #branchList .branch-item.unavailable { background-color: #dc3545; color: white; cursor: not-allowed; opacity: 0.7; } /* Style for unavailable branches */
         #dateList button, #timeList .timeButtons { background-color: #334155; color: #a0aec0; }
         #dateList button.clicked, #timeList .timeButtons.clicked { background-color: #3182ce !important; color: white !important; }
+        #timeList .timeButtons.unavailable { background-color: #dc3545; color: white; cursor: not-allowed; opacity: 0.7; } /* Style for unavailable times */
         #cloudflare-simulation { align-items: center; justify-content: center; padding: 20px; background-color: #2d3748; border-radius: 8px; margin: 20px 0; }
         .spinner { width: 24px; height: 24px; border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: #3182ce; border-radius: 50%; animation: spin 1s linear infinite; }
         #bot-required-overlay { display: flex; align-items: center; justify-content: center; color: #f56565; font-size: 24px; font-weight: bold; text-align: center; }
@@ -100,6 +102,30 @@
     <script>
         const selections = { branch: null, date: null, time: null };
         let startTime; // Variable to store the start time of the booking process
+        let unavailableBranches = [];
+        let unavailableTimes = [];
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function populateUnavailableBranches(branches) {
+            unavailableBranches = [];
+            const numUnavailable = getRandomInt(0, 2); // 0, 1, or 2 unavailable branches
+            const shuffledBranches = [...branches].sort(() => 0.5 - Math.random());
+            for (let i = 0; i < numUnavailable; i++) {
+                unavailableBranches.push(shuffledBranches[i]);
+            }
+        }
+
+        function populateUnavailableTimes(times) {
+            unavailableTimes = [];
+            const numUnavailable = getRandomInt(0, 2); // 0, 1, or 2 unavailable times
+            const shuffledTimes = [...times].sort(() => 0.5 - Math.random());
+            for (let i = 0; i < numUnavailable; i++) {
+                unavailableTimes.push(shuffledTimes[i]);
+            }
+        }
 
         function showPage(pageId) {
             document.querySelectorAll('#step-area .page').forEach(p => p.classList.remove('active'));
@@ -174,21 +200,31 @@
             nextBtn.classList.remove('enabled');
             list.innerHTML = "";
             const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld", "MEGABANGNA", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai", "Icon Siam"];
+            
+            populateUnavailableBranches(branches); // Populate unavailable branches for this session
+
             branches.forEach(b => {
                 const button = document.createElement("button");
                 button.className = "branch-item";
                 button.textContent = b;
-                button.onclick = () => {
-                    list.querySelectorAll(".branch-item.selected").forEach(el => el.classList.remove("selected"));
-                    button.classList.add("selected");
-                    selections.branch = b;
-                    nextBtn.disabled = false;
-                    nextBtn.classList.add('enabled');
-                };
+                const isUnavailable = unavailableBranches.includes(b);
+
+                if (isUnavailable) {
+                    button.classList.add("unavailable");
+                    button.disabled = true;
+                } else {
+                    button.onclick = () => {
+                        list.querySelectorAll(".branch-item.selected").forEach(el => el.classList.remove("selected"));
+                        button.classList.add("selected");
+                        selections.branch = b;
+                        nextBtn.disabled = false;
+                        nextBtn.classList.add('enabled');
+                    };
+                }
                 list.appendChild(button);
             });
             nextBtn.onclick = () => {
-                if (selections.branch) {
+                if (selections.branch && !unavailableBranches.includes(selections.branch)) {
                     modal.style.display = "none";
                     openDateTimeModal();
                 }
@@ -206,12 +242,20 @@
             nextBtn.classList.remove('enabled');
             dateList.innerHTML = "";
             timeList.innerHTML = "";
+            
+            const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00", "22:30"];
+            populateUnavailableTimes(times); // Populate unavailable times for this session
+
             const checkDateTimeValid = () => {
-                if (selections.date && selections.time) {
+                if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) {
                     nextBtn.disabled = false;
                     nextBtn.classList.add('enabled');
+                } else {
+                    nextBtn.disabled = true;
+                    nextBtn.classList.remove('enabled');
                 }
             };
+
             Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => {
                 const button = document.createElement("button");
                 button.className = "MuiPickersDay-root";
@@ -220,25 +264,35 @@
                     dateList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked"));
                     button.classList.add("clicked");
                     selections.date = d;
+                    selections.time = null; // Reset time selection when date changes
+                    timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); // Clear time selection highlight
                     checkDateTimeValid();
                 };
                 dateList.appendChild(button);
             });
-            const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00", "22:30"];
+            
             times.forEach(t => {
                 const button = document.createElement("button");
                 button.className = "timeButtons";
                 button.textContent = t;
-                button.onclick = () => {
-                    timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked"));
-                    button.classList.add("clicked");
-                    selections.time = t;
-                    checkDateTimeValid();
-                };
+                const isUnavailable = unavailableTimes.includes(t);
+
+                if (isUnavailable) {
+                    button.classList.add("unavailable");
+                    button.disabled = true;
+                } else {
+                    button.onclick = () => {
+                        timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked"));
+                        button.classList.add("clicked");
+                        selections.time = t;
+                        checkDateTimeValid();
+                    };
+                }
                 timeList.appendChild(button);
             });
+
             nextBtn.onclick = () => {
-                if (selections.date && selections.time) {
+                if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) {
                     modal.style.display = "none";
                     handleTermsPage();
                 }
@@ -248,7 +302,7 @@
         function startCountdown() {
             const countdownEl = document.getElementById("countdown");
             const registerBtn = document.getElementById("registerBtn");
-            let secondsLeft = 7; 
+            let secondsLeft = 7;    
             registerBtn.disabled = true;
             registerBtn.classList.remove('enabled');
             const timer = setInterval(() => {
