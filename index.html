@@ -6,7 +6,7 @@
     <title>Web Test Booking DPbot</title>
     <style>
         body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #1e1e2e; margin: 0; font-family: 'Poppins', sans-serif; padding: 20px; user-select: none; }
-        .main-container { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.6s ease; }
+        .main-container { display: none; flex-direction: column; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.6s ease; }
         .step-card { background: #2a2a3a; border-radius: 12px; padding: 20px; color: white; text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); margin-bottom: 16px; width: 100%; max-width: 420px; border: 1px solid #4c4c6a; }
         .page { display: none; }
         .page.active { display: block; }
@@ -33,7 +33,7 @@
         #timeList .timeButtons.unavailable { background-color: #f38ba8; color: white; cursor: not-allowed; opacity: 0.7; }
         #cloudflare-simulation { display:none; align-items: center; justify-content: center; padding: 20px; background-color: #2d3748; border-radius: 8px; margin: 20px 0; }
         .spinner { width: 24px; height: 24px; border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: #89b4fa; border-radius: 50%; animation: spin 1s linear infinite; }
-        #bot-required-overlay { display: none; flex-direction: column; align-items: center; justify-content: center; color: #f56565; font-size: 24px; font-weight: bold; text-align: center; }
+        #bot-required-overlay { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #f56565; font-size: 24px; font-weight: bold; text-align: center; }
         .scene { width: 250px; height: 250px; perspective: 1200px; margin: 20px auto; position: relative; }
         #object3d { width: 100%; height: 100%; position: absolute; top: 0; left: 0; transform-style: preserve-3d; pointer-events: none; }
         #captcha-canvas { width: 100%; height: 100%; position: absolute; top:0; left:0; cursor: grab; z-index: 2; }
@@ -53,9 +53,14 @@
     </style>
 </head>
 <body>
-    <div id="bot-required-overlay">Please Enable DPbot Extension</div>
+    <div id="bot-required-overlay">
+        <p>Please Enable DPbot Extension</p>
+        <p style="font-size: 16px; color: #a6adc8; font-weight: normal;">(And allow access to file URLs)</p>
+    </div>
+
     <div id="loadingCaptcha"><div class="spinner"></div><p style="font-size: 0.8em; margin-top: 20px;">กำลังสร้างปริศนา 3D...</p></div>
-    <div class="main-container" style="display: none;">
+    
+    <div class="main-container">
         <div class="step-card">
             <div id="step-area">
                 <div id="page-register" class="page active">
@@ -85,6 +90,7 @@
             </div>
         </div>
     </div>
+
     <div id="branchModal" class="modal">
         <div class="modal-content">
             <span class="modal-title">เลือกสาขา</span><span class="close" onclick="closeModal('branchModal')">×</span>
@@ -92,6 +98,7 @@
             <button class="next-btn" id="branchModalNextBtn" disabled style="margin-top: 20px; width: 100%;">Next</button>
         </div>
     </div>
+
     <div id="captchaModal" class="modal">
         <div class="modal-content">
             <h2 style="margin-top:0; color: #fab387;">ยืนยันตัวตน</h2>
@@ -111,6 +118,7 @@
             <button class="next-btn" id="captchaNextBtn" style="margin-top: 20px; width: 100%;" disabled>ยืนยัน</button>
         </div>
     </div>
+
     <div id="datetimeModal" class="modal">
         <div class="modal-content">
             <span class="modal-title">เลือกวันและเวลา</span><span class="close" onclick="closeModal('datetimeModal')">×</span>
@@ -379,17 +387,20 @@
                 }
             }, 1000);
         }
+        
+        // --- START: ส่วนที่แก้ไข ---
         function initializePage() {
+            // เช็คว่าบอททำงานอยู่หรือไม่ โดยดูจาก attribute ที่ content.js สร้างไว้
+            // เราจะให้ content.js เป็นคนแสดง .main-container เอง
             setTimeout(() => {
-                if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
-                     document.querySelector('.main-container').style.display = 'block';
-                     document.getElementById('bot-required-overlay').style.display = 'none';
-                     resetFlow();
-                } else {
-                     document.getElementById('bot-required-overlay').style.display = 'flex';
+                if (document.body.dataset.dpbotEnabled !== 'true') {
+                    document.getElementById('bot-required-overlay').style.display = 'flex';
+                    document.querySelector('.main-container').style.display = 'none';
                 }
-            }, 500);
+            }, 500); // รอ 500ms เพื่อให้ content.js มีเวลาทำงานก่อน
         }
+        // --- END: ส่วนที่แก้ไข ---
+
         registerBtn.addEventListener("click", openBranchModal);
         captchaNextBtn.addEventListener("click", () => {
              if (!captchaNextBtn.disabled) {
