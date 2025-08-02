@@ -28,6 +28,9 @@
         .branch-item { background: #334155; color: #a0aec0; }
         .branch-item.selected { background-color: #a6e3a1; color: #1e1e2e; }
         .branch-item.unavailable { background-color: #f38ba8; color: white; cursor: not-allowed; opacity: 0.7; }
+        #dateList button, #timeList .timeButtons { background-color: #334155; color: #a0aec0; }
+        #dateList button.clicked, #timeList .timeButtons.clicked { background-color: #3182ce !important; color: white !important; }
+        #timeList .timeButtons.unavailable { background-color: #f38ba8; color: white; cursor: not-allowed; opacity: 0.7; }
         #cloudflare-simulation { display:none; align-items: center; justify-content: center; padding: 20px; background-color: #2d3748; border-radius: 8px; margin: 20px 0; }
         .spinner { width: 24px; height: 24px; border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: #89b4fa; border-radius: 50%; animation: spin 1s linear infinite; }
         #bot-required-overlay { display: none; align-items: center; justify-content: center; color: #f56565; font-size: 24px; font-weight: bold; text-align: center; }
@@ -50,11 +53,8 @@
     </style>
 </head>
 <body>
-
     <div id="bot-required-overlay">Please Enable DPbot Extension</div>
-
     <div id="loadingCaptcha"><div class="spinner"></div><p style="font-size: 0.8em; margin-top: 20px;">กำลังสร้างปริศนา 3D...</p></div>
-    
     <div class="main-container" style="display: none;">
         <div class="step-card">
             <div id="step-area">
@@ -85,7 +85,6 @@
             </div>
         </div>
     </div>
-
     <div id="branchModal" class="modal">
         <div class="modal-content">
             <span class="modal-title">เลือกสาขา</span><span class="close" onclick="closeModal('branchModal')">×</span>
@@ -93,7 +92,6 @@
             <button class="next-btn" id="branchModalNextBtn" disabled style="margin-top: 20px; width: 100%;">Next</button>
         </div>
     </div>
-
     <div id="captchaModal" class="modal">
         <div class="modal-content">
             <h2 style="margin-top:0; color: #fab387;">ยืนยันตัวตน</h2>
@@ -106,13 +104,13 @@
                 <div id="object3d">
                     <div class="face front"><img src="my_character.png" alt="CAPTCHA Image"></div>
                 </div>
-            </div>
+                </div>
             <div id="captcha-status"></div>
             <div class="loading-bar-container" style="display: none;" id="loading-bar-container"><div class="loading-bar" id="loading-bar"></div></div>
             <div id="loading-text" style="display: none;">รอ 2 วินาที...</div>
+            <button class="next-btn" id="captchaNextBtn" style="margin-top: 20px; width: 100%;" disabled>ยืนยัน</button>
         </div>
     </div>
-
     <div id="datetimeModal" class="modal">
         <div class="modal-content">
             <span class="modal-title">เลือกวันและเวลา</span><span class="close" onclick="closeModal('datetimeModal')">×</span>
@@ -135,6 +133,7 @@
         const loadingText = document.getElementById('loading-text');
         const loadingBarContainer = document.getElementById('loading-bar-container');
         const loadingBar = document.getElementById('loading-bar');
+        const captchaNextBtn = document.getElementById('captchaNextBtn');
         let isDragging = false, lastX, lastY, currentXAngle = 0, currentYAngle = 0;
         const rotationSensitivity = 0.5;
 
@@ -247,6 +246,8 @@
             setInitialRotation();
             captchaStatus.textContent = '';
             captchaStatus.className = '';
+            captchaNextBtn.disabled = true;
+            captchaNextBtn.classList.remove('enabled');
             loadingText.style.display = 'none';
             loadingBarContainer.style.display = 'none';
             setTimeout(() => {
@@ -261,6 +262,8 @@
             if (Math.abs(normalizedY) <= tolerance && Math.abs(normalizedX) <= tolerance) {
                 captchaStatus.textContent = '✅ ผ่าน!';
                 captchaStatus.className = 'success';
+                captchaNextBtn.disabled = false;
+                captchaNextBtn.classList.add('enabled');
                 loadingText.style.display = 'block';
                 loadingBarContainer.style.display = 'block';
                 loadingBar.style.width = '0%';
@@ -270,13 +273,11 @@
                     loadingBar.style.width = `${progress}%`;
                     if (progress >= 100) clearInterval(interval);
                 }, 90);
-                setTimeout(() => {
-                    document.getElementById('captchaModal').style.display = 'none';
-                    openDateTimeModal();
-                }, 2000);
             } else {
                 captchaStatus.textContent = '❌ ลองอีกครั้ง';
                 captchaStatus.className = 'failure';
+                captchaNextBtn.disabled = true;
+                captchaNextBtn.classList.remove('enabled');
             }
         }
         canvas.addEventListener('mousedown', (e) => {
@@ -390,6 +391,12 @@
             }, 500);
         }
         registerBtn.addEventListener("click", openBranchModal);
+        captchaNextBtn.addEventListener("click", () => {
+             if (!captchaNextBtn.disabled) {
+                closeModal('captchaModal');
+                openDateTimeModal();
+             }
+        });
         finalConfirmBtn.addEventListener("click", handleSuccess);
         resetBtn.addEventListener("click", resetFlow);
         document.addEventListener("DOMContentLoaded", initializePage);
