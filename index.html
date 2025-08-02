@@ -33,7 +33,7 @@
         #timeList .timeButtons.unavailable { background-color: #f38ba8; color: white; cursor: not-allowed; opacity: 0.7; }
         #cloudflare-simulation { display:none; align-items: center; justify-content: center; padding: 20px; background-color: #2d3748; border-radius: 8px; margin: 20px 0; }
         .spinner { width: 24px; height: 24px; border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: #89b4fa; border-radius: 50%; animation: spin 1s linear infinite; }
-        #bot-required-overlay { display: none; align-items: center; justify-content: center; color: #f56565; font-size: 24px; font-weight: bold; text-align: center; }
+        #bot-required-overlay { display: none; flex-direction: column; align-items: center; justify-content: center; color: #f56565; font-size: 24px; font-weight: bold; text-align: center; }
         .scene { width: 250px; height: 250px; perspective: 1200px; margin: 20px auto; position: relative; }
         #object3d { width: 100%; height: 100%; position: absolute; top: 0; left: 0; transform-style: preserve-3d; pointer-events: none; }
         #captcha-canvas { width: 100%; height: 100%; position: absolute; top:0; left:0; cursor: grab; z-index: 2; }
@@ -96,7 +96,7 @@
         <div class="modal-content">
             <h2 style="margin-top:0; color: #fab387;">ยืนยันตัวตน</h2>
             <div id="captcha-description" style="text-align: center; color: #cdd6f4; margin-bottom: 15px;">
-                <p style="margin-top: 0;">หมุนภาพให้หันหน้าเข้าหาตัวเอง</p>
+                <p style="margin-top: 0;">หมุนภาพตัวละครให้หันหน้าเข้าหาตัวเอง</p>
                 <p style="font-size: 0.9em; opacity: 0.8;">ใช้เมาส์หรือนิ้วของคุณหมุนภาพตัวละครด้านหน้าให้หันเข้าหาคุณ โดยตรง</p>
             </div>
             <div class="scene">
@@ -104,7 +104,7 @@
                 <div id="object3d">
                     <div class="face front"><img src="my_character.png" alt="CAPTCHA Image"></div>
                 </div>
-                </div>
+            </div>
             <div id="captcha-status"></div>
             <div class="loading-bar-container" style="display: none;" id="loading-bar-container"><div class="loading-bar" id="loading-bar"></div></div>
             <div id="loading-text" style="display: none;">รอ 2 วินาที...</div>
