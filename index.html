@@ -36,131 +36,28 @@
         .spinner { width: 24px; height: 24px; border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: #3182ce; border-radius: 50%; animation: spin 1s linear infinite; }
         #bot-required-overlay { display: flex; align-items: center; justify-content: center; color: #f56565; font-size: 24px; font-weight: bold; text-align: center; }
 
-        /* --- CSS CAPTCHA ใหม่ที่ปรับปรุงแล้ว --- */
-        #captchaModal .modal-content {
-            background-color: #1a1a2e; /* สีพื้นหลังเข้มขึ้น */
-            color: #e0e0e0;
-            padding: 40px;
-            border-radius: 20px; /* ขอบโค้งมนมากขึ้น */
-            border: none; /* เอาขอบเดิมออก */
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.05) inset; /* เพิ่มเงาและแสงสะท้อน */
-            max-width: 450px;
-            text-align: center;
-            position: relative;
-            transition: all 0.5s ease-in-out;
-        }
-        #captchaModal .modal-title {
-            color: #4dd0e1; /* เปลี่ยนสีหัวข้อให้ดูทันสมัย */
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(77, 208, 225, 0.5); /* เพิ่มเงาให้ข้อความ */
-        }
-        #captcha-description {
-            color: #aeb2bd; /* ปรับสีให้กลมกลืน */
-            margin-bottom: 25px;
-            font-size: 1em;
-            line-height: 1.6;
-        }
-        #captcha-description p {
-            margin: 0;
-        }
-        /* --- START: ส่วนที่แก้ไขสำหรับ CANVAS --- */
-        #captcha-canvas-container {
-            width: 280px;
-            height: 280px;
-            margin: 30px auto;
-            position: relative;
-            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.2) 80%);
-            border-radius: 15px;
-            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
-            cursor: grab;
-        }
-        #captcha-canvas-container:active {
-             cursor: grabbing;
-        }
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-            border-radius: 15px;
-        }
-        /* --- END: ส่วนที่แก้ไขสำหรับ CANVAS --- */
+        /* --- CSS CAPTCHA --- */
+        #captchaModal .modal-content { background-color: #1a1a2e; color: #e0e0e0; padding: 40px; border-radius: 20px; border: none; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.05) inset; max-width: 450px; text-align: center; position: relative; transition: all 0.5s ease-in-out; }
+        #captchaModal .modal-title { color: #4dd0e1; margin-bottom: 20px; text-shadow: 0 0 10px rgba(77, 208, 225, 0.5); }
+        #captcha-description { color: #aeb2bd; margin-bottom: 25px; font-size: 1em; line-height: 1.6; }
+        #captcha-description p { margin: 0; }
+        #captcha-canvas-container { width: 280px; height: 280px; margin: 30px auto; position: relative; background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.2) 80%); border-radius: 15px; box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5); cursor: grab; }
+        #captcha-canvas-container:active { cursor: grabbing; }
+        canvas { display: block; width: 100%; height: 100%; border-radius: 15px; }
+        #captcha-status { margin-top: 30px; font-size: 1.6em; font-weight: bold; height: 40px; transition: all 0.5s ease; letter-spacing: 1px; }
+        .captcha-success { color: #4caf50; text-shadow: 0 0 10px #4caf50; }
+        .captcha-failure { color: #ff5252; text-shadow: 0 0 10px #ff5252; }
+        .captcha-success-glow { box-shadow: 0 0 30px #4caf50, 0 0 15px #4caf50 inset; }
 
-        #captcha-status {
-            margin-top: 30px;
-            font-size: 1.6em;
-            font-weight: bold;
-            height: 40px;
-            transition: all 0.5s ease;
-            letter-spacing: 1px;
-        }
-        .captcha-success {
-            color: #4caf50;
-            text-shadow: 0 0 10px #4caf50;
-        }
-        .captcha-failure {
-            color: #ff5252;
-            text-shadow: 0 0 10px #ff5252;
-        }
-        .captcha-success-glow {
-            box-shadow: 0 0 30px #4caf50, 0 0 15px #4caf50 inset;
-        }
+        /* --- CSS Loading Screen --- */
+        #loadingCaptcha { position: fixed; inset: 0; background-color: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; font-size: 1.5em; font-weight: bold; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1001; }
+        #loadingCaptcha.show { opacity: 1; visibility: visible; }
+        .loading-spinner { width: 40px; height: 40px; border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        .loading-bar-container { width: 80%; margin: 20px auto 0; background-color: #555; border-radius: 5px; height: 10px; overflow: hidden; position: relative; }
+        .loading-bar { width: 0%; height: 100%; background-color: #28a745; transition: width 0.2s ease-in-out; border-radius: 5px; }
+        #loading-text { color: #28a745; margin-top: 10px; font-size: 1em; font-weight: normal; }
 
-        /* --- CSS Loading Screen ใหม่ที่เพิ่มเข้ามา --- */
-        #loadingCaptcha {
-            position: fixed;
-            inset: 0;
-            background-color: #000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            font-size: 1.5em;
-            font-weight: bold;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            z-index: 1001;
-        }
-        #loadingCaptcha.show {
-            opacity: 1;
-            visibility: visible;
-        }
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        
-        /* Loading bar CSS */
-        .loading-bar-container {
-            width: 80%;
-            margin: 20px auto 0;
-            background-color: #555;
-            border-radius: 5px;
-            height: 10px;
-            overflow: hidden;
-            position: relative;
-        }
-        .loading-bar {
-            width: 0%;
-            height: 100%;
-            background-color: #28a745;
-            transition: width 0.2s ease-in-out;
-            border-radius: 5px;
-        }
-        #loading-text {
-            color: #28a745;
-            margin-top: 10px;
-            font-size: 1em;
-            font-weight: normal;
-        }
-
-        /* --- Keyframes เดิม --- */
+        /* --- Keyframes --- */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -195,10 +92,10 @@
             </div>
             
             <div id="captcha-container">
-                 <div id="captcha-canvas-container">
+                <div id="captcha-canvas-container">
                    <canvas id="captcha-canvas" width="280" height="280"></canvas>
                 </div>
-                 <div id="captcha-status"></div>
+                <div id="captcha-status"></div>
                 <div class="loading-bar-container" style="display: none;" id="loading-bar-container">
                     <div class="loading-bar" id="loading-bar"></div>
                 </div>
@@ -255,130 +152,33 @@
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script>
+        // --- START: โค้ดส่วนหลักของเว็บ (ไม่มีการเปลี่ยนแปลง) ---
         const selections = { branch: null, date: null, time: null };
         let startTime;
         let unavailableBranches = [];
         let unavailableTimes = [];
 
-        function getRandomInt(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
-        function populateUnavailableBranches(branches) {
-            unavailableBranches = [];
-            const numUnavailable = getRandomInt(0, 2);
-            const shuffledBranches = [...branches].sort(() => 0.5 - Math.random());
-            for (let i = 0; i < numUnavailable; i++) {
-                unavailableBranches.push(shuffledBranches[i]);
-            }
-        }
-        function populateUnavailableTimes(times) {
-            unavailableTimes = [];
-            const numUnavailable = getRandomInt(0, 2);
-            const shuffledTimes = [...times].sort(() => 0.5 - Math.random());
-            for (let i = 0; i < numUnavailable; i++) {
-                unavailableTimes.push(shuffledTimes[i]);
-            }
-        }
-        function showPage(pageId) {
-            document.querySelectorAll('#step-area .page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId)?.classList.add('active');
-        }
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-        function launchConfetti() {
-            if (typeof confetti !== 'function') return;
-            const end = Date.now() + (2 * 1000);
-            (function frame() {
-                confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } });
-                confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } });
-                if (Date.now() < end) requestAnimationFrame(frame);
-            }());
-        }
-        function handleSuccess() {
-            showPage('page-success');
-            const endTime = new Date();
-            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
-            document.getElementById('final-summary-branch').textContent = selections.branch;
-            document.getElementById('final-summary-date').textContent = selections.date;
-            document.getElementById('final-summary-time').textContent = selections.time;
-            document.getElementById('final-summary-time-taken').textContent = elapsedTime;
-            launchConfetti();
-        }
-        function resetFlow() {
-            Object.keys(selections).forEach(key => selections[key] = null);
-            showPage('page-register');
-            startCountdown();
-        }
-        function handleTermsPage() {
-            showPage('page-terms');
-            const checkbox = document.querySelector("input[name='acceptTermsAndConditions']");
-            const nextBtn = document.getElementById("finalConfirm");
-            const cloudflareSim = document.getElementById("cloudflare-simulation");
-            nextBtn.disabled = true;
-            nextBtn.classList.remove('enabled');
-            checkbox.checked = false;
-            cloudflareSim.style.display = 'none';
-            checkbox.onchange = () => {
-                if (checkbox.checked) {
-                    nextBtn.disabled = true;
-                    nextBtn.classList.remove('enabled');
-                    cloudflareSim.style.display = 'flex';
-                    setTimeout(() => {
-                        cloudflareSim.style.display = 'none';
-                        if (checkbox.checked) {
-                            nextBtn.disabled = false;
-                            nextBtn.classList.add('enabled');
-                        }
-                    }, 2500);
-                } else {
-                    nextBtn.disabled = true;
-                    nextBtn.classList.remove('enabled');
-                }
-            };
-        }
-        function openBranchModal() {
-            startTime = new Date();
-            const modal = document.getElementById("branchModal");
-            const nextBtn = document.getElementById("branchModalNextBtn");
-            const list = modal.querySelector("#branchList");
-            modal.style.display = "block";
-            nextBtn.disabled = true;
-            nextBtn.classList.remove('enabled');
-            list.innerHTML = "";
-            const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld", "MEGABANGNA", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai"];
-            
-            populateUnavailableBranches(branches);
+        function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        function populateUnavailableBranches(branches) { unavailableBranches = []; const numUnavailable = getRandomInt(0, 2); const shuffledBranches = [...branches].sort(() => 0.5 - Math.random()); for (let i = 0; i < numUnavailable; i++) { unavailableBranches.push(shuffledBranches[i]); } }
+        function populateUnavailableTimes(times) { unavailableTimes = []; const numUnavailable = getRandomInt(0, 2); const shuffledTimes = [...times].sort(() => 0.5 - Math.random()); for (let i = 0; i < numUnavailable; i++) { unavailableTimes.push(shuffledTimes[i]); } }
+        function showPage(pageId) { document.querySelectorAll('#step-area .page').forEach(p => p.classList.remove('active')); document.getElementById(pageId)?.classList.add('active'); }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+        function launchConfetti() { if (typeof confetti !== 'function') return; const end = Date.now() + (2 * 1000); (function frame() { confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } }); confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } }); if (Date.now() < end) requestAnimationFrame(frame); }()); }
+        function handleSuccess() { showPage('page-success'); const endTime = new Date(); const elapsedTime = ((endTime - startTime) / 1000).toFixed(2); document.getElementById('final-summary-branch').textContent = selections.branch; document.getElementById('final-summary-date').textContent = selections.date; document.getElementById('final-summary-time').textContent = selections.time; document.getElementById('final-summary-time-taken').textContent = elapsedTime; launchConfetti(); }
+        function resetFlow() { Object.keys(selections).forEach(key => selections[key] = null); showPage('page-register'); startCountdown(); }
+        function handleTermsPage() { showPage('page-terms'); const checkbox = document.querySelector("input[name='acceptTermsAndConditions']"); const nextBtn = document.getElementById("finalConfirm"); const cloudflareSim = document.getElementById("cloudflare-simulation"); nextBtn.disabled = true; nextBtn.classList.remove('enabled'); checkbox.checked = false; cloudflareSim.style.display = 'none'; checkbox.onchange = () => { if (checkbox.checked) { nextBtn.disabled = true; nextBtn.classList.remove('enabled'); cloudflareSim.style.display = 'flex'; setTimeout(() => { cloudflareSim.style.display = 'none'; if (checkbox.checked) { nextBtn.disabled = false; nextBtn.classList.add('enabled'); } }, 2500); } else { nextBtn.disabled = true; nextBtn.classList.remove('enabled'); } }; }
+        function openBranchModal() { startTime = new Date(); const modal = document.getElementById("branchModal"); const nextBtn = document.getElementById("branchModalNextBtn"); const list = modal.querySelector("#branchList"); modal.style.display = "block"; nextBtn.disabled = true; nextBtn.classList.remove('enabled'); list.innerHTML = ""; const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld", "MEGABANGNA", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai"]; populateUnavailableBranches(branches); branches.forEach(b => { const button = document.createElement("button"); button.className = "branch-item"; button.textContent = b; const isUnavailable = unavailableBranches.includes(b); if (isUnavailable) { button.classList.add("is_full"); button.disabled = true; } else { button.onclick = () => { list.querySelectorAll(".branch-item.selected").forEach(el => el.classList.remove("selected")); button.classList.add("selected"); selections.branch = b; nextBtn.disabled = false; nextBtn.classList.add('enabled'); }; } list.appendChild(button); }); nextBtn.onclick = () => { if (selections.branch && !unavailableBranches.includes(selections.branch)) { modal.style.display = "none"; openCaptchaModal(); } }; }
+        function openDateTimeModal() { const modal = document.getElementById("datetimeModal"); const nextBtn = document.getElementById("dateTimeNextBtn"); const dateList = modal.querySelector("#dateList"); const timeList = modal.querySelector("#timeList"); modal.style.display = "block"; nextBtn.disabled = true; nextBtn.classList.remove('enabled'); dateList.innerHTML = ""; timeList.innerHTML = ""; const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"]; populateUnavailableTimes(times); const checkDateTimeValid = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { nextBtn.disabled = false; nextBtn.classList.add('enabled'); } else { nextBtn.disabled = true; nextBtn.classList.remove('enabled'); } }; Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => { const button = document.createElement("button"); button.className = "MuiPickersDay-root"; button.textContent = d; button.onclick = () => { dateList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.date = d; selections.time = null; timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); checkDateTimeValid(); }; dateList.appendChild(button); }); times.forEach(t => { const button = document.createElement("button"); button.className = "timeButtons"; button.textContent = t; const isUnavailable = unavailableTimes.includes(t); if (isUnavailable) { button.classList.add("disabledTime"); button.disabled = true; } else { button.onclick = () => { timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.time = t; checkDateTimeValid(); }; } timeList.appendChild(button); }); nextBtn.onclick = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { modal.style.display = "none"; handleTermsPage(); } }; }
+        function startCountdown() { const countdownEl = document.getElementById("countdown"); const registerBtn = document.getElementById("registerBtn"); let secondsLeft = 7; registerBtn.disabled = true; registerBtn.classList.remove('enabled'); const timer = setInterval(() => { if (secondsLeft <= 0) { clearInterval(timer); countdownEl.textContent = "เปิดแล้ว!"; registerBtn.disabled = false; registerBtn.classList.add('enabled'); } else { countdownEl.textContent = `00:00:0${secondsLeft--}`; } }, 1000); }
+        function initializePage() { setTimeout(() => { if (document.body.dataset.dpbotEnabled === 'true') { document.querySelector('.main-container').style.display = 'flex'; document.getElementById('bot-required-overlay').style.display = 'none'; resetFlow(); } else { document.getElementById('bot-required-overlay').style.display = 'flex'; document.querySelector('.main-container').style.display = 'none'; } }, 200); }
+        document.getElementById("registerBtn").addEventListener("click", openBranchModal);
+        document.getElementById("finalConfirm").addEventListener("click", handleSuccess);
+        document.getElementById("resetBtn").addEventListener("click", resetFlow);
+        document.addEventListener("DOMContentLoaded", initializePage);
+        // --- END: โค้ดส่วนหลักของเว็บ ---
 
-            branches.forEach(b => {
-                const button = document.createElement("button");
-                button.className = "branch-item";
-                button.textContent = b;
-                const isUnavailable = unavailableBranches.includes(b);
 
-                if (isUnavailable) {
-                    button.classList.add("is_full");
-                    button.disabled = true;
-                } else {
-                    button.onclick = () => {
-                        list.querySelectorAll(".branch-item.selected").forEach(el => el.classList.remove("selected"));
-                        button.classList.add("selected");
-                        selections.branch = b;
-                        nextBtn.disabled = false;
-                        nextBtn.classList.add('enabled');
-                    };
-                }
-                list.appendChild(button);
-            });
-            nextBtn.onclick = () => {
-                if (selections.branch && !unavailableBranches.includes(selections.branch)) {
-                    modal.style.display = "none";
-                    openCaptchaModal();
-                }
-            };
-        }
-        
-        // --- START: NEW 3D CAPTCHA (CANVAS) LOGIC ---
+        // --- START: REVISED 3D CAPTCHA LOGIC ---
         const captchaModal = document.getElementById('captchaModal');
         const canvas = document.getElementById('captcha-canvas');
         const ctx = canvas.getContext('2d');
@@ -393,73 +193,52 @@
         let currentXAngle = 0;
         let currentYAngle = 0;
         const rotationSensitivity = 0.5;
+        let animationFrameId = null;
 
         function drawCube() {
             const width = canvas.width;
             const height = canvas.height;
             const size = width * 0.4;
+            const normalizedYAngle = ((currentYAngle % 360) + 540) % 360 - 180;
+            const normalizedXAngle = ((currentXAngle % 360) + 540) % 360 - 180;
+            const isFrontFacing = Math.abs(normalizedYAngle) <= 90;
 
             ctx.clearRect(0, 0, width, height);
             ctx.save();
             ctx.translate(width / 2, height / 2);
-
-            const rotationX = currentXAngle * Math.PI / 180;
-            const rotationY = currentYAngle * Math.PI / 180;
-
-            // Simple 3D projection
-            const points = [
-                {x: -size, y: -size, z: -size}, {x: size, y: -size, z: -size},
-                {x: size, y: size, z: -size}, {x: -size, y: size, z: -size},
-                {x: -size, y: -size, z: size}, {x: size, y: -size, z: size},
-                {x: size, y: size, z: size}, {x: -size, y: size, z: size}
-            ];
-
-            const rotatedPoints = points.map(p => {
-                // Rotate Y
-                let y_rotated = {
-                    x: p.x * Math.cos(rotationY) - p.z * Math.sin(rotationY),
-                    y: p.y,
-                    z: p.x * Math.sin(rotationY) + p.z * Math.cos(rotationY)
-                };
-                // Rotate X
-                let final_rotated = {
-                    x: y_rotated.x,
-                    y: y_rotated.y * Math.cos(rotationX) - y_rotated.z * Math.sin(rotationX),
-                    z: y_rotated.y * Math.sin(rotationX) + y_rotated.z * Math.cos(rotationX)
-                };
-                return { x: final_rotated.x, y: final_rotated.y, z: final_rotated.z };
-            });
-
-            // Draw faces (simplified)
-            ctx.strokeStyle = '#4dd0e1';
-            ctx.lineWidth = 2;
-            ctx.font = 'bold 48px sans-serif';
+            
+            ctx.font = 'bold 80px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            
-            // Draw a simplified representation
-            // This is enough for the bot to interact with the canvas
-            if (Math.abs(((currentYAngle % 360) + 540) % 360 - 180) > 90) {
-                 ctx.fillStyle = '#e0e0e0';
-                 ctx.fillText("DPbot", 0, 0); // Back
+
+            // Simulate flipping effect
+            const scaleX = Math.cos(currentYAngle * Math.PI / 180);
+            ctx.transform(scaleX, 0, 0, 1, 0, 0);
+
+            if (isFrontFacing) {
+                // Draw Front
+                ctx.fillStyle = '#4dd0e1';
+                ctx.fillText("🤖", 0, 0);
             } else {
-                 ctx.fillStyle = '#4caf50';
-                 ctx.fillText("✅", 0, 0); // Front
+                // Draw Back (flipped)
+                ctx.save();
+                ctx.transform(-1, 0, 0, 1, 0, 0); // Flip context for back text
+                ctx.fillStyle = '#e0e0e0';
+                ctx.fillText("DP", 0, 0);
+                ctx.restore();
             }
             
             ctx.restore();
         }
 
-
         function setInitialRotation() {
-            currentYAngle = Math.random() * 180 + 90;
-            currentXAngle = Math.random() * 60 - 30;
+            currentYAngle = -170; // Start mostly facing back
+            currentXAngle = Math.random() * 40 - 20;
             drawCube();
         }
         
         function openCaptchaModal() {
             const loadingCaptcha = document.getElementById('loadingCaptcha');
-            
             setInitialRotation();
             captchaStatus.textContent = '';
             captchaStatus.className = '';
@@ -467,11 +246,8 @@
             captchaNextBtn.classList.remove('enabled');
             loadingBarContainer.style.display = 'none';
             loadingText.style.display = 'none';
-
             document.getElementById('captcha-canvas-container').classList.remove('captcha-success-glow');
-
             loadingCaptcha.classList.add('show');
-            
             setTimeout(() => {
                 loadingCaptcha.classList.remove('show');
                 captchaModal.style.display = 'block';
@@ -482,8 +258,7 @@
         function checkRotation() {
             const normalizedYAngle = ((currentYAngle % 360) + 540) % 360 - 180;
             const normalizedXAngle = ((currentXAngle % 360) + 540) % 360 - 180;
-            const tolerance = 25; // Increased tolerance slightly
-            
+            const tolerance = 20;
             const canvasContainer = document.getElementById('captcha-canvas-container');
 
             if (Math.abs(normalizedYAngle) <= tolerance && Math.abs(normalizedXAngle) <= tolerance) {
@@ -491,51 +266,50 @@
                 captchaStatus.className = 'captcha-success';
                 captchaNextBtn.disabled = false;
                 captchaNextBtn.classList.add('enabled');
-                
                 canvasContainer.classList.add('captcha-success-glow');
-
                 loadingBarContainer.style.display = 'block';
                 loadingText.style.display = 'block';
-                
                 loadingBar.style.width = '0%';
                 
                 let progress = 0;
                 const interval = setInterval(() => {
-                    if (progress >= 100) {
-                        clearInterval(interval);
-                    } else {
-                        progress += 5;
-                        loadingBar.style.width = `${progress}%`;
-                    }
+                    if (progress >= 100) clearInterval(interval);
+                    else loadingBar.style.width = `${progress += 5}%`;
                 }, 100);
 
                 setTimeout(() => {
                     closeModal('captchaModal');
                     openDateTimeModal();
                 }, 2000);
-
             } else {
                 captchaStatus.textContent = '❌ ลองอีกครั้ง';
                 captchaStatus.className = 'captcha-failure';
                 captchaNextBtn.disabled = true;
                 captchaNextBtn.classList.remove('enabled');
-                
                 canvasContainer.classList.remove('captcha-success-glow');
             }
         }
         
+        function renderLoop() {
+            if (!isDragging) return;
+            drawCube();
+            animationFrameId = requestAnimationFrame(renderLoop);
+        }
+        
         function handleDragStart(e) {
+            e.preventDefault();
             isDragging = true;
             lastX = e.clientX || e.touches[0].clientX;
             lastY = e.clientY || e.touches[0].clientY;
             captchaStatus.textContent = '';
             captchaStatus.className = '';
-            loadingBarContainer.style.display = 'none';
-            loadingText.style.display = 'none';
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = requestAnimationFrame(renderLoop);
         }
 
         function handleDragMove(e) {
             if (!isDragging) return;
+            e.preventDefault();
             const clientX = e.clientX || e.touches[0].clientX;
             const clientY = e.clientY || e.touches[0].clientY;
             const deltaX = clientX - lastX;
@@ -544,12 +318,12 @@
             currentXAngle -= deltaY * rotationSensitivity;
             lastX = clientX;
             lastY = clientY;
-            drawCube();
         }
 
         function handleDragEnd() {
             if (!isDragging) return;
             isDragging = false;
+            cancelAnimationFrame(animationFrameId);
             checkRotation();
         }
 
@@ -559,116 +333,14 @@
         document.addEventListener('mouseup', handleDragEnd);
 
         // Touch Events
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleDragStart(e); }, { passive: false });
-        document.addEventListener('touchmove', (e) => { if (isDragging) e.preventDefault(); handleDragMove(e); }, { passive: false });
+        canvas.addEventListener('touchstart', handleDragStart, { passive: false });
+        document.addEventListener('touchmove', handleDragMove, { passive: false });
         document.addEventListener('touchend', handleDragEnd);
         
         captchaNextBtn.addEventListener('click', () => {
-            if (!captchaNextBtn.disabled) {
-                closeModal('captchaModal');
-                openDateTimeModal();
-            }
+            if (!captchaNextBtn.disabled) { closeModal('captchaModal'); openDateTimeModal(); }
         });
-        // --- END: NEW 3D CAPTCHA (CANVAS) LOGIC ---
-        
-        function openDateTimeModal() {
-            const modal = document.getElementById("datetimeModal");
-            const nextBtn = document.getElementById("dateTimeNextBtn");
-            const dateList = modal.querySelector("#dateList");
-            const timeList = modal.querySelector("#timeList");
-            modal.style.display = "block";
-            nextBtn.disabled = true;
-            nextBtn.classList.remove('enabled');
-            dateList.innerHTML = "";
-            timeList.innerHTML = "";
-            
-            const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"];
-            populateUnavailableTimes(times);
-            const checkDateTimeValid = () => {
-                if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) {
-                    nextBtn.disabled = false;
-                    nextBtn.classList.add('enabled');
-                } else {
-                    nextBtn.disabled = true;
-                    nextBtn.classList.remove('enabled');
-                }
-            };
-            Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => {
-                const button = document.createElement("button");
-                button.className = "MuiPickersDay-root";
-                button.textContent = d;
-                button.onclick = () => {
-                    dateList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked"));
-                    button.classList.add("clicked");
-                    selections.date = d;
-                    selections.time = null;
-                    timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked"));
-                    checkDateTimeValid();
-                };
-                dateList.appendChild(button);
-            });
-            
-            times.forEach(t => {
-                const button = document.createElement("button");
-                button.className = "timeButtons";
-                button.textContent = t;
-                const isUnavailable = unavailableTimes.includes(t);
-                if (isUnavailable) {
-                    button.classList.add("disabledTime");
-                    button.disabled = true;
-                } else {
-                    button.onclick = () => {
-                        timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked"));
-                        button.classList.add("clicked");
-                        selections.time = t;
-                        checkDateTimeValid();
-                    };
-                }
-                timeList.appendChild(button);
-            });
-            nextBtn.onclick = () => {
-                if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) {
-                    modal.style.display = "none";
-                    handleTermsPage();
-                }
-            };
-        }
-        function startCountdown() {
-            const countdownEl = document.getElementById("countdown");
-            const registerBtn = document.getElementById("registerBtn");
-            let secondsLeft = 7;
-            registerBtn.disabled = true;
-            registerBtn.classList.remove('enabled');
-            const timer = setInterval(() => {
-                if (secondsLeft <= 0) {
-                    clearInterval(timer);
-                    countdownEl.textContent = "เปิดแล้ว!";
-                    registerBtn.disabled = false;
-                    registerBtn.classList.add('enabled');
-                } else {
-                    countdownEl.textContent = `00:00:0${secondsLeft--}`;
-                }
-            }, 1000);
-        }
-        function initializePage() {
-            // This now correctly CHECKS if the bot has set the attribute
-            setTimeout(() => {
-                if (document.body.dataset.dpbotEnabled === 'true') {
-                    document.querySelector('.main-container').style.display = 'flex';
-                    document.getElementById('bot-required-overlay').style.display = 'none';
-                    resetFlow();
-                } else {
-                    document.getElementById('bot-required-overlay').style.display = 'flex';
-                    document.querySelector('.main-container').style.display = 'none';
-                }
-            }, 200);
-        }
-
-        document.getElementById("registerBtn").addEventListener("click", openBranchModal);
-        document.getElementById("finalConfirm").addEventListener("click", handleSuccess);
-        document.getElementById("resetBtn").addEventListener("click", resetFlow);
-        // We initialize when the DOM is loaded, but the visibility check depends on the bot's content script.
-        document.addEventListener("DOMContentLoaded", initializePage);
+        // --- END: REVISED 3D CAPTCHA LOGIC ---
     </script>
 </body>
 </html>
