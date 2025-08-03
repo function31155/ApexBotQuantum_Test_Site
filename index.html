@@ -56,32 +56,6 @@
         .loading-bar-container { width: 80%; margin: 20px auto 0; background-color: #555; border-radius: 5px; height: 10px; overflow: hidden; position: relative; }
         .loading-bar { width: 0%; height: 100%; background-color: #28a745; transition: width 0.2s ease-in-out; border-radius: 5px; }
         #loading-text { color: #28a745; margin-top: 10px; font-size: 1em; font-weight: normal; }
-        
-        /* --- ✨ START: Gemini Feature CSS --- */
-        #gemini-story-container {
-            background-color: #1e293b;
-            border: 1px solid #4dd0e1;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 20px;
-            color: #e0e0e0;
-            font-style: italic;
-            display: none; /* Hidden by default */
-            text-align: left;
-            line-height: 1.6;
-        }
-        #gemini-story-container.loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        button#generateStoryBtn {
-            background: linear-gradient(45deg, #89b4fa, #cba6f7);
-            color: white;
-            width: 100%;
-            margin-top: 10px;
-        }
-        /* --- ✨ END: Gemini Feature CSS --- */
 
         /* --- Keyframes --- */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -172,12 +146,6 @@
                         <p>เวลาที่ใช้: <span id="final-summary-time-taken"></span> วินาที</p>
                     </div>
                     <button id="resetBtn">จองอีกครั้ง</button>
-                     <!-- ✨ START: Gemini Feature HTML -->
-                    <button id="generateStoryBtn">✨ สร้างเรื่องราวการจอง</button>
-                    <div id="gemini-story-container">
-                        <!-- Story will be displayed here -->
-                    </div>
-                    <!-- ✨ END: Gemini Feature HTML -->
                 </div>
             </div>
         </div>
@@ -198,7 +166,7 @@
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
         function launchConfetti() { if (typeof confetti !== 'function') return; const end = Date.now() + (2 * 1000); (function frame() { confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } }); confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } }); if (Date.now() < end) requestAnimationFrame(frame); }()); }
         function handleSuccess() { showPage('page-success'); const endTime = new Date(); const elapsedTime = ((endTime - startTime) / 1000).toFixed(2); document.getElementById('final-summary-branch').textContent = selections.branch; document.getElementById('final-summary-date').textContent = selections.date; document.getElementById('final-summary-time').textContent = selections.time; document.getElementById('final-summary-time-taken').textContent = elapsedTime; launchConfetti(); }
-        function resetFlow() { Object.keys(selections).forEach(key => selections[key] = null); showPage('page-register'); startCountdown(); document.getElementById('gemini-story-container').style.display = 'none'; /* Hide story on reset */ }
+        function resetFlow() { Object.keys(selections).forEach(key => selections[key] = null); showPage('page-register'); startCountdown(); }
         function handleTermsPage() { showPage('page-terms'); const checkbox = document.querySelector("input[name='acceptTermsAndConditions']"); const nextBtn = document.getElementById("finalConfirm"); const cloudflareSim = document.getElementById("cloudflare-simulation"); nextBtn.disabled = true; nextBtn.classList.remove('enabled'); checkbox.checked = false; cloudflareSim.style.display = 'none'; checkbox.onchange = () => { if (checkbox.checked) { nextBtn.disabled = true; nextBtn.classList.remove('enabled'); cloudflareSim.style.display = 'flex'; setTimeout(() => { cloudflareSim.style.display = 'none'; if (checkbox.checked) { nextBtn.disabled = false; nextBtn.classList.add('enabled'); } }, 2500); } else { nextBtn.disabled = true; nextBtn.classList.remove('enabled'); } }; }
         function openBranchModal() { startTime = new Date(); const modal = document.getElementById("branchModal"); const nextBtn = document.getElementById("branchModalNextBtn"); const list = modal.querySelector("#branchList"); modal.style.display = "block"; nextBtn.disabled = true; nextBtn.classList.remove('enabled'); list.innerHTML = ""; const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld", "MEGABANGNA", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai"]; populateUnavailableBranches(branches); branches.forEach(b => { const button = document.createElement("button"); button.className = "branch-item"; button.textContent = b; const isUnavailable = unavailableBranches.includes(b); if (isUnavailable) { button.classList.add("is_full"); button.disabled = true; } else { button.onclick = () => { list.querySelectorAll(".branch-item.selected").forEach(el => el.classList.remove("selected")); button.classList.add("selected"); selections.branch = b; nextBtn.disabled = false; nextBtn.classList.add('enabled'); }; } list.appendChild(button); }); nextBtn.onclick = () => { if (selections.branch && !unavailableBranches.includes(selections.branch)) { modal.style.display = "none"; openCaptchaModal(); } }; }
         function openDateTimeModal() { const modal = document.getElementById("datetimeModal"); const nextBtn = document.getElementById("dateTimeNextBtn"); const dateList = modal.querySelector("#dateList"); const timeList = modal.querySelector("#timeList"); modal.style.display = "block"; nextBtn.disabled = true; nextBtn.classList.remove('enabled'); dateList.innerHTML = ""; timeList.innerHTML = ""; const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"]; populateUnavailableTimes(times); const checkDateTimeValid = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { nextBtn.disabled = false; nextBtn.classList.add('enabled'); } else { nextBtn.disabled = true; nextBtn.classList.remove('enabled'); } }; Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => { const button = document.createElement("button"); button.className = "MuiPickersDay-root"; button.textContent = d; button.onclick = () => { dateList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.date = d; selections.time = null; timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); checkDateTimeValid(); }; dateList.appendChild(button); }); times.forEach(t => { const button = document.createElement("button"); button.className = "timeButtons"; button.textContent = t; const isUnavailable = unavailableTimes.includes(t); if (isUnavailable) { button.classList.add("disabledTime"); button.disabled = true; } else { button.onclick = () => { timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.time = t; checkDateTimeValid(); }; } timeList.appendChild(button); }); nextBtn.onclick = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { modal.style.display = "none"; handleTermsPage(); } }; }
@@ -211,7 +179,7 @@
         // --- END: Main Web Logic ---
 
 
-        // --- START: REVISED AND WORKING 3D CAPTCHA LOGIC ---
+        // --- START: FINAL WORKING 3D CAPTCHA LOGIC ---
         const captchaModal = document.getElementById('captchaModal');
         const canvas = document.getElementById('captcha-canvas');
         const ctx = canvas.getContext('2d');
@@ -226,7 +194,6 @@
         let currentXAngle = 0;
         let currentYAngle = 0;
         const rotationSensitivity = 0.5;
-        let animationFrameId = null;
 
         function drawCube() {
             const width = canvas.width;
@@ -242,28 +209,24 @@
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
-            // Simulate 3D flipping effect
             const scaleX = Math.cos(currentYAngle * Math.PI / 180);
             ctx.transform(scaleX, 0, 0, 1, 0, 0);
 
             if (isFrontFacing) {
-                // Draw Front Face (Robot)
                 ctx.fillStyle = '#4dd0e1';
                 ctx.fillText("🤖", 0, 0);
             } else {
-                // Draw Back Face (DP Text) - Flipped
                 ctx.save();
-                ctx.transform(-1, 0, 0, 1, 0, 0); // Flip context for back text
+                ctx.transform(-1, 0, 0, 1, 0, 0);
                 ctx.fillStyle = '#e0e0e0';
                 ctx.fillText("DP", 0, 0);
                 ctx.restore();
             }
-            
             ctx.restore();
         }
 
         function setInitialRotation() {
-            currentYAngle = -170; // Start mostly facing back
+            currentYAngle = -170;
             currentXAngle = Math.random() * 40 - 20;
             drawCube();
         }
@@ -321,12 +284,6 @@
             }
         }
         
-        function renderLoop() {
-            if (!isDragging) return;
-            drawCube();
-            animationFrameId = requestAnimationFrame(renderLoop);
-        }
-        
         function handleDragStart(e) {
             e.preventDefault();
             isDragging = true;
@@ -334,8 +291,6 @@
             lastY = e.clientY || e.touches[0].clientY;
             captchaStatus.textContent = '';
             captchaStatus.className = '';
-            cancelAnimationFrame(animationFrameId);
-            animationFrameId = requestAnimationFrame(renderLoop);
         }
 
         function handleDragMove(e) {
@@ -349,12 +304,12 @@
             currentXAngle -= deltaY * rotationSensitivity;
             lastX = clientX;
             lastY = clientY;
+            drawCube(); // Redraw immediately on move
         }
 
         function handleDragEnd() {
             if (!isDragging) return;
             isDragging = false;
-            cancelAnimationFrame(animationFrameId);
             checkRotation();
         }
 
@@ -371,62 +326,7 @@
         captchaNextBtn.addEventListener('click', () => {
             if (!captchaNextBtn.disabled) { closeModal('captchaModal'); openDateTimeModal(); }
         });
-        // --- END: REVISED AND WORKING 3D CAPTCHA LOGIC ---
-        
-        // --- ✨ START: Gemini API Feature Logic ---
-        const generateStoryBtn = document.getElementById('generateStoryBtn');
-        const storyContainer = document.getElementById('gemini-story-container');
-
-        generateStoryBtn.addEventListener('click', async () => {
-            // 1. Show loading state
-            storyContainer.style.display = 'flex';
-            storyContainer.classList.add('loading');
-            storyContainer.innerHTML = '<div class="spinner"></div>';
-            generateStoryBtn.disabled = true;
-
-            // 2. Prepare the prompt for Gemini
-            const prompt = `คุณคือผู้ช่วยสร้างสรรค์ ช่วยเขียนเรื่องราวสั้นๆ ที่ตลกขบขันหรือน่าตื่นเต้น เกี่ยวกับเหตุผลที่ฉันต้องรีบจองคิว Pop Mart ที่สาขา ${selections.branch} ในวันที่ ${selections.date} เวลา ${selections.time} อย่างเร่งด่วนที่สุด เรื่องราวต้องไม่ยาวเกิน 3-4 ประโยคและเป็นภาษาไทย`;
-            
-            const chatHistory = [];
-            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-            const payload = { contents: chatHistory };
-            const apiKey = ""; // API key will be provided by the environment
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-            try {
-                // 3. Call the Gemini API
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`API error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                
-                // 4. Display the result
-                storyContainer.classList.remove('loading');
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    const storyText = result.candidates[0].content.parts[0].text;
-                    storyContainer.innerHTML = storyText.replace(/\n/g, '<br>'); // Display story
-                } else {
-                    storyContainer.textContent = 'ขออภัยค่ะ ไม่สามารถสร้างเรื่องราวได้ในขณะนี้';
-                }
-
-            } catch (error) {
-                console.error("Gemini API call failed:", error);
-                storyContainer.classList.remove('loading');
-                storyContainer.textContent = 'เกิดข้อผิดพลาดในการเชื่อมต่อกับ Gemini';
-            } finally {
-                generateStoryBtn.disabled = false;
-            }
-        });
-        // --- ✨ END: Gemini API Feature Logic ---
+        // --- END: FINAL WORKING 3D CAPTCHA LOGIC ---
     </script>
 </body>
 </html>
