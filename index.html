@@ -209,8 +209,16 @@
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
-            const scaleX = Math.cos(currentYAngle * Math.PI / 180);
-            ctx.transform(scaleX, 0, 0, 1, 0, 0);
+            // Apply a transformation that simulates 3D rotation on both axes
+            const rotX = currentXAngle * Math.PI / 180;
+            const scaleY = Math.cos(rotX);
+            const perspectiveY = Math.sin(rotX);
+
+            const rotY = currentYAngle * Math.PI / 180;
+            const scaleX = Math.cos(rotY);
+            
+            ctx.transform(scaleX, perspectiveY * 0.2 , 0, scaleY, 0, 0);
+
 
             if (isFrontFacing) {
                 ctx.fillStyle = '#4dd0e1';
