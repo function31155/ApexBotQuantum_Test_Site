@@ -5,268 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Web Test Booking DPbot</title>
     <style>
-        /* --- CSS เดิม --- */
-        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #000000; margin: 0; font-family: sans-serif; padding: 0; }
-        .main-container { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.6s ease; }
-        .step-card { background: #334155; border-radius: 12px; padding: 20px; color: white; text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); margin-bottom: 16px; width: 100%; max-width: 420px; }
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #1e1e2e; margin: 0; font-family: 'Poppins', sans-serif; padding: 20px; user-select: none; }
+        .main-container { display: none; flex-direction: column; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.6s ease; }
+        .step-card { background: #2a2a3a; border-radius: 12px; padding: 20px; color: white; text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); margin-bottom: 16px; width: 100%; max-width: 420px; border: 1px solid #4c4c6a; }
         .page { display: none; }
         .page.active { display: block; }
-        .countdown-container { text-align: center; font-size: 28px; color: red; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; }
+        .countdown-container { text-align: center; font-size: 28px; color: #f38ba8; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; }
         button { border-radius: 8px; border: none; padding: 10px 16px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; }
         button:disabled { cursor: not-allowed; opacity: 0.6; }
         button.register { color: #333; font-size: 1.2rem; background-color: rgb(222, 222, 222); }
-        button.register.enabled { background-color: #22c55e; color: white; opacity: 1; }
-        button.next-btn { background-color: #888; color: #ccc; }
-        button.next-btn.enabled { background-color: #28a745; color: white; opacity: 1; }
-        .summary-info { background-color: #2d3748; color: #cbd5e1; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; border: 1px solid #4a5568; }
-        .summary-info h3 { color: #e2e8f0; margin-top: 0; }
-        .summary-info span { color: #48bb78; font-weight: bold; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); z-index: 1000; overflow-y: auto; animation: fadeInModal 0.3s ease; }
+        button.register.enabled { background-color: #a6e3a1; color: #1e1e2e; }
+        button.next-btn { background-color: #5c5f77; color: #a6adc8; }
+        button.next-btn.enabled { background-color: #89b4fa; color: #1e1e2e; }
+        .summary-info { background-color: #313244; color: #cdd6f4; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; border: 1px solid #45475a; }
+        .summary-info h3 { color: #cdd6f4; margin-top: 0; }
+        .summary-info span { color: #a6e3a1; font-weight: bold; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background-color: #1e293b; color: white; margin: 80px auto; padding: 24px 20px; border-radius: 16px; width: 90%; max-width: 420px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); position: relative; animation: slideUp 0.3s ease; }
-        .modal-title { font-size: 20px; font-weight: bold; margin-bottom: 12px; display: block; text-align: center; color: #a0aec0; }
-        .modal .close { position: absolute; top: 12px; right: 16px; font-size: 24px; color: #718096; cursor: pointer; }
+        .modal-title { font-size: 20px; font-weight: bold; margin-bottom: 12px; display: block; text-align: center; color: #a6adc8; }
+        .modal .close { position: absolute; top: 12px; right: 16px; font-size: 24px; color: #7f849c; cursor: pointer; }
         .branchButtons { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 15px; }
-        #branchList .branch-item { background: #334155; color: #a0aec0; }
-        #branchList .branch-item.selected { background-color: #22c55e; color: white; }
-        #branchList .branch-item.unavailable { background-color: #dc3545; color: white; cursor: not-allowed; opacity: 0.7; }
+        .branch-item { background: #334155; color: #a0aec0; }
+        .branch-item.selected { background-color: #a6e3a1; color: #1e1e2e; }
+        .branch-item.unavailable { background-color: #f38ba8; color: white; cursor: not-allowed; opacity: 0.7; }
         #dateList button, #timeList .timeButtons { background-color: #334155; color: #a0aec0; }
         #dateList button.clicked, #timeList .timeButtons.clicked { background-color: #3182ce !important; color: white !important; }
-        #timeList .timeButtons.unavailable { background-color: #dc3545; color: white; cursor: not-allowed; opacity: 0.7; }
-        #cloudflare-simulation { align-items: center; justify-content: center; padding: 20px; background-color: #2d3748; border-radius: 8px; margin: 20px 0; }
-        .spinner { width: 24px; height: 24px; border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: #3182ce; border-radius: 50%; animation: spin 1s linear infinite; }
-        #bot-required-overlay { display: flex; align-items: center; justify-content: center; color: #f56565; font-size: 24px; font-weight: bold; text-align: center; }
-
-        /* --- CSS CAPTCHA ใหม่ที่เพิ่มเข้ามา --- */
-        #captchaModal .modal-content {
-            background-color: #1a1a2e;
-            color: #e0e0e0;
-            padding: 40px;
-            border-radius: 16px;
-            border: 2px solid #4a4a6c;
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
-            max-width: 400px;
-            text-align: center;
-            position: relative;
-        }
-
-        #captchaModal .modal-title {
-            color: #e0e0e0;
-            margin-bottom: 20px;
-        }
-
-        #captcha-description {
-            color: #ddd;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        #captcha-container p {
-            margin-top: 0;
-            font-size: 1.1em;
-            opacity: 0.8;
-            margin-bottom: 20px;
-        }
-
-        .scene {
-            width: 250px;
-            height: 250px;
-            perspective: 1200px;
-            margin: 30px auto;
-            position: relative;
-        }
-        
-        #object3d {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            cursor: grab;
-            transition: transform 0.1s ease-out;
-        }
-
-        #object3d:active { cursor: grabbing; }
-
-        .face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 10px;
-            overflow: hidden;
-            backface-visibility: hidden;
-        }
-        
-        .front { transform: translateZ(0); }
+        #timeList .timeButtons.unavailable { background-color: #f38ba8; color: white; cursor: not-allowed; opacity: 0.7; }
+        #cloudflare-simulation { display:none; align-items: center; justify-content: center; padding: 20px; background-color: #2d3748; border-radius: 8px; margin: 20px 0; }
+        .spinner { width: 24px; height: 24px; border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: #89b4fa; border-radius: 50%; animation: spin 1s linear infinite; }
+        #bot-required-overlay { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #f56565; font-size: 24px; font-weight: bold; text-align: center; }
+        .scene { width: 250px; height: 250px; perspective: 1200px; margin: 20px auto; position: relative; }
+        #object3d { width: 100%; height: 100%; position: absolute; top: 0; left: 0; transform-style: preserve-3d; pointer-events: none; }
+        #captcha-canvas { width: 100%; height: 100%; position: absolute; top:0; left:0; cursor: grab; z-index: 2; }
+        #captcha-canvas:active { cursor: grabbing; }
+        .face { position: absolute; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; border-radius: 10px; overflow: hidden; backface-visibility: hidden; }
         .front img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
-        .back { background-color: #3f3f5b; transform: rotateY(180deg); }
-        
-        .back h2 {
-            color: #fff;
-            font-size: 2.5em;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-
-        #captcha-status {
-            margin-top: 20px;
-            font-size: 1.5em;
-            font-weight: bold;
-            height: 40px;
-            transition: color 0.5s ease;
-        }
-        .captcha-success { color: #4caf50; }
-        .captcha-failure { color: #e57373; }
-        
-        /* --- CSS Loading Screen ใหม่ที่เพิ่มเข้ามา --- */
-        #loadingCaptcha {
-            position: fixed;
-            inset: 0;
-            background-color: #000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            font-size: 1.5em;
-            font-weight: bold;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            z-index: 1001;
-        }
-
-        #loadingCaptcha.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        
-        /* CSS สำหรับ Loading Overlay ใน CAPTCHA modal */
-        #captcha-loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            font-size: 1.5em;
-            font-weight: bold;
-            border-radius: 16px;
-        }
-        
-        /* Loading bar CSS */
-        .loading-bar-container {
-            width: 80%;
-            margin: 20px auto 0;
-            background-color: #555;
-            border-radius: 5px;
-            height: 10px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .loading-bar {
-            width: 0%;
-            height: 100%;
-            background-color: #28a745;
-            transition: width 0.2s ease-in-out;
-            border-radius: 5px;
-        }
-
-        #loading-text {
-            color: #28a745;
-            margin-top: 10px;
-            font-size: 1em;
-            font-weight: normal;
-        }
-
-        /* --- Keyframes เดิม --- */
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
+        #captcha-status { margin-top: 15px; font-size: 1.2em; font-weight: bold; height: 30px; transition: color 0.5s ease; }
+        .captcha-success { color: #a6e3a1; }
+        .captcha-failure { color: #f38ba8; }
+        #loadingCaptcha { position: fixed; inset: 0; background-color: #11111b; display: none; flex-direction: column; justify-content: center; align-items: center; color: #fff; font-size: 1.5em; font-weight: bold; z-index: 1001; }
+        .loading-bar-container { width: 80%; margin: 15px auto 0; background-color: #45475a; border-radius: 5px; height: 8px; overflow: hidden; }
+        .loading-bar { width: 0%; height: 100%; background-color: #a6e3a1; transition: width 0.1s linear; border-radius: 5px; }
+        #loading-text { color: #a6e3a1; margin-top: 10px; font-size: 0.9em; height: 20px; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    
     <div id="bot-required-overlay">
-        Please Enable DPbot Extension
+        <p>Please Enable DPbot Extension</p>
+        <p style="font-size: 16px; color: #a6adc8; font-weight: normal;">(And allow access to file URLs)</p>
     </div>
 
-    <div id="loadingCaptcha">
-        <div class="loading-spinner"></div>
-        กำลังสร้างปริศนา 3D...
-    </div>
-
-    <div id="branchModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-title">เลือกสาขา</span><span class="close" onclick="closeModal('branchModal')">×</span>
-            <div id="branchList" class="branchButtons"></div>
-            <button class="next-btn" id="branchModalNextBtn" disabled style="margin-top: 20px; width: 100%;">Next</button>
-        </div>
-    </div>
+    <div id="loadingCaptcha"><div class="spinner"></div><p style="font-size: 0.8em; margin-top: 20px;">กำลังสร้างปริศนา 3D...</p></div>
     
-    <div id="captchaModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-title">ยืนยันตัวตน</span>
-            <div id="captcha-description" style="text-align: center; color: #ddd; margin-bottom: 15px;">
-                <p style="margin-top: 0;">หมุนภาพให้หันหน้าเข้าหาตัวเอง</p>
-                <p style="font-size: 0.9em; opacity: 0.8;">ใช้เมาส์หรือนิ้วของคุณหมุนภาพตัวละครด้านหน้าให้หันเข้าหาคุณ โดยตรง ภาพจะสว่างขึ้นเมื่อวางแนวถูกต้องด้วยความแม่นยำ 95%</p>
-            </div>
-            
-            <div id="captcha-container">
-                <div class="scene">
-                    <div id="object3d">
-                        <div class="face front">
-                            <img src="YOUR_IMAGE_HERE.png" alt="CAPTCHA Image">
-                        </div>
-                        <div class="face back">
-                            <h2>DPbot</h2>
-                        </div>
-                    </div>
-                </div>
-                <div id="captcha-status"></div>
-                <div class="loading-bar-container" style="display: none;" id="loading-bar-container">
-                    <div class="loading-bar" id="loading-bar"></div>
-                </div>
-                <div id="loading-text" style="display: none;">รอ 2 วินาที...</div>
-            </div>
-            <button class="next-btn" id="captchaNextBtn" style="margin-top: 20px; width: 100%;" disabled>ยืนยัน</button>
-        </div>
-    </div>
-
-    <div id="datetimeModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-title">เลือกวันและเวลา</span><span class="close" onclick="closeModal('datetimeModal')">×</span>
-            <div id="dateList" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-bottom: 15px;"></div>
-            <div id="timeList" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px;"></div>
-            <div class="datePicketButSection" style="margin-top: 20px;">
-                <button class="Next next-btn" id="dateTimeNextBtn" disabled style="width: 100%;">Next</button>
-            </div>
-        </div>
-    </div>
-    
-    <div class="main-container" style="display: none;">
+    <div class="main-container">
         <div class="step-card">
             <div id="step-area">
                 <div id="page-register" class="page active">
-                    <h2>ไปกันต่อ</h2><p>ระบบลงทะเบียนของคุณพร้อมแล้ว</p>
+                    <h2>ไปกันต่อ</h2><p style="color: #a6adc8;">ระบบลงทะเบียนของคุณพร้อมแล้ว</p>
                     <div class="countdown-container"><span id="countdown"></span></div>
                     <button class="register" id="registerBtn" disabled>ลงทะเบียน</button>
                 </div>
@@ -275,14 +73,11 @@
                     <label style="color: white; display: flex; align-items: center; justify-content: center; gap: 10px; margin: 20px 0;">
                         <input name="acceptTermsAndConditions" type="checkbox" style="width: 18px; height: 18px;"> ยอมรับเงื่อนไข
                     </label>
-                    <div id="cloudflare-simulation" style="display: none;">
-                        <div class="spinner"></div>
-                        <span style="margin-left: 15px;">Verifying you are human...</span>
-                    </div>
+                    <div id="cloudflare-simulation"><div class="spinner"></div><span style="margin-left: 15px;">Verifying you are human...</span></div>
                     <button class="next-btn" id="finalConfirm" type="submit" disabled>Confirm Booking</button>
                 </div>
                 <div id="page-success" class="page">
-                    <h2 style="color:#22c55e;">🎉 Booking Success!</h2>
+                    <h2 style="color:#a6e3a1;">🎉 Booking Success!</h2>
                     <div class="summary-info">
                         <h3>รายละเอียดการจองของคุณ</h3>
                         <p>สาขา: <span id="final-summary-branch"></span></p>
@@ -296,54 +91,81 @@
         </div>
     </div>
 
+    <div id="branchModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-title">เลือกสาขา</span><span class="close" onclick="closeModal('branchModal')">×</span>
+            <div id="branchList" class="branchButtons"></div>
+            <button class="next-btn" id="branchModalNextBtn" disabled style="margin-top: 20px; width: 100%;">Next</button>
+        </div>
+    </div>
+
+    <div id="captchaModal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-top:0; color: #fab387;">ยืนยันตัวตน</h2>
+            <div id="captcha-description" style="text-align: center; color: #cdd6f4; margin-bottom: 15px;">
+                <p style="margin-top: 0;">หมุนภาพตัวละครให้หันหน้าเข้าหาตัวเอง</p>
+                <p style="font-size: 0.9em; opacity: 0.8;">ใช้เมาส์หรือนิ้วของคุณหมุนภาพตัวละครด้านหน้าให้หันเข้าหาคุณ โดยตรง</p>
+            </div>
+            <div class="scene">
+                <canvas id="captcha-canvas"></canvas>
+                <div id="object3d">
+                    <div class="face front"><img src="my_character.png" alt="CAPTCHA Image"></div>
+                </div>
+            </div>
+            <div id="captcha-status"></div>
+            <div class="loading-bar-container" style="display: none;" id="loading-bar-container"><div class="loading-bar" id="loading-bar"></div></div>
+            <div id="loading-text" style="display: none;">รอ 2 วินาที...</div>
+            <button class="next-btn" id="captchaNextBtn" style="margin-top: 20px; width: 100%;" disabled>ยืนยัน</button>
+        </div>
+    </div>
+
+    <div id="datetimeModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-title">เลือกวันและเวลา</span><span class="close" onclick="closeModal('datetimeModal')">×</span>
+            <div id="dateList" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-bottom: 15px;"></div>
+            <div id="timeList" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px;"></div>
+            <div class="datePicketButSection" style="margin-top: 20px;"><button class="next-btn" id="dateTimeNextBtn" disabled style="width: 100%;">Next</button></div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script>
         const selections = { branch: null, date: null, time: null };
-        let startTime;
-        let unavailableBranches = [];
-        let unavailableTimes = [];
+        let startTime, unavailableBranches = [], unavailableTimes = [];
+        const registerBtn = document.getElementById("registerBtn");
+        const finalConfirmBtn = document.getElementById("finalConfirm");
+        const resetBtn = document.getElementById("resetBtn");
+        const canvas = document.getElementById('captcha-canvas');
+        const object3d = document.getElementById('object3d');
+        const captchaStatus = document.getElementById('captcha-status');
+        const loadingText = document.getElementById('loading-text');
+        const loadingBarContainer = document.getElementById('loading-bar-container');
+        const loadingBar = document.getElementById('loading-bar');
+        const captchaNextBtn = document.getElementById('captchaNextBtn');
+        let isDragging = false, lastX, lastY, currentXAngle = 0, currentYAngle = 0;
+        const rotationSensitivity = 0.5;
 
-        function getRandomInt(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
+        function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        function populateUnavailable(sourceArray, count) {
+            const unavailable = [];
+            const shuffled = [...sourceArray].sort(() => 0.5 - Math.random());
+            for (let i = 0; i < count; i++) { unavailable.push(shuffled[i]); }
+            return unavailable;
         }
-
-        function populateUnavailableBranches(branches) {
-            unavailableBranches = [];
-            const numUnavailable = getRandomInt(0, 2);
-            const shuffledBranches = [...branches].sort(() => 0.5 - Math.random());
-            for (let i = 0; i < numUnavailable; i++) {
-                unavailableBranches.push(shuffledBranches[i]);
-            }
-        }
-
-        function populateUnavailableTimes(times) {
-            unavailableTimes = [];
-            const numUnavailable = getRandomInt(0, 2);
-            const shuffledTimes = [...times].sort(() => 0.5 - Math.random());
-            for (let i = 0; i < numUnavailable; i++) {
-                unavailableTimes.push(shuffledTimes[i]);
-            }
-        }
-
         function showPage(pageId) {
             document.querySelectorAll('#step-area .page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId)?.classList.add('active');
         }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
         function launchConfetti() {
             if (typeof confetti !== 'function') return;
-            const end = Date.now() + (2 * 1000);
+            const end = Date.now() + 2000;
             (function frame() {
                 confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } });
                 confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } });
                 if (Date.now() < end) requestAnimationFrame(frame);
             }());
         }
-
         function handleSuccess() {
             showPage('page-success');
             const endTime = new Date();
@@ -354,61 +176,52 @@
             document.getElementById('final-summary-time-taken').textContent = elapsedTime;
             launchConfetti();
         }
-
         function resetFlow() {
             Object.keys(selections).forEach(key => selections[key] = null);
             showPage('page-register');
             startCountdown();
         }
-
         function handleTermsPage() {
             showPage('page-terms');
             const checkbox = document.querySelector("input[name='acceptTermsAndConditions']");
-            const nextBtn = document.getElementById("finalConfirm");
             const cloudflareSim = document.getElementById("cloudflare-simulation");
-            nextBtn.disabled = true;
-            nextBtn.classList.remove('enabled');
+            finalConfirmBtn.disabled = true;
+            finalConfirmBtn.classList.remove('enabled');
             checkbox.checked = false;
             cloudflareSim.style.display = 'none';
             checkbox.onchange = () => {
                 if (checkbox.checked) {
-                    nextBtn.disabled = true;
-                    nextBtn.classList.remove('enabled');
+                    finalConfirmBtn.disabled = true;
                     cloudflareSim.style.display = 'flex';
                     setTimeout(() => {
                         cloudflareSim.style.display = 'none';
                         if (checkbox.checked) {
-                            nextBtn.disabled = false;
-                            nextBtn.classList.add('enabled');
+                            finalConfirmBtn.disabled = false;
+                            finalConfirmBtn.classList.add('enabled');
                         }
-                    }, 2500);
+                    }, 1500);
                 } else {
-                    nextBtn.disabled = true;
-                    nextBtn.classList.remove('enabled');
+                    finalConfirmBtn.disabled = true;
+                    finalConfirmBtn.classList.remove('enabled');
                 }
             };
         }
-        
         function openBranchModal() {
             startTime = new Date();
             const modal = document.getElementById("branchModal");
             const nextBtn = document.getElementById("branchModalNextBtn");
             const list = modal.querySelector("#branchList");
-            modal.style.display = "block";
+            modal.style.display = "flex";
             nextBtn.disabled = true;
             nextBtn.classList.remove('enabled');
             list.innerHTML = "";
             const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld", "MEGABANGNA", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai", "Icon Siam"];
-            
-            populateUnavailableBranches(branches);
-
+            unavailableBranches = populateUnavailable(branches, getRandomInt(0, 2));
             branches.forEach(b => {
                 const button = document.createElement("button");
                 button.className = "branch-item";
                 button.textContent = b;
-                const isUnavailable = unavailableBranches.includes(b);
-
-                if (isUnavailable) {
+                if (unavailableBranches.includes(b)) {
                     button.classList.add("unavailable");
                     button.disabled = true;
                 } else {
@@ -423,187 +236,94 @@
                 list.appendChild(button);
             });
             nextBtn.onclick = () => {
-                if (selections.branch && !unavailableBranches.includes(selections.branch)) {
+                if (selections.branch) {
                     modal.style.display = "none";
                     openCaptchaModal();
                 }
             };
         }
-        
-        // --- CAPTCHA Logic ---
-        const captchaModal = document.getElementById('captchaModal');
-        const object3d = document.getElementById('object3d');
-        const captchaStatus = document.getElementById('captcha-status');
-        const captchaNextBtn = document.getElementById('captchaNextBtn');
-        const loadingBarContainer = document.getElementById('loading-bar-container');
-        const loadingBar = document.getElementById('loading-bar');
-        const loadingText = document.getElementById('loading-text');
-
-        let isDragging = false;
-        let lastX, lastY;
-        let currentXAngle = 0;
-        let currentYAngle = 0;
-        const rotationSensitivity = 0.5;
-
         function setInitialRotation() {
-            currentYAngle = Math.random() * 180 + 90;
-            currentXAngle = Math.random() * 60 - 30;
+            currentYAngle = 120 + (Math.random() * 120 - 60);
+            currentXAngle = Math.random() * 40 - 20;
+            object3d.style.transition = 'none';
             object3d.style.transform = `rotateX(${currentXAngle}deg) rotateY(${currentYAngle}deg)`;
         }
-        
-        function updateRotation() {
-            if (!isDragging) return;
-            object3d.style.transform = `rotateX(${currentXAngle}deg) rotateY(${currentYAngle}deg)`;
-            requestAnimationFrame(updateRotation);
-        }
-
         function openCaptchaModal() {
             const loadingCaptcha = document.getElementById('loadingCaptcha');
+            loadingCaptcha.style.display = 'flex';
             setInitialRotation();
             captchaStatus.textContent = '';
             captchaStatus.className = '';
             captchaNextBtn.disabled = true;
             captchaNextBtn.classList.remove('enabled');
-            loadingBarContainer.style.display = 'none';
             loadingText.style.display = 'none';
-
-            loadingCaptcha.classList.add('show');
-
+            loadingBarContainer.style.display = 'none';
             setTimeout(() => {
-                loadingCaptcha.classList.remove('show');
-                captchaModal.style.display = 'block';
-            }, 1000);
+                loadingCaptcha.style.display = 'none';
+                document.getElementById('captchaModal').style.display = 'flex';
+            }, 1500);
         }
-
         function checkRotation() {
-            const normalizedYAngle = ((currentYAngle % 360) + 540) % 360 - 180;
-            const normalizedXAngle = ((currentXAngle % 360) + 540) % 360 - 180;
-            const tolerance = 20;
-
-            if (Math.abs(normalizedYAngle) <= tolerance && Math.abs(normalizedXAngle) <= tolerance) {
+            const normalizedY = ((currentYAngle % 360) + 540) % 360 - 180;
+            const normalizedX = ((currentXAngle % 360) + 540) % 360 - 180;
+            const tolerance = 25;
+            if (Math.abs(normalizedY) <= tolerance && Math.abs(normalizedX) <= tolerance) {
                 captchaStatus.textContent = '✅ ผ่าน!';
-                captchaStatus.className = 'captcha-success';
+                captchaStatus.className = 'success';
                 captchaNextBtn.disabled = false;
                 captchaNextBtn.classList.add('enabled');
-
-                // แสดง Loading Bar และข้อความ
-                loadingBarContainer.style.display = 'block';
                 loadingText.style.display = 'block';
-                
+                loadingBarContainer.style.display = 'block';
                 loadingBar.style.width = '0%';
-                
                 let progress = 0;
                 const interval = setInterval(() => {
-                    if (progress >= 100) {
-                        clearInterval(interval);
-                    } else {
-                        progress += 5;
-                        loadingBar.style.width = `${progress}%`;
-                    }
-                }, 100);
-
-                // รอ 2 วินาทีแล้วไปขั้นตอนต่อไป
-                setTimeout(() => {
-                    closeModal('captchaModal');
-                    openDateTimeModal();
-                }, 2000);
-
+                    progress += 5;
+                    loadingBar.style.width = `${progress}%`;
+                    if (progress >= 100) clearInterval(interval);
+                }, 90);
             } else {
                 captchaStatus.textContent = '❌ ลองอีกครั้ง';
-                captchaStatus.className = 'captcha-failure';
+                captchaStatus.className = 'failure';
                 captchaNextBtn.disabled = true;
                 captchaNextBtn.classList.remove('enabled');
             }
         }
-        
-        // Mouse Events
-        object3d.addEventListener('mousedown', (e) => {
+        canvas.addEventListener('mousedown', (e) => {
             isDragging = true;
             lastX = e.clientX;
             lastY = e.clientY;
             object3d.style.transition = 'none';
-            captchaStatus.textContent = '';
-            captchaStatus.className = '';
-            loadingBarContainer.style.display = 'none';
-            loadingText.style.display = 'none';
-            requestAnimationFrame(updateRotation);
         });
-
         document.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             const deltaX = e.clientX - lastX;
             const deltaY = e.clientY - lastY;
-            currentYAngle += deltaX * rotationSensitivity;
-            currentXAngle -= deltaY * rotationSensitivity;
+            currentYAngle += deltaX * 0.5;
+            currentXAngle -= deltaY * 0.5;
             lastX = e.clientX;
             lastY = e.clientY;
+            object3d.style.transform = `rotateX(${currentXAngle}deg) rotateY(${currentYAngle}deg)`;
         });
-
         document.addEventListener('mouseup', () => {
             if (!isDragging) return;
             isDragging = false;
-            object3d.style.transition = 'transform 0.5s ease';
+            object3d.style.transition = 'transform 0.4s ease';
             checkRotation();
         });
-
-        // Touch Events
-        object3d.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            isDragging = true;
-            const touch = e.touches[0];
-            lastX = touch.clientX;
-            lastY = touch.clientY;
-            object3d.style.transition = 'none';
-            captchaStatus.textContent = '';
-            captchaStatus.className = '';
-            loadingBarContainer.style.display = 'none';
-            loadingText.style.display = 'none';
-            requestAnimationFrame(updateRotation);
-        }, { passive: false });
-
-        document.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            e.preventDefault();
-            const touch = e.touches[0];
-            const deltaX = touch.clientX - lastX;
-            const deltaY = touch.clientY - lastY;
-            currentYAngle += deltaX * rotationSensitivity;
-            currentXAngle -= deltaY * rotationSensitivity;
-            lastX = touch.clientX;
-            lastY = touch.clientY;
-        }, { passive: false });
-
-        document.addEventListener('touchend', () => {
-            if (!isDragging) return;
-            isDragging = false;
-            object3d.style.transition = 'transform 0.5s ease';
-            checkRotation();
-        });
-        
-        captchaNextBtn.addEventListener('click', () => {
-            if (!captchaNextBtn.disabled) {
-                closeModal('captchaModal');
-                openDateTimeModal();
-            }
-        });
-        // --- END CAPTCHA Logic ---
-
         function openDateTimeModal() {
             const modal = document.getElementById("datetimeModal");
             const nextBtn = document.getElementById("dateTimeNextBtn");
             const dateList = modal.querySelector("#dateList");
             const timeList = modal.querySelector("#timeList");
-            modal.style.display = "block";
+            modal.style.display = "flex";
             nextBtn.disabled = true;
             nextBtn.classList.remove('enabled');
             dateList.innerHTML = "";
             timeList.innerHTML = "";
-            
             const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00", "22:30"];
-            populateUnavailableTimes(times);
-
+            unavailableTimes = populateUnavailable(times, getRandomInt(0, 4));
             const checkDateTimeValid = () => {
-                if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) {
+                if (selections.date && selections.time) {
                     nextBtn.disabled = false;
                     nextBtn.classList.add('enabled');
                 } else {
@@ -611,29 +331,24 @@
                     nextBtn.classList.remove('enabled');
                 }
             };
-
-            Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => {
+            Array.from({ length: 7 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() + i); return d; })
+            .forEach(d => {
                 const button = document.createElement("button");
-                button.className = "MuiPickersDay-root";
-                button.textContent = d;
+                button.textContent = d.toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short' });
                 button.onclick = () => {
                     dateList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked"));
                     button.classList.add("clicked");
-                    selections.date = d;
+                    selections.date = d.toLocaleDateString('th-TH');
                     selections.time = null;
                     timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked"));
                     checkDateTimeValid();
                 };
                 dateList.appendChild(button);
             });
-            
             times.forEach(t => {
                 const button = document.createElement("button");
-                button.className = "timeButtons";
                 button.textContent = t;
-                const isUnavailable = unavailableTimes.includes(t);
-                if (isUnavailable) {
-                    button.classList.add("unavailable");
+                if (unavailableTimes.includes(t)) {
                     button.disabled = true;
                 } else {
                     button.onclick = () => {
@@ -646,49 +361,52 @@
                 timeList.appendChild(button);
             });
             nextBtn.onclick = () => {
-                if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) {
+                if (selections.date && selections.time) {
                     modal.style.display = "none";
                     handleTermsPage();
                 }
             };
         }
-
         function startCountdown() {
             const countdownEl = document.getElementById("countdown");
             const registerBtn = document.getElementById("registerBtn");
-            let secondsLeft = 7;
+            let secondsLeft = 5;
             registerBtn.disabled = true;
             registerBtn.classList.remove('enabled');
+            countdownEl.style.display = 'block';
+            countdownEl.textContent = `เปิดใน ${secondsLeft} วินาที`;
             const timer = setInterval(() => {
+                secondsLeft--;
                 if (secondsLeft <= 0) {
                     clearInterval(timer);
-                    countdownEl.textContent = "เปิดแล้ว!";
+                    countdownEl.style.display = 'none';
                     registerBtn.disabled = false;
                     registerBtn.classList.add('enabled');
                 } else {
-                    countdownEl.textContent = `00:00:0${secondsLeft--}`;
+                    countdownEl.textContent = `เปิดใน ${secondsLeft} วินาที`;
                 }
             }, 1000);
         }
-        
         function initializePage() {
             setTimeout(() => {
-                document.body.dataset.dpbotEnabled = 'true';
-                if (document.body.dataset.dpbotEnabled === 'true') {
-                    document.querySelector('.main-container').style.display = 'flex';
-                    document.getElementById('bot-required-overlay').style.display = 'none';
-                    resetFlow();
+                if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
+                     document.querySelector('.main-container').style.display = 'block';
+                     document.getElementById('bot-required-overlay').style.display = 'none';
+                     resetFlow();
                 } else {
-                    document.getElementById('bot-required-overlay').style.display = 'flex';
-                    document.querySelector('.main-container').style.display = 'none';
+                     document.getElementById('bot-required-overlay').style.display = 'flex';
                 }
-            }, 200);
+            }, 500);
         }
-
-        // --- Event Listeners ---
-        document.getElementById("registerBtn").addEventListener("click", openBranchModal);
-        document.getElementById("finalConfirm").addEventListener("click", handleSuccess);
-        document.getElementById("resetBtn").addEventListener("click", resetFlow);
+        registerBtn.addEventListener("click", openBranchModal);
+        captchaNextBtn.addEventListener("click", () => {
+             if (!captchaNextBtn.disabled) {
+                closeModal('captchaModal');
+                openDateTimeModal();
+             }
+        });
+        finalConfirmBtn.addEventListener("click", handleSuccess);
+        resetBtn.addEventListener("click", resetFlow);
         document.addEventListener("DOMContentLoaded", initializePage);
     </script>
 </body>
