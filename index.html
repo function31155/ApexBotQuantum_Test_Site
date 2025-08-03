@@ -43,7 +43,7 @@
         #captcha-description p { margin: 0; }
         #captcha-canvas-container { width: 280px; height: 280px; margin: 30px auto; position: relative; background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.2) 80%); border-radius: 15px; box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5); cursor: grab; }
         #captcha-canvas-container:active { cursor: grabbing; }
-        canvas { display: block; width: 100%; height: 100%; border-radius: 15px; }
+        canvas { display: block; width: 100%; height: 100%; border-radius: 15px; touch-action: none; /* Prevents scrolling on touch devices */ }
         #captcha-status { margin-top: 30px; font-size: 1.6em; font-weight: bold; height: 40px; transition: all 0.5s ease; letter-spacing: 1px; }
         .captcha-success { color: #4caf50; text-shadow: 0 0 10px #4caf50; }
         .captcha-failure { color: #ff5252; text-shadow: 0 0 10px #ff5252; }
@@ -321,15 +321,11 @@
             checkRotation();
         }
 
-        // Mouse Events
-        canvas.addEventListener('mousedown', handleDragStart);
-        document.addEventListener('mousemove', handleDragMove);
-        document.addEventListener('mouseup', handleDragEnd);
-
-        // Touch Events
-        canvas.addEventListener('touchstart', handleDragStart, { passive: false });
-        document.addEventListener('touchmove', handleDragMove, { passive: false });
-        document.addEventListener('touchend', handleDragEnd);
+        // Unified Pointer Events for Mouse, Touch, and Bot
+        canvas.addEventListener('pointerdown', handleDragStart);
+        canvas.addEventListener('pointermove', handleDragMove);
+        canvas.addEventListener('pointerup', handleDragEnd);
+        canvas.addEventListener('pointercancel', handleDragEnd); // Also end drag on cancel
         
         captchaNextBtn.addEventListener('click', () => {
             if (!captchaNextBtn.disabled) { closeModal('captchaModal'); openDateTimeModal(); }
