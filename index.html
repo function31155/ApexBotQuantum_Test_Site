@@ -110,7 +110,7 @@
         <div class="modal-content">
             <span class="modal-title">เลือกวันและเวลา</span><span class="close" onclick="closeModal('datetimeModal')">×</span>
             <div id="dateList" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-bottom: 15px;"></div>
-            <div id="timeList" style="display: flex; flex-wrap: wrap; justify: center; gap: 5px;"></div>
+            <div id="timeList" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px;"></div>
             <div class="datePicketButSection" style="margin-top: 20px;">
                 <button class="Next next-btn" id="dateTimeNextBtn" disabled style="width: 100%;">Next</button>
             </div>
@@ -195,14 +195,10 @@
         let currentYAngle = 0;
         const rotationSensitivity = 0.5;
 
-        // NEW: Random Target Angle for Verification
-        let targetYAngle = 0;
-        let targetXAngle = 0;
-
         function drawCube() {
             const width = canvas.width;
             const height = canvas.height;
-            const normalizedYAngle = (((currentYAngle - targetYAngle) % 360) + 540) % 360 - 180;
+            const normalizedYAngle = ((currentYAngle % 360) + 540) % 360 - 180;
             const isFrontFacing = Math.abs(normalizedYAngle) <= 90;
 
             ctx.clearRect(0, 0, width, height);
@@ -213,6 +209,7 @@
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
+            // Apply a transformation that simulates 3D rotation on both axes
             const rotX = currentXAngle * Math.PI / 180;
             const scaleY = Math.cos(rotX);
             const perspectiveY = Math.sin(rotX);
@@ -236,18 +233,26 @@
             ctx.restore();
         }
 
-        function setInitialRotation() {
-            // NEW: Randomize both initial and target angles
-            targetYAngle = [0, 90, 180, 270][Math.floor(Math.random() * 4)];
-            targetXAngle = [0, 90, 180, 270][Math.floor(Math.random() * 4)];
-            currentYAngle = targetYAngle + (Math.random() > 0.5 ? 90 : -90);
-            currentXAngle = targetXAngle + (Math.random() * 40 - 20); // Keep X angle close to target for easier solving
+        // NEW: Function to set a random initial rotation
+        function setRandomInitialRotation() {
+            // Generate a random angle for Y-axis (left/right) that is NOT near the solution (0 or 360)
+            const randomAngleY = Math.random() * 360;
+            if (randomAngleY < 90) {
+                currentYAngle = randomAngleY + 90; // Avoid angles near 0 degrees
+            } else if (randomAngleY > 270) {
+                currentYAngle = randomAngleY - 90; // Avoid angles near 360 degrees
+            } else {
+                currentYAngle = randomAngleY;
+            }
+            // Generate a random angle for X-axis (up/down)
+            currentXAngle = Math.random() * 60 - 30; // Random angle between -30 and 30
             drawCube();
         }
         
         function openCaptchaModal() {
             const loadingCaptcha = document.getElementById('loadingCaptcha');
-            setInitialRotation();
+            // MODIFIED: Call the new function to set a random initial rotation
+            setRandomInitialRotation();
             captchaStatus.textContent = '';
             captchaStatus.className = '';
             captchaNextBtn.disabled = true;
@@ -264,9 +269,8 @@
         }
 
         function checkRotation() {
-            // NEW: Check rotation against the randomized target angles
-            const normalizedYAngle = (((currentYAngle - targetYAngle) % 360) + 540) % 360 - 180;
-            const normalizedXAngle = (((currentXAngle - targetXAngle) % 360) + 540) % 360 - 180;
+            const normalizedYAngle = ((currentYAngle % 360) + 540) % 360 - 180;
+            const normalizedXAngle = ((currentXAngle % 360) + 540) % 360 - 180;
             const tolerance = 20;
             const canvasContainer = document.getElementById('captcha-canvas-container');
 
