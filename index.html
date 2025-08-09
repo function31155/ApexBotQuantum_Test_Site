@@ -1,362 +1,389 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Web Test Booking DPbot</title>
-    <style>
-        /* --- CSS Styles --- */
-        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #000000; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 0; }
-        .main-container { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.6s ease; }
-        .step-card { background: #334155; border-radius: 12px; padding: 20px; color: white; text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); margin-bottom: 16px; width: 100%; max-width: 420px; }
-        .page { display: none; }
-        .page.active { display: block; }
-        .countdown-container { text-align: center; font-size: 28px; color: #f87171; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; }
-        button { border-radius: 8px; border: none; padding: 10px 16px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; }
-        button:disabled { cursor: not-allowed; opacity: 0.6; }
-        button.register { color: #333; font-size: 1.2rem; background-color: rgb(222, 222, 222); }
-        button.register.enabled { background-color: #22c55e; color: white; opacity: 1; }
-        button.next-btn { background-color: #888; color: #ccc; }
-        button.next-btn.enabled { background-color: #28a745; color: white; opacity: 1; }
-        .summary-info { background-color: #2d3748; color: #cbd5e1; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; border: 1px solid #4a5568; }
-        .summary-info h3 { color: #e2e8f0; margin-top: 0; }
-        .summary-info span { color: #48bb78; font-weight: bold; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); z-index: 1000; overflow-y: auto; animation: fadeInModal 0.3s ease; }
-        .modal-content { background-color: #1e293b; color: white; margin: 80px auto; padding: 24px 20px; border-radius: 16px; width: 90%; max-width: 420px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); position: relative; animation: slideUp 0.3s ease; }
-        .modal-title { font-size: 20px; font-weight: bold; margin-bottom: 12px; display: block; text-align: center; color: #a0aec0; }
-        .modal .close { position: absolute; top: 12px; right: 16px; font-size: 24px; color: #718096; cursor: pointer; }
-        .branchButtons { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 15px; }
-        #branchList .branch-item { background: #334155; color: #a0aec0; }
-        #branchList .branch-item.selected { background-color: #22c55e; color: white; }
-        #branchList .branch-item.is_full { background-color: #dc3545; color: white; cursor: not-allowed; opacity: 0.7; }
-        #dateList button, #timeList .timeButtons { background-color: #334155; color: #a0aec0; }
-        #dateList button.clicked, #timeList .timeButtons.clicked { background-color: #3182ce !important; color: white !important; }
-        #timeList .timeButtons.disabledTime { background-color: #dc3545; color: white; cursor: not-allowed; opacity: 0.7; }
-        #cloudflare-simulation { align-items: center; justify-content: center; padding: 20px; background-color: #2d3748; border-radius: 8px; margin: 20px 0; }
-        .spinner { width: 24px; height: 24px; border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: #3182ce; border-radius: 50%; animation: spin 1s linear infinite; }
-        #bot-required-overlay { display: none; flex-direction: column; align-items: center; justify-content: center; color: #f56565; font-size: 24px; font-weight: bold; text-align: center; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Web Test Booking (3D CAPTCHA)</title>
+  <style>
+    body { display:flex; justify-content:center; align-items:center; min-height:100vh; background:#000; margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+    .main-container { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:20px; animation:fadeIn .6s ease; }
+    .step-card { background:#334155; border-radius:12px; padding:20px; color:#fff; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,.15); margin-bottom:16px; width:100%; max-width:420px; }
+    .page { display:none; } .page.active { display:block; }
+    .countdown-container { text-align:center; font-size:28px; color:#f87171; font-weight:bold; letter-spacing:2px; margin-bottom:15px; }
+    button { border-radius:8px; border:none; padding:10px 16px; font-weight:bold; cursor:pointer; transition:all .2s ease; }
+    button:disabled { cursor:not-allowed; opacity:.6; }
+    button.register { color:#333; font-size:1.2rem; background:#dedede; }
+    button.register.enabled { background:#22c55e; color:#fff; opacity:1; }
+    button.next-btn { background:#888; color:#ccc; }
+    button.next-btn.enabled { background:#28a745; color:#fff; opacity:1; }
+    .summary-info { background:#2d3748; color:#cbd5e1; padding:15px; border-radius:8px; margin:20px 0; text-align:left; border:1px solid #4a5568; }
+    .summary-info h3 { color:#e2e8f0; margin-top:0; }
+    .summary-info span { color:#48bb78; font-weight:bold; }
+    .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:1000; overflow-y:auto; animation:fadeInModal .3s ease; }
+    .modal-content { background:#1e293b; color:#fff; margin:80px auto; padding:24px 20px; border-radius:16px; width:90%; max-width:420px; box-shadow:0 10px 30px rgba(0,0,0,.4); position:relative; animation:slideUp .3s ease; }
+    .modal-title { font-size:20px; font-weight:bold; margin-bottom:12px; display:block; text-align:center; color:#a0aec0; }
+    .modal .close { position:absolute; top:12px; right:16px; font-size:24px; color:#718096; cursor:pointer; }
+    .branchButtons { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin-top:15px; }
+    #branchList .branch-item { background:#334155; color:#a0aec0; }
+    #branchList .branch-item.selected { background:#22c55e; color:#fff; }
+    #branchList .branch-item.is_full { background:#dc3545; color:#fff; cursor:not-allowed; opacity:.7; }
+    #dateList button, #timeList .timeButtons { background:#334155; color:#a0aec0; }
+    #dateList button.clicked, #timeList .timeButtons.clicked { background:#3182ce !important; color:#fff !important; }
+    #timeList .timeButtons.disabledTime { background:#dc3545; color:#fff; cursor:not-allowed; opacity:.7; }
+    #cloudflare-simulation { align-items:center; justify-content:center; padding:20px; background:#2d3748; border-radius:8px; margin:20px 0; }
+    .spinner { width:24px; height:24px; border:3px solid rgba(255,255,255,.3); border-top-color:#3182ce; border-radius:50%; animation:spin 1s linear infinite; }
 
-        /* --- CSS CAPTCHA --- */
-        #captchaModal .modal-content { background-color: #1a1a2e; color: #e0e0e0; padding: 40px; border-radius: 20px; border: none; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.05) inset; max-width: 450px; text-align: center; position: relative; transition: all 0.5s ease-in-out; }
-        #captchaModal .modal-title { color: #4dd0e1; margin-bottom: 20px; text-shadow: 0 0 10px rgba(77, 208, 225, 0.5); }
-        #captcha-description { color: #aeb2bd; margin-bottom: 25px; font-size: 1em; line-height: 1.6; }
-        #captcha-description p { margin: 0; }
-        #captcha-canvas-container { width: 280px; height: 280px; margin: 30px auto; position: relative; background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.2) 80%); border-radius: 15px; box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5); cursor: grab; }
-        #captcha-canvas-container:active { cursor: grabbing; }
-        canvas { display: block; width: 100%; height: 100%; border-radius: 15px; touch-action: none; }
-        #captcha-status { margin-top: 30px; font-size: 1.6em; font-weight: bold; height: 40px; transition: all 0.5s ease; letter-spacing: 1px; }
-        .captcha-success { color: #4caf50; text-shadow: 0 0 10px #4caf50; }
-        .captcha-failure { color: #ff5252; text-shadow: 0 0 10px #ff5252; }
-        .captcha-success-glow { box-shadow: 0 0 30px #4caf50, 0 0 15px #4caf50 inset; }
+    /* CAPTCHA */
+    #captchaModal .modal-content { background:#1a1a2e; color:#e0e0e0; padding:40px; border-radius:20px; border:none; box-shadow:0 10px 40px rgba(0,0,0,.6), 0 0 20px rgba(255,255,255,.05) inset; max-width:450px; text-align:center; position:relative; transition:all .5s ease-in-out; }
+    #captchaModal .modal-title { color:#4dd0e1; margin-bottom:20px; text-shadow:0 0 10px rgba(77,208,225,.5); }
+    #captcha-description { color:#aeb2bd; margin-bottom:25px; font-size:1em; line-height:1.6; }
+    #captcha-canvas-container { width:280px; height:280px; margin:30px auto; position:relative; background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.05) 0%, rgba(0,0,0,.2) 80%); border-radius:15px; box-shadow:inset 0 0 15px rgba(0,0,0,.5); cursor:grab; }
+    #captcha-canvas-container:active { cursor:grabbing; }
+    canvas { display:block; width:100%; height:100%; border-radius:15px; touch-action:none; }
+    #captcha-status { margin-top:30px; font-size:1.6em; font-weight:bold; height:40px; transition:all .5s ease; letter-spacing:1px; }
+    .captcha-success { color:#4caf50; text-shadow:0 0 10px #4caf50; }
+    .captcha-failure { color:#ff5252; text-shadow:0 0 10px #ff5252; }
+    .captcha-success-glow { box-shadow:0 0 30px #4caf50, 0 0 15px #4caf50 inset; }
 
-        /* --- CSS Loading Screen --- */
-        #loadingCaptcha { position: fixed; inset: 0; background-color: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; font-size: 1.5em; font-weight: bold; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1001; }
-        #loadingCaptcha.show { opacity: 1; visibility: visible; }
-        .loading-spinner { width: 40px; height: 40px; border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
-        .loading-bar-container { width: 80%; margin: 20px auto 0; background-color: #555; border-radius: 5px; height: 10px; overflow: hidden; position: relative; }
-        .loading-bar { width: 0%; height: 100%; background-color: #28a745; transition: width 0.2s ease-in-out; border-radius: 5px; }
-        #loading-text { color: #28a745; margin-top: 10px; font-size: 1em; font-weight: normal; }
+    /* Loading overlay */
+    #loadingCaptcha { position:fixed; inset:0; background:#000; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#fff; font-size:1.5em; font-weight:bold; opacity:0; visibility:hidden; transition:opacity .3s ease, visibility .3s ease; z-index:1001; }
+    #loadingCaptcha.show { opacity:1; visibility:visible; }
+    .loading-spinner { width:40px; height:40px; border:4px solid rgba(255,255,255,.3); border-top-color:#fff; border-radius:50%; animation:spin 1s linear infinite; margin-bottom:20px; }
+    .loading-bar-container { width:80%; margin:20px auto 0; background:#555; border-radius:5px; height:10px; overflow:hidden; position:relative; }
+    .loading-bar { width:0%; height:100%; background:#28a745; transition:width .2s ease-in-out; border-radius:5px; }
+    #loading-text { color:#28a745; margin-top:10px; font-size:1em; font-weight:normal; display:none; }
 
-        /* --- Keyframes --- */
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes spin { to { transform: rotate(360deg); } }
-    </style>
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    @keyframes fadeInModal { from { opacity:0; } to { opacity:1; } }
+    @keyframes slideUp { from { transform:translateY(40px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
 </head>
 <body>
+  <div id="loadingCaptcha">
+    <div class="loading-spinner"></div>
+    กำลังสร้างปริศนา 3D...
+  </div>
 
-    <div id="loadingCaptcha">
-        <div class="loading-spinner"></div>
-        กำลังสร้างปริศนา 3D...
+  <!-- Branch -->
+  <div id="branchModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-title">เลือกสาขา</span><span class="close" onclick="closeModal('branchModal')">×</span>
+      <div id="branchList" class="branchButtons"></div>
+      <button class="next-btn" id="branchModalNextBtn" disabled style="margin-top:20px; width:100%;">Next</button>
     </div>
+  </div>
 
-    <div id="branchModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-title">เลือกสาขา</span><span class="close" onclick="closeModal('branchModal')">×</span>
-            <div id="branchList" class="branchButtons"></div>
-            <button class="next-btn" id="branchModalNextBtn" disabled style="margin-top: 20px; width: 100%;">Next</button>
+  <!-- CAPTCHA -->
+  <div id="captchaModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-title">ยืนยันตัวตน</span>
+      <div id="captcha-description">
+        <p>หมุนการ์ดให้ “ด้านหน้า” หันเข้าหาคุณ</p>
+        <p style="font-size:.9em; opacity:.8;">ด้านหน้าเป็นรูป icon.png และด้านหลังมีข้อความ “ApexBot”</p>
+      </div>
+      <div id="captcha-container">
+        <div id="captcha-canvas-container"></div>
+        <div id="captcha-status"></div>
+        <div class="loading-bar-container" id="loading-bar-container" style="display:none;">
+          <div class="loading-bar" id="loading-bar"></div>
         </div>
+        <div id="loading-text">รอ 2 วินาที...</div>
+      </div>
+      <button class="next-btn" id="captchaNextBtn" style="margin-top:20px; width:100%;" disabled>ยืนยัน</button>
     </div>
-    
-    <div id="captchaModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-title">ยืนยันตัวตน</span>
-            <div id="captcha-description" style="text-align: center; color: #aeb2bd; margin-bottom: 25px;">
-                <p>หมุนภาพตัวละครให้หันหน้าเข้าหาตัวเอง</p>
-                <p style="font-size: 0.9em; opacity: 0.8;">ใช้เมาส์หรือนิ้วของคุณหมุนวัตถุ 3D ให้หันเข้าหาคุณ โดยตรง ภาพจะสว่างขึ้นเมื่อวางแนวถูกต้อง</p>
-            </div>
-            
-            <div id="captcha-container">
-                <div id="captcha-canvas-container">
-                    <!-- จะถูกแทนที่ด้วย WebGL Canvas ของ Three.js -->
-                </div>
-                <div id="captcha-status"></div>
-                <div class="loading-bar-container" style="display: none;" id="loading-bar-container">
-                    <div class="loading-bar" id="loading-bar"></div>
-                </div>
-                <div id="loading-text" style="display: none;">รอ 2 วินาที...</div>
-            </div>
-            <button class="next-btn" id="captchaNextBtn" style="margin-top: 20px; width: 100%;" disabled>ยืนยัน</button>
+  </div>
+
+  <!-- DateTime -->
+  <div id="datetimeModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-title">เลือกวันและเวลา</span><span class="close" onclick="closeModal('datetimeModal')">×</span>
+      <div id="dateList" style="display:flex; flex-wrap:wrap; justify-content:center; gap:5px; margin-bottom:15px;"></div>
+      <div id="timeList" style="display:flex; flex-wrap:wrap; justify-content:center; gap:5px;"></div>
+      <div style="margin-top:20px;">
+        <button class="next-btn" id="dateTimeNextBtn" disabled style="width:100%;">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main-container" style="display:flex;">
+    <div class="step-card">
+      <div id="step-area">
+        <div id="page-register" class="page active">
+          <h2>ไปกันต่อ</h2><p>ระบบลงทะเบียนของคุณพร้อมแล้ว</p>
+          <div class="countdown-container"><span id="countdown"></span></div>
+          <button class="register" id="registerBtn" disabled>ลงทะเบียน</button>
         </div>
-    </div>
-
-    <div id="datetimeModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-title">เลือกวันและเวลา</span><span class="close" onclick="closeModal('datetimeModal')">×</span>
-            <div id="dateList" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-bottom: 15px;"></div>
-            <div id="timeList" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px;"></div>
-            <div class="datePicketButSection" style="margin-top: 20px;">
-                <button class="Next next-btn" id="dateTimeNextBtn" disabled style="width: 100%;">Next</button>
-            </div>
+        <div id="page-terms" class="page">
+          <h2>เงื่อนไขและข้อตกลง</h2>
+          <label style="color:white; display:flex; align-items:center; justify-content:center; gap:10px; margin:20px 0;">
+            <input name="acceptTermsAndConditions" type="checkbox" style="width:18px; height:18px;" /> ยอมรับเงื่อนไข
+          </label>
+          <div id="cloudflare-simulation" style="display:none;">
+            <div class="spinner"></div><span style="margin-left:15px;">Verifying you are human...</span>
+          </div>
+          <button class="next-btn" id="finalConfirm" type="submit" disabled>Confirm Booking</button>
         </div>
-    </div>
-    
-    <div class="main-container" style="display: flex;">
-        <div class="step-card">
-            <div id="step-area">
-                <div id="page-register" class="page active">
-                    <h2>ไปกันต่อ</h2><p>ระบบลงทะเบียนของคุณพร้อมแล้ว</p>
-                    <div class="countdown-container"><span id="countdown"></span></div>
-                    <button class="register" id="registerBtn" disabled>ลงทะเบียน</button>
-                </div>
-                <div id="page-terms" class="page">
-                    <h2>เงื่อนไขและข้อตกลง</h2>
-                    <label style="color: white; display: flex; align-items: center; justify-content: center; gap: 10px; margin: 20px 0;">
-                        <input name="acceptTermsAndConditions" type="checkbox" style="width: 18px; height: 18px;"> ยอมรับเงื่อนไข
-                    </label>
-                    <div id="cloudflare-simulation" style="display: none;">
-                        <div class="spinner"></div>
-                        <span style="margin-left: 15px;">Verifying you are human...</span>
-                    </div>
-                    <button class="next-btn" id="finalConfirm" type="submit" disabled>Confirm Booking</button>
-                </div>
-                <div id="page-success" class="page">
-                    <h2 style="color:#22c55e;">🎉 Booking Success!</h2>
-                    <div class="summary-info">
-                        <h3>รายละเอียดการจองของคุณ</h3>
-                        <p>สาขา: <span id="final-summary-branch"></span></p>
-                        <p>วันที่: <span id="final-summary-date"></span></p>
-                        <p>เวลา: <span id="final-summary-time"></span></p>
-                        <p>เวลาที่ใช้: <span id="final-summary-time-taken"></span> วินาที</p>
-                    </div>
-                    <button id="resetBtn">จองอีกครั้ง</button>
-                </div>
-            </div>
+        <div id="page-success" class="page">
+          <h2 style="color:#22c55e;">🎉 Booking Success!</h2>
+          <div class="summary-info">
+            <h3>รายละเอียดการจองของคุณ</h3>
+            <p>สาขา: <span id="final-summary-branch"></span></p>
+            <p>วันที่: <span id="final-summary-date"></span></p>
+            <p>เวลา: <span id="final-summary-time"></span></p>
+            <p>เวลาที่ใช้: <span id="final-summary-time-taken"></span> วินาที</p>
+          </div>
+          <button id="resetBtn">จองอีกครั้ง</button>
         </div>
+      </div>
     </div>
+  </div>
 
-    <!-- libs -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-    <script src="https://unpkg.com/three@0.161.0/build/three.min.js"></script>
+  <!-- Libs -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="https://unpkg.com/three@0.161.0/build/three.min.js"></script>
 
-    <script>
-        // --- START: Main Web Logic (ยกของเดิมมาและตัด DPbot overlay ออก) ---
-        const selections = { branch: null, date: null, time: null };
-        let startTime;
-        let unavailableBranches = [];
-        let unavailableTimes = [];
+  <script>
+    // -------- Main logic (คงเดิม แต่ตัด DPbot overlay) --------
+    const selections = { branch:null, date:null, time:null };
+    let startTime;
+    let unavailableBranches = [];
+    let unavailableTimes = [];
 
-        function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-        function populateUnavailableBranches(branches) { unavailableBranches = []; const numUnavailable = getRandomInt(0, 2); const shuffledBranches = [...branches].sort(() => 0.5 - Math.random()); for (let i = 0; i < numUnavailable; i++) { unavailableBranches.push(shuffledBranches[i]); } }
-        function populateUnavailableTimes(times) { unavailableTimes = []; const numUnavailable = getRandomInt(0, 2); const shuffledTimes = [...times].sort(() => 0.5 - Math.random()); for (let i = 0; i < numUnavailable; i++) { unavailableTimes.push(shuffledTimes[i]); } }
-        function showPage(pageId) { document.querySelectorAll('#step-area .page').forEach(p => p.classList.remove('active')); document.getElementById(pageId)?.classList.add('active'); }
-        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
-        function launchConfetti() { if (typeof confetti !== 'function') return; const end = Date.now() + (2 * 1000); (function frame() { confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } }); confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } }); if (Date.now() < end) requestAnimationFrame(frame); }()); }
-        function handleSuccess() { showPage('page-success'); const endTime = new Date(); const elapsedTime = ((endTime - startTime) / 1000).toFixed(2); document.getElementById('final-summary-branch').textContent = selections.branch; document.getElementById('final-summary-date').textContent = selections.date; document.getElementById('final-summary-time').textContent = selections.time; document.getElementById('final-summary-time-taken').textContent = elapsedTime; launchConfetti(); }
-        function resetFlow() { Object.keys(selections).forEach(key => selections[key] = null); showPage('page-register'); startCountdown(); }
-        function handleTermsPage() { showPage('page-terms'); const checkbox = document.querySelector("input[name='acceptTermsAndConditions']"); const nextBtn = document.getElementById("finalConfirm"); const cloudflareSim = document.getElementById("cloudflare-simulation"); nextBtn.disabled = true; nextBtn.classList.remove('enabled'); checkbox.checked = false; cloudflareSim.style.display = 'none'; checkbox.onchange = () => { if (checkbox.checked) { nextBtn.disabled = true; nextBtn.classList.remove('enabled'); cloudflareSim.style.display = 'flex'; setTimeout(() => { cloudflareSim.style.display = 'none'; if (checkbox.checked) { nextBtn.disabled = false; nextBtn.classList.add('enabled'); } }, 2500); } else { nextBtn.disabled = true; nextBtn.classList.remove('enabled'); } }; }
-        function openBranchModal() { startTime = new Date(); const modal = document.getElementById("branchModal"); const nextBtn = document.getElementById("branchModalNextBtn"); const list = modal.querySelector("#branchList"); modal.style.display = "block"; nextBtn.disabled = true; nextBtn.classList.remove('enabled'); list.innerHTML = ""; const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld", "MEGABANGNA", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai", "ICONSIAM"]; populateUnavailableBranches(branches); branches.forEach(b => { const button = document.createElement("button"); button.className = "branch-item"; button.textContent = b; const isUnavailable = unavailableBranches.includes(b); if (isUnavailable) { button.classList.add("is_full"); button.disabled = true; } else { button.onclick = () => { list.querySelectorAll(".branch-item.selected").forEach(el => el.classList.remove("selected")); button.classList.add("selected"); selections.branch = b; nextBtn.disabled = false; nextBtn.classList.add('enabled'); }; } list.appendChild(button); }); nextBtn.onclick = () => { if (selections.branch && !unavailableBranches.includes(selections.branch)) { modal.style.display = "none"; openCaptchaModal(); } }; }
-        function openDateTimeModal() { const modal = document.getElementById("datetimeModal"); const nextBtn = document.getElementById("dateTimeNextBtn"); const dateList = modal.querySelector("#dateList"); const timeList = modal.querySelector("#timeList"); modal.style.display = "block"; nextBtn.disabled = true; nextBtn.classList.remove('enabled'); dateList.innerHTML = ""; timeList.innerHTML = ""; const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"]; populateUnavailableTimes(times); const checkDateTimeValid = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { nextBtn.disabled = false; nextBtn.classList.add('enabled'); } else { nextBtn.disabled = true; nextBtn.classList.remove('enabled'); } }; Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => { const button = document.createElement("button"); button.className = "MuiPickersDay-root"; button.textContent = d; button.onclick = () => { dateList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.date = d; selections.time = null; timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); checkDateTimeValid(); }; dateList.appendChild(button); }); times.forEach(t => { const button = document.createElement("button"); button.className = "timeButtons"; button.textContent = t; const isUnavailable = unavailableTimes.includes(t); if (isUnavailable) { button.classList.add("disabledTime"); button.disabled = true; } else { button.onclick = () => { timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.time = t; checkDateTimeValid(); }; } timeList.appendChild(button); }); nextBtn.onclick = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { modal.style.display = "none"; handleTermsPage(); } }; }
-        function startCountdown() { const countdownEl = document.getElementById("countdown"); const registerBtn = document.getElementById("registerBtn"); let secondsLeft = 7; registerBtn.disabled = true; registerBtn.classList.remove('enabled'); const timer = setInterval(() => { if (secondsLeft <= 0) { clearInterval(timer); countdownEl.textContent = "เปิดแล้ว!"; registerBtn.disabled = false; registerBtn.classList.add('enabled'); } else { countdownEl.textContent = `00:00:0${secondsLeft--}`; } }, 1000); }
-        function initializePage() {
-            // แสดง main UI ทันที (ตัดระบบ DPbot ออก)
-            document.querySelector('.main-container').style.display = 'flex';
-            resetFlow();
-        }
-        document.getElementById("registerBtn").addEventListener("click", openBranchModal);
-        document.getElementById("finalConfirm").addEventListener("click", handleSuccess);
-        document.getElementById("resetBtn").addEventListener("click", resetFlow);
-        document.addEventListener("DOMContentLoaded", initializePage);
-        // --- END: Main Web Logic ---
-    </script>
+    function getRandomInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+    function populateUnavailableBranches(branches){
+      unavailableBranches = [];
+      const n = getRandomInt(0,2);
+      const shuffled = [...branches].sort(()=>0.5-Math.random());
+      for(let i=0;i<n;i++) unavailableBranches.push(shuffled[i]);
+    }
+    function populateUnavailableTimes(times){
+      unavailableTimes = [];
+      const n = getRandomInt(0,2);
+      const shuffled = [...times].sort(()=>0.5-Math.random());
+      for(let i=0;i<n;i++) unavailableTimes.push(shuffled[i]);
+    }
+    function showPage(id){ document.querySelectorAll('#step-area .page').forEach(p=>p.classList.remove('active')); document.getElementById(id)?.classList.add('active'); }
+    function closeModal(id){ document.getElementById(id).style.display='none'; }
+    function launchConfetti(){ if(typeof confetti!=='function') return; const end=Date.now()+(2*1000); (function frame(){ confetti({particleCount:3,angle:60,spread:55,origin:{x:0}}); confetti({particleCount:3,angle:120,spread:55,origin:{x:1}}); if(Date.now()<end) requestAnimationFrame(frame); })(); }
+    function handleSuccess(){ showPage('page-success'); const endTime=new Date(); const elapsed=((endTime-startTime)/1000).toFixed(2); document.getElementById('final-summary-branch').textContent=selections.branch; document.getElementById('final-summary-date').textContent=selections.date; document.getElementById('final-summary-time').textContent=selections.time; document.getElementById('final-summary-time-taken').textContent=elapsed; launchConfetti(); }
+    function resetFlow(){ Object.keys(selections).forEach(k=>selections[k]=null); showPage('page-register'); startCountdown(); }
+    function handleTermsPage(){
+      showPage('page-terms');
+      const checkbox=document.querySelector("input[name='acceptTermsAndConditions']");
+      const nextBtn=document.getElementById("finalConfirm");
+      const cloudflareSim=document.getElementById("cloudflare-simulation");
+      nextBtn.disabled=true; nextBtn.classList.remove('enabled'); checkbox.checked=false; cloudflareSim.style.display='none';
+      checkbox.onchange=()=>{ if(checkbox.checked){ nextBtn.disabled=true; nextBtn.classList.remove('enabled'); cloudflareSim.style.display='flex'; setTimeout(()=>{ cloudflareSim.style.display='none'; if(checkbox.checked){ nextBtn.disabled=false; nextBtn.classList.add('enabled'); } }, 2500); } else { nextBtn.disabled=true; nextBtn.classList.remove('enabled'); } };
+    }
+    function openBranchModal(){
+      startTime=new Date();
+      const modal=document.getElementById("branchModal");
+      const nextBtn=document.getElementById("branchModalNextBtn");
+      const list=modal.querySelector("#branchList");
+      modal.style.display="block"; nextBtn.disabled=true; nextBtn.classList.remove('enabled'); list.innerHTML="";
+      const branches=["Terminal 21","Central Ladprao","Siam Center","Fashion Island","Centralworld","MEGABANGNA","Siam Square","Emsphere","Central Pattaya","Seacon Square","Central Westgate","Central Chiangmai","ICONSIAM"];
+      populateUnavailableBranches(branches);
+      branches.forEach(b=>{
+        const btn=document.createElement("button");
+        btn.className="branch-item"; btn.textContent=b;
+        const isUn=unavailableBranches.includes(b);
+        if(isUn){ btn.classList.add("is_full"); btn.disabled=true; }
+        else { btn.onclick=()=>{ list.querySelectorAll(".branch-item.selected").forEach(el=>el.classList.remove("selected")); btn.classList.add("selected"); selections.branch=b; nextBtn.disabled=false; nextBtn.classList.add('enabled'); }; }
+        list.appendChild(btn);
+      });
+      nextBtn.onclick=()=>{ if(selections.branch && !unavailableBranches.includes(selections.branch)){ modal.style.display="none"; openCaptchaModal(); } };
+    }
+    function openDateTimeModal(){
+      const modal=document.getElementById("datetimeModal");
+      const nextBtn=document.getElementById("dateTimeNextBtn");
+      const dateList=modal.querySelector("#dateList");
+      const timeList=modal.querySelector("#timeList");
+      modal.style.display="block"; nextBtn.disabled=true; nextBtn.classList.remove('enabled'); dateList.innerHTML=""; timeList.innerHTML="";
+      const times=["10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30","20:00","20:30","21:00","21:30"];
+      populateUnavailableTimes(times);
+      const check=()=>{ if(selections.date && selections.time && !unavailableTimes.includes(selections.time)){ nextBtn.disabled=false; nextBtn.classList.add('enabled'); } else { nextBtn.disabled=true; nextBtn.classList.remove('enabled'); } };
+      Array.from({length:31},(_,i)=>i+1).forEach(d=>{
+        const btn=document.createElement("button");
+        btn.className="MuiPickersDay-root"; btn.textContent=d;
+        btn.onclick=()=>{ dateList.querySelectorAll(".clicked").forEach(b=>b.classList.remove("clicked")); btn.classList.add("clicked"); selections.date=d; selections.time=null; timeList.querySelectorAll(".clicked").forEach(b=>b.classList.remove("clicked")); check(); };
+        dateList.appendChild(btn);
+      });
+      times.forEach(t=>{
+        const btn=document.createElement("button");
+        btn.className="timeButtons"; btn.textContent=t;
+        const isUn=unavailableTimes.includes(t);
+        if(isUn){ btn.classList.add("disabledTime"); btn.disabled=true; }
+        else { btn.onclick=()=>{ timeList.querySelectorAll(".clicked").forEach(b=>b.classList.remove("clicked")); btn.classList.add("clicked"); selections.time=t; check(); }; }
+        timeList.appendChild(btn);
+      });
+      nextBtn.onclick=()=>{ if(selections.date && selections.time && !unavailableTimes.includes(selections.time)){ modal.style.display="none"; handleTermsPage(); } };
+    }
+    function startCountdown(){
+      const countdownEl=document.getElementById("countdown");
+      const registerBtn=document.getElementById("registerBtn");
+      let s=7; registerBtn.disabled=true; registerBtn.classList.remove('enabled');
+      const timer=setInterval(()=>{ if(s<=0){ clearInterval(timer); countdownEl.textContent="เปิดแล้ว!"; registerBtn.disabled=false; registerBtn.classList.add('enabled'); } else { countdownEl.textContent=`00:00:0${s--}`; } },1000);
+    }
+    function initializePage(){ document.querySelector('.main-container').style.display='flex'; resetFlow(); }
+    document.getElementById("registerBtn").addEventListener("click", openBranchModal);
+    document.getElementById("finalConfirm").addEventListener("click", handleSuccess);
+    document.getElementById("resetBtn").addEventListener("click", resetFlow);
+    document.addEventListener("DOMContentLoaded", initializePage);
+  </script>
 
-    <!-- --- START: CAPTCHA 3D ด้วย Three.js (แทนที่เวอร์ชัน Canvas เดิม) --- -->
-    <script>
-        const captchaModal = document.getElementById('captchaModal');
-        const container = document.getElementById('captcha-canvas-container');
-        const captchaStatus = document.getElementById('captcha-status');
-        const captchaNextBtn = document.getElementById('captchaNextBtn');
-        const loadingBarContainer = document.getElementById('loading-bar-container');
-        const loadingBar = document.getElementById('loading-bar');
-        const loadingText = document.getElementById('loading-text');
+  <!-- ---------- CAPTCHA 3D: การ์ด (หน้า icon.png / หลัง ApexBot) ---------- -->
+  <script>
+    const captchaModal = document.getElementById('captchaModal');
+    const container = document.getElementById('captcha-canvas-container');
+    const captchaStatus = document.getElementById('captcha-status');
+    const captchaNextBtn = document.getElementById('captchaNextBtn');
+    const loadingBarContainer = document.getElementById('loading-bar-container');
+    const loadingBar = document.getElementById('loading-bar');
+    const loadingText = document.getElementById('loading-text');
 
-        let scene, camera, renderer, mesh;
-        let isDragging = false;
-        let lastX, lastY;
-        const rotationSensitivity = 0.5; // scale สำหรับการลาก (จะคูณช่วงคำนวณเป็น degree ต่อ pixel)
-        let currentXAngle = 0; // degrees
-        let currentYAngle = 0; // degrees
-        const tolerance = 20;  // degrees
+    let scene, camera, renderer, card;
+    let isDragging = false;
+    let lastX = 0, lastY = 0;
+    let currentX = 0, currentY = 0;   // องศา
+    const sens = 0.6;                  // ความไวต่อพิกเซล
+    const tolerance = 15;              // องศาที่นับว่าตรง
+    const targetFront = { x:0, y:0 };  // “หันหน้าเข้าหาเรา” = 0°
 
-        function degToRad(d) { return d * Math.PI / 180; }
-        function normalizeAngle180(deg) { return ((deg % 360) + 540) % 360 - 180; }
+    function deg2rad(d){ return d*Math.PI/180; }
+    function norm180(a){ return ((a%360)+540)%360-180; }
 
-        function initThree() {
-            // renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setPixelRatio(window.devicePixelRatio || 1);
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            container.innerHTML = '';
-            container.appendChild(renderer.domElement);
+    function makeBackTextTexture(text='ApexBot'){
+      const cv = document.createElement('canvas');
+      cv.width = 1024; cv.height = 1024;
+      const ctx = cv.getContext('2d');
+      ctx.fillStyle = '#e0e0e0'; ctx.fillRect(0,0,cv.width,cv.height);
+      ctx.fillStyle = '#222'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = 'bold 180px "Segoe UI", Roboto, sans-serif';
+      ctx.fillText(text, cv.width/2, cv.height/2);
+      ctx.strokeStyle = '#444'; ctx.lineWidth = 6; ctx.strokeText(text, cv.width/2, cv.height/2);
+      const tex = new THREE.CanvasTexture(cv);
+      tex.anisotropy = 8; tex.needsUpdate = true;
+      return tex;
+    }
 
-            // scene & camera
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
-            camera.position.set(0, 0, 4);
+    function buildScene(frontTextureUrl){
+      renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+      renderer.setPixelRatio(window.devicePixelRatio||1);
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      container.innerHTML=''; container.appendChild(renderer.domElement);
 
-            // lights
-            const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-            scene.add(ambient);
-            const dir = new THREE.DirectionalLight(0xffffff, 0.9);
-            dir.position.set(2, 3, 5);
-            scene.add(dir);
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(42, container.clientWidth/container.clientHeight, 0.1, 100);
+      camera.position.set(0,0,3.6);
 
-            // object: กล่อง 3D โดยให้หน้าด้านผู้ใช้สีฟ้า (pz) และด้านหลังสีเทา (nz)
-            const geo = new THREE.BoxGeometry(1.6, 1.6, 1.6);
-            const frontMat = new THREE.MeshStandardMaterial({ color: 0x4dd0e1, metalness: 0.2, roughness: 0.4 });
-            const backMat  = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, metalness: 0.1, roughness: 0.6 });
-            const sideMat  = new THREE.MeshStandardMaterial({ color: 0x6b7280, metalness: 0.1, roughness: 0.8 });
-            // materials order: [px, nx, py, ny, pz, nz]
-            const materials = [sideMat, sideMat, sideMat, sideMat, frontMat, backMat];
+      scene.add(new THREE.AmbientLight(0xffffff, .75));
+      const key = new THREE.DirectionalLight(0xffffff, 1.1); key.position.set(2,3,5); scene.add(key);
+      const rim = new THREE.DirectionalLight(0xffffff, .45); rim.position.set(-3,2,-4); scene.add(rim);
 
-            mesh = new THREE.Mesh(geo, materials);
-            scene.add(mesh);
+      const w=2.2, h=3.0, t=0.06;
+      const geo = new THREE.BoxGeometry(w,h,t);
 
-            // initial rotation (คล้ายเดิม: หันเกือบหลัง)
-            currentYAngle = -170;
-            currentXAngle = Math.random() * 40 - 20;
-            mesh.rotation.set(degToRad(currentXAngle), degToRad(currentYAngle), 0);
+      const loader = new THREE.TextureLoader();
+      const frontMap = loader.load(frontTextureUrl);
+      frontMap.anisotropy = 8; frontMap.colorSpace = THREE.SRGBColorSpace;
 
-            // events
-            window.addEventListener('resize', onResize);
-            const el = renderer.domElement;
-            el.addEventListener('pointerdown', handleDragStart);
-            el.addEventListener('pointermove', handleDragMove);
-            el.addEventListener('pointerup', handleDragEnd);
-            el.addEventListener('pointercancel', handleDragEnd);
+      const backMap = makeBackTextTexture('ApexBot');
 
-            render();
-        }
+      const matFront = new THREE.MeshStandardMaterial({ map:frontMap, roughness:.55, metalness:.05 });
+      const matBack  = new THREE.MeshStandardMaterial({ map:backMap,  roughness:.75, metalness:.02 });
+      const matEdge  = new THREE.MeshStandardMaterial({ color:0x555b66, roughness:.85 });
+      // materials order: [px, nx, py, ny, pz, nz] -> pz = หน้า, nz = หลัง
+      const mats = [matEdge, matEdge, matEdge, matEdge, matFront, matBack];
 
-        function onResize() {
-            if (!renderer || !camera) return;
-            const w = container.clientWidth;
-            const h = container.clientHeight;
-            renderer.setSize(w, h);
-            camera.aspect = w / h;
-            camera.updateProjectionMatrix();
-        }
+      card = new THREE.Mesh(geo, mats);
+      currentY = -160 + (Math.random()*10-5);
+      currentX = (Math.random()*24-12);
+      card.rotation.set(deg2rad(currentX), deg2rad(currentY), 0);
+      scene.add(card);
 
-        function render() {
-            if (!renderer) return;
-            renderer.render(scene, camera);
-            requestAnimationFrame(render);
-        }
+      window.addEventListener('resize', onResize);
+      const el = renderer.domElement;
+      el.addEventListener('pointerdown', startDrag);
+      el.addEventListener('pointermove', moveDrag);
+      el.addEventListener('pointerup', endDrag);
+      el.addEventListener('pointercancel', endDrag);
 
-        function updateMeshRotation() {
-            if (!mesh) return;
-            mesh.rotation.x = degToRad(currentXAngle);
-            mesh.rotation.y = degToRad(currentYAngle);
-        }
+      render();
+    }
 
-        function checkRotation() {
-            const nx = normalizeAngle180(currentXAngle);
-            const ny = normalizeAngle180(currentYAngle);
-            if (Math.abs(nx) <= tolerance && Math.abs(ny) <= tolerance) {
-                captchaStatus.textContent = '✅ ผ่าน!';
-                captchaStatus.className = 'captcha-success';
-                captchaNextBtn.disabled = false;
-                captchaNextBtn.classList.add('enabled');
-                container.classList.add('captcha-success-glow');
-                loadingBarContainer.style.display = 'block';
-                loadingText.style.display = 'block';
-                loadingBar.style.width = '0%';
-                let progress = 0;
-                const interval = setInterval(() => {
-                    if (progress >= 100) clearInterval(interval);
-                    else loadingBar.style.width = `${progress += 5}%`;
-                }, 100);
-                setTimeout(() => {
-                    closeModal('captchaModal');
-                    openDateTimeModal();
-                }, 2000);
-            } else {
-                captchaStatus.textContent = '❌ ลองอีกครั้ง';
-                captchaStatus.className = 'captcha-failure';
-                captchaNextBtn.disabled = true;
-                captchaNextBtn.classList.remove('enabled');
-                container.classList.remove('captcha-success-glow');
-            }
-        }
+    function onResize(){
+      if(!renderer||!camera) return;
+      const w=container.clientWidth, h=container.clientHeight;
+      renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix();
+    }
+    function render(){ if(!renderer) return; renderer.render(scene,camera); requestAnimationFrame(render); }
 
-        function handleDragStart(e) {
-            e.preventDefault();
-            isDragging = true;
-            lastX = e.clientX ?? (e.touches && e.touches[0].clientX);
-            lastY = e.clientY ?? (e.touches && e.touches[0].clientY);
-            captchaStatus.textContent = '';
-            captchaStatus.className = '';
-        }
+    function startDrag(e){
+      e.preventDefault(); isDragging=true;
+      lastX = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
+      lastY = e.clientY ?? e.touches?.[0]?.clientY ?? 0;
+      captchaStatus.textContent=''; captchaStatus.className='';
+    }
+    function moveDrag(e){
+      if(!isDragging) return; e.preventDefault();
+      const x = e.clientX ?? e.touches?.[0]?.clientX ?? lastX;
+      const y = e.clientY ?? e.touches?.[0]?.clientY ?? lastY;
+      const dx = x-lastX, dy=y-lastY;
+      currentY += dx * sens;    // yaw
+      currentX -= dy * sens;    // pitch
+      currentX = Math.max(-85, Math.min(85, currentX));
+      card.rotation.set(deg2rad(currentX), deg2rad(currentY), 0);
+      lastX=x; lastY=y;
+    }
+    function endDrag(){ if(!isDragging) return; isDragging=false; checkPass(); }
 
-        function handleDragMove(e) {
-            if (!isDragging) return;
-            e.preventDefault();
-            const clientX = e.clientX ?? (e.touches && e.touches[0].clientX);
-            const clientY = e.clientY ?? (e.touches && e.touches[0].clientY);
-            const deltaX = clientX - lastX;
-            const deltaY = clientY - lastY;
+    function checkPass(){
+      const nx = Math.abs(norm180(currentX - targetFront.x));
+      const ny = Math.abs(norm180(currentY - targetFront.y));
+      if(nx<=tolerance && ny<=tolerance){
+        showPassUI(true);
+        setTimeout(()=>{ closeModal('captchaModal'); openDateTimeModal(); }, 2000);
+      }else{
+        showPassUI(false);
+      }
+    }
+    function showPassUI(ok){
+      if(ok){
+        captchaStatus.textContent='✅ ผ่าน!'; captchaStatus.className='captcha-success';
+        captchaNextBtn.disabled=false; captchaNextBtn.classList.add('enabled');
+        container.classList.add('captcha-success-glow');
+        loadingBarContainer.style.display='block'; loadingText.style.display='block'; loadingBar.style.width='0%';
+        let p=0; const it=setInterval(()=>{ if(p>=100) return clearInterval(it); loadingBar.style.width=(p+=5)+'%'; },100);
+      }else{
+        captchaStatus.textContent='❌ ลองอีกครั้ง'; captchaStatus.className='captcha-failure';
+        captchaNextBtn.disabled=true; captchaNextBtn.classList.remove('enabled');
+        container.classList.remove('captcha-success-glow');
+        loadingBarContainer.style.display='none'; loadingText.style.display='none';
+      }
+    }
 
-            // ปรับเป็น degree ต่อ pixel แบบ simple
-            currentYAngle += deltaX * rotationSensitivity; // yaw
-            currentXAngle -= deltaY * rotationSensitivity; // pitch
-            // จำกัด pitch ไม่ให้เกิน ±90 เพื่อ UX ที่ควบคุมง่าย
-            currentXAngle = Math.max(-90, Math.min(90, currentXAngle));
+    function openCaptchaModal(){
+      const loadingCaptcha=document.getElementById('loadingCaptcha');
+      captchaStatus.textContent=''; captchaStatus.className='';
+      captchaNextBtn.disabled=true; captchaNextBtn.classList.remove('enabled');
+      loadingBarContainer.style.display='none'; loadingText.style.display='none';
+      container.classList.remove('captcha-success-glow');
 
-            updateMeshRotation();
-            lastX = clientX; lastY = clientY;
-        }
+      loadingCaptcha.classList.add('show');
+      setTimeout(()=>{
+        loadingCaptcha.classList.remove('show');
+        captchaModal.style.display='block';
+        // ใช้ไฟล์รูปด้านหน้าชื่อ icon.png
+        buildScene('icon.png');
+      }, 800);
+    }
+    window.openCaptchaModal = openCaptchaModal;
 
-        function handleDragEnd() {
-            if (!isDragging) return;
-            isDragging = false;
-            checkRotation();
-        }
-
-        // override ฟังก์ชันเปิด CAPTCHA ใน flow เดิม
-        function openCaptchaModal() {
-            const loadingCaptcha = document.getElementById('loadingCaptcha');
-            captchaStatus.textContent = '';
-            captchaStatus.className = '';
-            captchaNextBtn.disabled = true;
-            captchaNextBtn.classList.remove('enabled');
-            loadingBarContainer.style.display = 'none';
-            loadingText.style.display = 'none';
-            container.classList.remove('captcha-success-glow');
-
-            loadingCaptcha.classList.add('show');
-            setTimeout(() => {
-                loadingCaptcha.classList.remove('show');
-                captchaModal.style.display = 'block';
-                initThree();
-            }, 1000);
-        }
-        window.openCaptchaModal = openCaptchaModal;
-
-        document.getElementById('captchaNextBtn').addEventListener('click', () => {
-            if (!captchaNextBtn.disabled) { closeModal('captchaModal'); openDateTimeModal(); }
-        });
-    </script>
-    <!-- --- END: CAPTCHA 3D ด้วย Three.js --- -->
+    document.getElementById('captchaNextBtn').addEventListener('click', ()=>{
+      if(!captchaNextBtn.disabled){ closeModal('captchaModal'); openDateTimeModal(); }
+    });
+  </script>
 </body>
 </html>
