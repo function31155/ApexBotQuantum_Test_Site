@@ -34,7 +34,7 @@
         #timeList .timeButtons.disabledTime { background-color: #dc3545; color: white; cursor: not-allowed; opacity: 0.7; }
         #cloudflare-simulation { align-items: center; justify-content: center; padding: 20px; background-color: #2d3748; border-radius: 8px; margin: 20px 0; }
         .spinner { width: 24px; height: 24px; border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: #3182ce; border-radius: 50%; animation: spin 1s linear infinite; }
-        #bot-required-overlay { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #f56565; font-size: 24px; font-weight: bold; text-align: center; }
+        #bot-required-overlay { display: none; flex-direction: column; align-items: center; justify-content: center; color: #f56565; font-size: 24px; font-weight: bold; text-align: center; }
 
         /* --- CSS CAPTCHA --- */
         #captchaModal .modal-content { background-color: #1a1a2e; color: #e0e0e0; padding: 40px; border-radius: 20px; border: none; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.05) inset; max-width: 450px; text-align: center; position: relative; transition: all 0.5s ease-in-out; }
@@ -43,7 +43,7 @@
         #captcha-description p { margin: 0; }
         #captcha-canvas-container { width: 280px; height: 280px; margin: 30px auto; position: relative; background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.2) 80%); border-radius: 15px; box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5); cursor: grab; }
         #captcha-canvas-container:active { cursor: grabbing; }
-        canvas { display: block; width: 100%; height: 100%; border-radius: 15px; touch-action: none; /* Prevents scrolling on touch devices */ }
+        canvas { display: block; width: 100%; height: 100%; border-radius: 15px; touch-action: none; }
         #captcha-status { margin-top: 30px; font-size: 1.6em; font-weight: bold; height: 40px; transition: all 0.5s ease; letter-spacing: 1px; }
         .captcha-success { color: #4caf50; text-shadow: 0 0 10px #4caf50; }
         .captcha-failure { color: #ff5252; text-shadow: 0 0 10px #ff5252; }
@@ -65,11 +65,6 @@
     </style>
 </head>
 <body>
-    
-    <div id="bot-required-overlay">
-        Please Enable DPbot Extension
-        <small style="font-size: 1rem; margin-top: 10px;">(And allow access to file URLs)</small>
-    </div>
 
     <div id="loadingCaptcha">
         <div class="loading-spinner"></div>
@@ -89,12 +84,12 @@
             <span class="modal-title">ยืนยันตัวตน</span>
             <div id="captcha-description" style="text-align: center; color: #aeb2bd; margin-bottom: 25px;">
                 <p>หมุนภาพตัวละครให้หันหน้าเข้าหาตัวเอง</p>
-                <p style="font-size: 0.9em; opacity: 0.8;">ใช้เมาส์หรือนิ้วของคุณหมุนภาพตัวละครด้านหน้าให้หันเข้าหาคุณ โดยตรง ภาพจะสว่างขึ้นเมื่อวางแนวถูกต้อง</p>
+                <p style="font-size: 0.9em; opacity: 0.8;">ใช้เมาส์หรือนิ้วของคุณหมุนวัตถุ 3D ให้หันเข้าหาคุณ โดยตรง ภาพจะสว่างขึ้นเมื่อวางแนวถูกต้อง</p>
             </div>
             
             <div id="captcha-container">
                 <div id="captcha-canvas-container">
-                   <canvas id="captcha-canvas" width="280" height="280"></canvas>
+                    <!-- จะถูกแทนที่ด้วย WebGL Canvas ของ Three.js -->
                 </div>
                 <div id="captcha-status"></div>
                 <div class="loading-bar-container" style="display: none;" id="loading-bar-container">
@@ -117,7 +112,7 @@
         </div>
     </div>
     
-    <div class="main-container" style="display: none;">
+    <div class="main-container" style="display: flex;">
         <div class="step-card">
             <div id="step-area">
                 <div id="page-register" class="page active">
@@ -151,9 +146,12 @@
         </div>
     </div>
 
+    <!-- libs -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script src="https://unpkg.com/three@0.161.0/build/three.min.js"></script>
+
     <script>
-        // --- START: Main Web Logic (Unchanged) ---
+        // --- START: Main Web Logic (ยกของเดิมมาและตัด DPbot overlay ออก) ---
         const selections = { branch: null, date: null, time: null };
         let startTime;
         let unavailableBranches = [];
@@ -171,114 +169,124 @@
         function openBranchModal() { startTime = new Date(); const modal = document.getElementById("branchModal"); const nextBtn = document.getElementById("branchModalNextBtn"); const list = modal.querySelector("#branchList"); modal.style.display = "block"; nextBtn.disabled = true; nextBtn.classList.remove('enabled'); list.innerHTML = ""; const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld", "MEGABANGNA", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai", "ICONSIAM"]; populateUnavailableBranches(branches); branches.forEach(b => { const button = document.createElement("button"); button.className = "branch-item"; button.textContent = b; const isUnavailable = unavailableBranches.includes(b); if (isUnavailable) { button.classList.add("is_full"); button.disabled = true; } else { button.onclick = () => { list.querySelectorAll(".branch-item.selected").forEach(el => el.classList.remove("selected")); button.classList.add("selected"); selections.branch = b; nextBtn.disabled = false; nextBtn.classList.add('enabled'); }; } list.appendChild(button); }); nextBtn.onclick = () => { if (selections.branch && !unavailableBranches.includes(selections.branch)) { modal.style.display = "none"; openCaptchaModal(); } }; }
         function openDateTimeModal() { const modal = document.getElementById("datetimeModal"); const nextBtn = document.getElementById("dateTimeNextBtn"); const dateList = modal.querySelector("#dateList"); const timeList = modal.querySelector("#timeList"); modal.style.display = "block"; nextBtn.disabled = true; nextBtn.classList.remove('enabled'); dateList.innerHTML = ""; timeList.innerHTML = ""; const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"]; populateUnavailableTimes(times); const checkDateTimeValid = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { nextBtn.disabled = false; nextBtn.classList.add('enabled'); } else { nextBtn.disabled = true; nextBtn.classList.remove('enabled'); } }; Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => { const button = document.createElement("button"); button.className = "MuiPickersDay-root"; button.textContent = d; button.onclick = () => { dateList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.date = d; selections.time = null; timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); checkDateTimeValid(); }; dateList.appendChild(button); }); times.forEach(t => { const button = document.createElement("button"); button.className = "timeButtons"; button.textContent = t; const isUnavailable = unavailableTimes.includes(t); if (isUnavailable) { button.classList.add("disabledTime"); button.disabled = true; } else { button.onclick = () => { timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.time = t; checkDateTimeValid(); }; } timeList.appendChild(button); }); nextBtn.onclick = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { modal.style.display = "none"; handleTermsPage(); } }; }
         function startCountdown() { const countdownEl = document.getElementById("countdown"); const registerBtn = document.getElementById("registerBtn"); let secondsLeft = 7; registerBtn.disabled = true; registerBtn.classList.remove('enabled'); const timer = setInterval(() => { if (secondsLeft <= 0) { clearInterval(timer); countdownEl.textContent = "เปิดแล้ว!"; registerBtn.disabled = false; registerBtn.classList.add('enabled'); } else { countdownEl.textContent = `00:00:0${secondsLeft--}`; } }, 1000); }
-        function initializePage() { setTimeout(() => { if (document.body.dataset.dpbotEnabled === 'true') { document.querySelector('.main-container').style.display = 'flex'; document.getElementById('bot-required-overlay').style.display = 'none'; resetFlow(); } else { document.getElementById('bot-required-overlay').style.display = 'flex'; document.querySelector('.main-container').style.display = 'none'; } }, 200); }
+        function initializePage() {
+            // แสดง main UI ทันที (ตัดระบบ DPbot ออก)
+            document.querySelector('.main-container').style.display = 'flex';
+            resetFlow();
+        }
         document.getElementById("registerBtn").addEventListener("click", openBranchModal);
         document.getElementById("finalConfirm").addEventListener("click", handleSuccess);
         document.getElementById("resetBtn").addEventListener("click", resetFlow);
         document.addEventListener("DOMContentLoaded", initializePage);
         // --- END: Main Web Logic ---
+    </script>
 
-
-        // --- START: FINAL WORKING 3D CAPTCHA LOGIC ---
+    <!-- --- START: CAPTCHA 3D ด้วย Three.js (แทนที่เวอร์ชัน Canvas เดิม) --- -->
+    <script>
         const captchaModal = document.getElementById('captchaModal');
-        const canvas = document.getElementById('captcha-canvas');
-        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('captcha-canvas-container');
         const captchaStatus = document.getElementById('captcha-status');
         const captchaNextBtn = document.getElementById('captchaNextBtn');
         const loadingBarContainer = document.getElementById('loading-bar-container');
         const loadingBar = document.getElementById('loading-bar');
         const loadingText = document.getElementById('loading-text');
 
+        let scene, camera, renderer, mesh;
         let isDragging = false;
         let lastX, lastY;
-        let currentXAngle = 0;
-        let currentYAngle = 0;
-        const rotationSensitivity = 0.5;
+        const rotationSensitivity = 0.5; // scale สำหรับการลาก (จะคูณช่วงคำนวณเป็น degree ต่อ pixel)
+        let currentXAngle = 0; // degrees
+        let currentYAngle = 0; // degrees
+        const tolerance = 20;  // degrees
 
-        function drawCube() {
-            const width = canvas.width;
-            const height = canvas.height;
-            const normalizedYAngle = ((currentYAngle % 360) + 540) % 360 - 180;
-            const isFrontFacing = Math.abs(normalizedYAngle) <= 90;
+        function degToRad(d) { return d * Math.PI / 180; }
+        function normalizeAngle180(deg) { return ((deg % 360) + 540) % 360 - 180; }
 
-            ctx.clearRect(0, 0, width, height);
-            ctx.save();
-            ctx.translate(width / 2, height / 2);
-            
-            ctx.font = 'bold 80px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
+        function initThree() {
+            // renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio || 1);
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.innerHTML = '';
+            container.appendChild(renderer.domElement);
 
-            // Apply a transformation that simulates 3D rotation on both axes
-            const rotX = currentXAngle * Math.PI / 180;
-            const scaleY = Math.cos(rotX);
-            const perspectiveY = Math.sin(rotX);
+            // scene & camera
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 0, 4);
 
-            const rotY = currentYAngle * Math.PI / 180;
-            const scaleX = Math.cos(rotY);
-            
-            ctx.transform(scaleX, perspectiveY * 0.2 , 0, scaleY, 0, 0);
+            // lights
+            const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambient);
+            const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+            dir.position.set(2, 3, 5);
+            scene.add(dir);
 
+            // object: กล่อง 3D โดยให้หน้าด้านผู้ใช้สีฟ้า (pz) และด้านหลังสีเทา (nz)
+            const geo = new THREE.BoxGeometry(1.6, 1.6, 1.6);
+            const frontMat = new THREE.MeshStandardMaterial({ color: 0x4dd0e1, metalness: 0.2, roughness: 0.4 });
+            const backMat  = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, metalness: 0.1, roughness: 0.6 });
+            const sideMat  = new THREE.MeshStandardMaterial({ color: 0x6b7280, metalness: 0.1, roughness: 0.8 });
+            // materials order: [px, nx, py, ny, pz, nz]
+            const materials = [sideMat, sideMat, sideMat, sideMat, frontMat, backMat];
 
-            if (isFrontFacing) {
-                ctx.fillStyle = '#4dd0e1';
-                ctx.fillText("🤖", 0, 0);
-            } else {
-                ctx.save();
-                ctx.transform(-1, 0, 0, 1, 0, 0);
-                ctx.fillStyle = '#e0e0e0';
-                ctx.fillText("DP", 0, 0);
-                ctx.restore();
-            }
-            ctx.restore();
-        }
+            mesh = new THREE.Mesh(geo, materials);
+            scene.add(mesh);
 
-        function setInitialRotation() {
+            // initial rotation (คล้ายเดิม: หันเกือบหลัง)
             currentYAngle = -170;
             currentXAngle = Math.random() * 40 - 20;
-            drawCube();
+            mesh.rotation.set(degToRad(currentXAngle), degToRad(currentYAngle), 0);
+
+            // events
+            window.addEventListener('resize', onResize);
+            const el = renderer.domElement;
+            el.addEventListener('pointerdown', handleDragStart);
+            el.addEventListener('pointermove', handleDragMove);
+            el.addEventListener('pointerup', handleDragEnd);
+            el.addEventListener('pointercancel', handleDragEnd);
+
+            render();
         }
-        
-        function openCaptchaModal() {
-            const loadingCaptcha = document.getElementById('loadingCaptcha');
-            setInitialRotation();
-            captchaStatus.textContent = '';
-            captchaStatus.className = '';
-            captchaNextBtn.disabled = true;
-            captchaNextBtn.classList.remove('enabled');
-            loadingBarContainer.style.display = 'none';
-            loadingText.style.display = 'none';
-            document.getElementById('captcha-canvas-container').classList.remove('captcha-success-glow');
-            loadingCaptcha.classList.add('show');
-            setTimeout(() => {
-                loadingCaptcha.classList.remove('show');
-                captchaModal.style.display = 'block';
-                drawCube();
-            }, 1000);
+
+        function onResize() {
+            if (!renderer || !camera) return;
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+            renderer.setSize(w, h);
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+        }
+
+        function render() {
+            if (!renderer) return;
+            renderer.render(scene, camera);
+            requestAnimationFrame(render);
+        }
+
+        function updateMeshRotation() {
+            if (!mesh) return;
+            mesh.rotation.x = degToRad(currentXAngle);
+            mesh.rotation.y = degToRad(currentYAngle);
         }
 
         function checkRotation() {
-            const normalizedYAngle = ((currentYAngle % 360) + 540) % 360 - 180;
-            const normalizedXAngle = ((currentXAngle % 360) + 540) % 360 - 180;
-            const tolerance = 20;
-            const canvasContainer = document.getElementById('captcha-canvas-container');
-
-            if (Math.abs(normalizedYAngle) <= tolerance && Math.abs(normalizedXAngle) <= tolerance) {
+            const nx = normalizeAngle180(currentXAngle);
+            const ny = normalizeAngle180(currentYAngle);
+            if (Math.abs(nx) <= tolerance && Math.abs(ny) <= tolerance) {
                 captchaStatus.textContent = '✅ ผ่าน!';
                 captchaStatus.className = 'captcha-success';
                 captchaNextBtn.disabled = false;
                 captchaNextBtn.classList.add('enabled');
-                canvasContainer.classList.add('captcha-success-glow');
+                container.classList.add('captcha-success-glow');
                 loadingBarContainer.style.display = 'block';
                 loadingText.style.display = 'block';
                 loadingBar.style.width = '0%';
-                
                 let progress = 0;
                 const interval = setInterval(() => {
                     if (progress >= 100) clearInterval(interval);
                     else loadingBar.style.width = `${progress += 5}%`;
                 }, 100);
-
                 setTimeout(() => {
                     closeModal('captchaModal');
                     openDateTimeModal();
@@ -288,15 +296,15 @@
                 captchaStatus.className = 'captcha-failure';
                 captchaNextBtn.disabled = true;
                 captchaNextBtn.classList.remove('enabled');
-                canvasContainer.classList.remove('captcha-success-glow');
+                container.classList.remove('captcha-success-glow');
             }
         }
-        
+
         function handleDragStart(e) {
             e.preventDefault();
             isDragging = true;
-            lastX = e.clientX || e.touches[0].clientX;
-            lastY = e.clientY || e.touches[0].clientY;
+            lastX = e.clientX ?? (e.touches && e.touches[0].clientX);
+            lastY = e.clientY ?? (e.touches && e.touches[0].clientY);
             captchaStatus.textContent = '';
             captchaStatus.className = '';
         }
@@ -304,15 +312,19 @@
         function handleDragMove(e) {
             if (!isDragging) return;
             e.preventDefault();
-            const clientX = e.clientX || e.touches[0].clientX;
-            const clientY = e.clientY || e.touches[0].clientY;
+            const clientX = e.clientX ?? (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY ?? (e.touches && e.touches[0].clientY);
             const deltaX = clientX - lastX;
             const deltaY = clientY - lastY;
-            currentYAngle += deltaX * rotationSensitivity;
-            currentXAngle -= deltaY * rotationSensitivity;
-            lastX = clientX;
-            lastY = clientY;
-            drawCube(); // Redraw immediately on move
+
+            // ปรับเป็น degree ต่อ pixel แบบ simple
+            currentYAngle += deltaX * rotationSensitivity; // yaw
+            currentXAngle -= deltaY * rotationSensitivity; // pitch
+            // จำกัด pitch ไม่ให้เกิน ±90 เพื่อ UX ที่ควบคุมง่าย
+            currentXAngle = Math.max(-90, Math.min(90, currentXAngle));
+
+            updateMeshRotation();
+            lastX = clientX; lastY = clientY;
         }
 
         function handleDragEnd() {
@@ -321,16 +333,30 @@
             checkRotation();
         }
 
-        // Unified Pointer Events for Mouse, Touch, and Bot
-        canvas.addEventListener('pointerdown', handleDragStart);
-        canvas.addEventListener('pointermove', handleDragMove);
-        canvas.addEventListener('pointerup', handleDragEnd);
-        canvas.addEventListener('pointercancel', handleDragEnd); // Also end drag on cancel
-        
-        captchaNextBtn.addEventListener('click', () => {
+        // override ฟังก์ชันเปิด CAPTCHA ใน flow เดิม
+        function openCaptchaModal() {
+            const loadingCaptcha = document.getElementById('loadingCaptcha');
+            captchaStatus.textContent = '';
+            captchaStatus.className = '';
+            captchaNextBtn.disabled = true;
+            captchaNextBtn.classList.remove('enabled');
+            loadingBarContainer.style.display = 'none';
+            loadingText.style.display = 'none';
+            container.classList.remove('captcha-success-glow');
+
+            loadingCaptcha.classList.add('show');
+            setTimeout(() => {
+                loadingCaptcha.classList.remove('show');
+                captchaModal.style.display = 'block';
+                initThree();
+            }, 1000);
+        }
+        window.openCaptchaModal = openCaptchaModal;
+
+        document.getElementById('captchaNextBtn').addEventListener('click', () => {
             if (!captchaNextBtn.disabled) { closeModal('captchaModal'); openDateTimeModal(); }
         });
-        // --- END: FINAL WORKING 3D CAPTCHA LOGIC ---
     </script>
+    <!-- --- END: CAPTCHA 3D ด้วย Three.js --- -->
 </body>
 </html>
