@@ -81,38 +81,32 @@
         .page { display: none; }
         .page.active { display: block; }
         
-        .countdown-container { text-align: center; font-size: 28px; color: var(--accent-danger); font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; font-family: var(--font-header); }
+        .countdown-container { text-align: center; font-size: 28px; color: #f87171; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; font-family: var(--font-header); }
         
         button {
             position: relative;
-            width: 100%;
-            padding: 12px;
-            color: var(--bg-dark);
-            background-color: var(--accent-cyber);
-            border: 1px solid var(--accent-cyber);
+            padding: 10px 16px;
             font-family: var(--font-header);
             font-size: 14px;
             text-transform: uppercase;
             letter-spacing: 1px;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 0 10px var(--accent-glow), inset 0 0 5px rgba(255,255,255,0.5);
-            clip-path: polygon(calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%, 0 0);
+            border-radius: 4px;
+            border: 1px solid var(--accent-cyber);
             overflow: hidden;
+            width: 100%;
+            box-sizing: border-box;
         }
 
-        button::before {
-            content: ''; position: absolute; top: 0; left: -100%; width: 75%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-            transition: left 0.4s ease; transform: skewX(-25deg);
-        }
-        button:hover:not(:disabled) { background-color: #fff; color: #000; box-shadow: 0 0 25px var(--accent-glow), 0 0 15px #fff; }
-        button:hover:not(:disabled)::before { left: 125%; }
-        button:active:not(:disabled) { transform: scale(0.98); box-shadow: 0 0 10px var(--accent-glow); }
-        button:disabled { cursor: not-allowed; opacity: 0.5; background-color: #555; border-color: #777; box-shadow: none; }
+        button:active:not(:disabled) { transform: scale(0.98); }
+        button:disabled { cursor: not-allowed; opacity: 0.5; background-color: #555 !important; border-color: #777 !important; color: #999 !important; box-shadow: none !important; }
 
-        button.register { color: #fff; opacity: 0.5; background-color: #555; }
-        button.register.enabled { background-color: var(--accent-green); border-color: var(--accent-green); opacity: 1; box-shadow: 0 0 15px var(--accent-green); }
+        button.register { color: #333; background-color: rgb(222, 222, 222); border: none; }
+        button.register.enabled { background-color: #22c55e; color: white; opacity: 1; border-color: #22c55e; }
+        
+        button.next-btn { background-color: #888; color: #ccc; border: none;}
+        button.next-btn.enabled { background-color: #28a745; color: white; opacity: 1; border-color: #28a745;}
         
         .summary-info { background-color: rgba(10, 15, 24, 0.8); color: var(--text-muted); padding: 15px; border-radius: 4px; margin: 20px 0; text-align: left; border: 1px solid var(--border-color); }
         .summary-info h3 { color: var(--accent-cyber); margin-top: 0; font-size: 18px; text-align: left;}
@@ -125,15 +119,14 @@
         .modal .close:hover { color: var(--text-color); }
         
         .branchButtons { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 15px; }
-        .branch-item { background: rgba(10, 15, 24, 0.8); color: var(--text-muted); border: 1px solid var(--border-color); }
-        .branch-item:hover:not(:disabled) { background: var(--border-color); }
-        .branch-item.selected { background-color: var(--accent-cyber); color: var(--bg-dark); box-shadow: 0 0 10px var(--accent-glow); }
-        .branch-item.is_full { background-color: var(--accent-danger); color: white; cursor: not-allowed; opacity: 0.7; }
+        .branch-item { background: #334155; color: #a0aec0; }
+        .branch-item.selected { background-color: #22c55e; color: white; }
+        .branch-item.is_full { background-color: #dc3545; color: white; cursor: not-allowed; opacity: 0.7; }
         
         #dateList, #timeList { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 15px; }
-        #dateList button, #timeList .timeButtons { background-color: rgba(10, 15, 24, 0.8); color: var(--text-muted); border: 1px solid var(--border-color); padding: 8px 12px; }
-        #dateList button.clicked, #timeList .timeButtons.clicked { background-color: var(--accent-cyber) !important; color: var(--bg-dark) !important; box-shadow: 0 0 10px var(--accent-glow); }
-        #timeList .timeButtons.disabledTime { background-color: var(--accent-danger); color: white; cursor: not-allowed; opacity: 0.7; }
+        #dateList button, #timeList .timeButtons { background-color: #334155; color: #a0aec0; padding: 8px 12px; }
+        #dateList button.clicked, #timeList .timeButtons.clicked { background-color: #3182ce !important; color: white !important; }
+        #timeList .timeButtons.disabledTime { background-color: #dc3545; color: white; cursor: not-allowed; opacity: 0.7; }
         
         #cloudflare-simulation { display: none; align-items: center; justify-content: center; padding: 20px; background-color: rgba(10, 15, 24, 0.8); border-radius: 4px; margin: 20px 0; border: 1px solid var(--border-color); }
         .spinner { width: 24px; height: 24px; border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: var(--accent-cyber); border-radius: 50%; animation: spin 1s linear infinite; }
@@ -148,7 +141,7 @@
         .captcha-success { color: var(--accent-green); text-shadow: 0 0 10px var(--accent-green); }
         .captcha-failure { color: var(--accent-danger); text-shadow: 0 0 10px var(--accent-danger); }
         .captcha-success-glow { box-shadow: 0 0 20px var(--accent-green); }
-
+        
         #loadingCaptcha { position: fixed; inset: 0; background-color: var(--bg-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; font-family: var(--font-header); font-size: 1.5em; letter-spacing: 2px; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1001; }
         #loadingCaptcha.show { opacity: 1; visibility: visible; }
         .loading-spinner { width: 40px; height: 40px; border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: var(--accent-cyber); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
@@ -244,7 +237,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script>
-        // --- START: Main Web Logic (Unchanged) ---
         const selections = { branch: null, date: null, time: null };
         let startTime;
         let unavailableBranches = [];
@@ -262,7 +254,19 @@
         function openBranchModal() { startTime = new Date(); const modal = document.getElementById("branchModal"); const nextBtn = document.getElementById("branchModalNextBtn"); const list = modal.querySelector("#branchList"); modal.style.display = "flex"; nextBtn.disabled = true; list.innerHTML = ""; const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld", "MEGABANGNA", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai", "ICONSIAM"]; populateUnavailableBranches(branches); branches.forEach(b => { const button = document.createElement("button"); button.className = "branch-item"; button.textContent = b; const isUnavailable = unavailableBranches.includes(b); if (isUnavailable) { button.classList.add("is_full"); button.disabled = true; } else { button.onclick = () => { list.querySelectorAll(".branch-item.selected").forEach(el => el.classList.remove("selected")); button.classList.add("selected"); selections.branch = b; nextBtn.disabled = false; }; } list.appendChild(button); }); nextBtn.onclick = () => { if (selections.branch && !unavailableBranches.includes(selections.branch)) { modal.style.display = "none"; openCaptchaModal(); } }; }
         function openDateTimeModal() { const modal = document.getElementById("datetimeModal"); const nextBtn = document.getElementById("dateTimeNextBtn"); const dateList = modal.querySelector("#dateList"); const timeList = modal.querySelector("#timeList"); modal.style.display = "flex"; nextBtn.disabled = true; dateList.innerHTML = ""; timeList.innerHTML = ""; const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"]; populateUnavailableTimes(times); const checkDateTimeValid = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { nextBtn.disabled = false; } else { nextBtn.disabled = true; } }; Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => { const button = document.createElement("button"); button.className = "MuiPickersDay-root"; button.textContent = d; button.onclick = () => { dateList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.date = d; selections.time = null; timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); checkDateTimeValid(); }; dateList.appendChild(button); }); times.forEach(t => { const button = document.createElement("button"); button.className = "timeButtons"; button.textContent = t; const isUnavailable = unavailableTimes.includes(t); if (isUnavailable) { button.classList.add("disabledTime"); button.disabled = true; } else { button.onclick = () => { timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.time = t; checkDateTimeValid(); }; } timeList.appendChild(button); }); nextBtn.onclick = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { modal.style.display = "none"; handleTermsPage(); } }; }
         function startCountdown() { const countdownEl = document.getElementById("countdown"); const registerBtn = document.getElementById("registerBtn"); let secondsLeft = 7; registerBtn.disabled = true; registerBtn.classList.remove('enabled'); const timer = setInterval(() => { if (secondsLeft <= 0) { clearInterval(timer); countdownEl.textContent = "OPEN!"; registerBtn.disabled = false; registerBtn.classList.add('enabled'); } else { countdownEl.textContent = `00:00:0${secondsLeft--}`; } }, 1000); }
-        function initializePage() { setTimeout(() => { if (document.body.dataset.dpbotEnabled === 'true') { document.querySelector('.main-container').style.display = 'flex'; document.getElementById('bot-required-overlay').style.display = 'none'; resetFlow(); } else { document.getElementById('bot-required-overlay').style.display = 'flex'; document.querySelector('.main-container').style.display = 'none'; } }, 200); }
+        function initializePage() {
+            const checkBot = () => {
+                if (document.body.dataset.dpbotEnabled === 'true') {
+                    document.querySelector('.main-container').style.display = 'flex';
+                    document.getElementById('bot-required-overlay').style.display = 'none';
+                    resetFlow();
+                } else {
+                    document.getElementById('bot-required-overlay').style.display = 'flex';
+                    document.querySelector('.main-container').style.display = 'none';
+                }
+            };
+            setTimeout(checkBot, 200);
+        }
         document.getElementById("registerBtn").addEventListener("click", openBranchModal);
         document.getElementById("finalConfirm").addEventListener("click", handleSuccess);
         document.getElementById("resetBtn").addEventListener("click", resetFlow);
