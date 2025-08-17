@@ -73,40 +73,18 @@
             text-transform: uppercase;
         }
 
-        p {
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-        
+        p { color: var(--text-muted); font-size: 14px; }
         .page { display: none; }
         .page.active { display: block; }
-        
         .countdown-container { text-align: center; font-size: 28px; color: #f87171; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; font-family: var(--font-header); }
         
-        button {
-            position: relative;
-            padding: 10px 16px;
-            font-family: var(--font-header);
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border-radius: 4px;
-            border: 1px solid var(--accent-cyber);
-            overflow: hidden;
-            width: 100%;
-            box-sizing: border-box;
-        }
+        button { border-radius: 8px; border: none; padding: 10px 16px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; font-family: var(--font-body); }
+        button:disabled { cursor: not-allowed; opacity: 0.6; }
 
-        button:active:not(:disabled) { transform: scale(0.98); }
-        button:disabled { cursor: not-allowed; opacity: 0.5; background-color: #555 !important; border-color: #777 !important; color: #999 !important; box-shadow: none !important; }
-
-        button.register { color: #333; background-color: rgb(222, 222, 222); border: none; }
-        button.register.enabled { background-color: #22c55e; color: white; opacity: 1; border-color: #22c55e; }
-        
-        button.next-btn { background-color: #888; color: #ccc; border: none;}
-        button.next-btn.enabled { background-color: #28a745; color: white; opacity: 1; border-color: #28a745;}
+        button.register { color: #333; font-size: 1.2rem; background-color: rgb(222, 222, 222); }
+        button.register.enabled { background-color: #22c55e; color: white; opacity: 1; }
+        button.next-btn { background-color: #888; color: #ccc; }
+        button.next-btn.enabled { background-color: #28a745; color: white; opacity: 1; }
         
         .summary-info { background-color: rgba(10, 15, 24, 0.8); color: var(--text-muted); padding: 15px; border-radius: 4px; margin: 20px 0; text-align: left; border: 1px solid var(--border-color); }
         .summary-info h3 { color: var(--accent-cyber); margin-top: 0; font-size: 18px; text-align: left;}
@@ -216,7 +194,7 @@
                     </div>
                     <div class="checkbox-row" style="justify-content: center; margin: 20px 0;">
                          <input name="acceptTermsAndConditions" type="checkbox" id="terms-checkbox">
-                         <label for="terms-checkbox">I accept the terms</label>
+                         <label for="terms-checkbox" style="color:white; font-family:var(--font-body);">I accept the terms</label>
                     </div>
                     <button class="next-btn" id="finalConfirm" type="submit" disabled>Confirm Booking</button>
                 </div>
@@ -229,7 +207,7 @@
                         <p>Time: <span id="final-summary-time"></span></p>
                         <p>Time Taken: <span id="final-summary-time-taken"></span> seconds</p>
                     </div>
-                    <button id="resetBtn" style="background-color: var(--accent-cyber);">Book Again</button>
+                    <button id="resetBtn">Book Again</button>
                 </div>
             </div>
         </div>
