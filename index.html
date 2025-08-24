@@ -7,21 +7,18 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto+Mono:wght@400;500&display=swap');
         :root { --bg-dark: #0a0f18; --bg-panel: rgba(18, 28, 48, 0.85); --border-color: rgba(0, 191, 255, 0.3); --accent-cyber: #00bfff; --accent-glow: rgba(0, 191, 255, 0.7); --text-color: #e0e6f0; --text-muted: #88a0c0; --accent-danger: #ff4d6d; --accent-green: #00ffab; --font-header: 'Orbitron', sans-serif; --font-body: 'Roboto Mono', monospace; }
-        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: var(--bg-dark); margin: 0; font-family: var(--font-body); padding: 0; background-image: linear-gradient(rgba(0, 191, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 191, 255, 0.05) 1px, transparent 1px); background-size: 30px 30px; animation: pan-background 60s linear infinite; }
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: var(--bg-dark); margin: 0; font-family: var(--font-body); padding: 20px; box-sizing: border-box; background-image: linear-gradient(rgba(0, 191, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 191, 255, 0.05) 1px, transparent 1px); background-size: 30px 30px; animation: pan-background 60s linear infinite; }
         @keyframes pan-background { from { background-position: 0 0; } to { background-position: 300px 300px; } }
-        .main-container { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.6s ease; width: 100%; max-width: 420px; box-sizing: border-box; }
+        .main-container { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; animation: fadeIn 0.6s ease; width: 100%; max-width: 420px; box-sizing: border-box; }
         .step-card { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 4px; padding: 25px; color: var(--text-color); text-align: center; box-shadow: 0 0 25px rgba(0, 191, 255, 0.2), inset 0 0 10px rgba(10, 15, 24, 0.5); margin-bottom: 16px; width: 100%; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%); }
         h2 { font-family: var(--font-header); color: var(--accent-cyber); text-shadow: 0 0 8px var(--accent-glow); font-size: 24px; letter-spacing: 2px; text-transform: uppercase; }
         p { color: var(--text-muted); font-size: 14px; }
         .page { display: none; }
         .page.active { display: block; }
-        .countdown-container { text-align: center; font-size: 28px; color: #f87171; font-weight: bold; letter-spacing: 2px; margin-bottom: 15px; font-family: var(--font-header); }
         button { border-radius: 8px; border: none; padding: 10px 16px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; font-family: var(--font-body); }
         button:disabled { cursor: not-allowed; opacity: 0.6; }
-        button.register { color: #333; font-size: 1.2rem; background-color: rgb(222, 222, 222); }
-        button.register.enabled { background-color: #22c55e; color: white; opacity: 1; }
-        button.next-btn { background-color: #888; color: #ccc; }
-        button.next-btn.enabled { background-color: #28a745; color: white; opacity: 1; }
+        button.register { color: #333; font-size: 1.2rem; background-color: #22c55e; color: white; }
+        button.next-btn { background-color: #28a745; color: white; }
         .summary-info { background-color: rgba(10, 15, 24, 0.8); color: var(--text-muted); padding: 15px; border-radius: 4px; margin: 20px 0; text-align: left; border: 1px solid var(--border-color); }
         .summary-info h3 { color: var(--accent-cyber); margin-top: 0; font-size: 18px; text-align: left;}
         .summary-info span { color: var(--accent-green); font-weight: bold; }
@@ -33,32 +30,54 @@
         .branchButtons { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 15px; }
         .branch-item { background: #334155; color: #a0aec0; }
         .branch-item.selected { background-color: #22c55e; color: white; }
-        .branch-item.is_full { background-color: #dc3545; color: white; cursor: not-allowed; opacity: 0.7; }
         #dateList, #timeList { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 15px; }
         #dateList button, #timeList .timeButtons { background-color: #334155; color: #a0aec0; padding: 8px 12px; }
         #dateList button.clicked, #timeList .timeButtons.clicked { background-color: #3182ce !important; color: white !important; }
-        #timeList .timeButtons.disabledTime { background-color: #dc3545; color: white; cursor: not-allowed; opacity: 0.7; }
-        #cloudflare-simulation { display: none; align-items: center; justify-content: center; padding: 20px; background-color: rgba(10, 15, 24, 0.8); border-radius: 4px; margin: 20px 0; border: 1px solid var(--border-color); }
-        .spinner { width: 24px; height: 24px; border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: var(--accent-cyber); border-radius: 50%; animation: spin 1s linear infinite; }
         #bot-required-overlay { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--accent-danger); font-size: 24px; font-weight: bold; text-align: center; font-family: var(--font-header); }
+        .aws-captcha-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin: 20px 0; }
+        .aws-captcha-grid img { width: 100%; border: 2px solid transparent; border-radius: 4px; cursor: pointer; transition: border-color 0.2s; }
+        .aws-captcha-grid img:hover { border-color: var(--accent-cyber); }
+        #fakeLineLoginBtn { position: fixed; bottom: 10px; right: 10px; background: #00B900; color: white; z-index: 1001; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     
     <div id="bot-required-overlay">
         Please Enable ApexBot Extension
-        <small style="font-size: 1rem; margin-top: 10px;">(And allow access to file URLs if prompted)</small>
     </div>
+
+    <button id="fakeLineLoginBtn">Simulate LINE Login</button>
 
     <div id="branchModal" class="modal">
         <div class="modal-content">
             <span class="modal-title">Select Branch</span><span class="close" onclick="closeModal('branchModal')">×</span>
             <div id="branchList" class="branchButtons"></div>
             <button class="next-btn" id="branchModalNextBtn" disabled style="margin-top: 20px;">Next</button>
+        </div>
+    </div>
+
+    <div id="gameCaptchaPage" class="page">
+        <div class="step-card">
+            <h2>GAME CAPTCHA</h2>
+            <p>This is a simulated Game CAPTCHA page.<br>Bypass Mode should skip this page entirely.</p>
+        </div>
+    </div>
+
+    <div id="awsCaptchaModal" class="modal">
+        <div class="modal-content">
+             <span class="modal-title">Security Verification</span>
+             <p>Please select all images with a 🤖</p>
+             <div class="aws-captcha-grid">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='50' font-size='40' text-anchor='middle' dy='.3em'%3E🤖%3C/text%3E%3C/svg%3E">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='50' font-size='40' text-anchor='middle' dy='.3em'%3E🚗%3C/text%3E%3C/svg%3E">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='50' font-size='40' text-anchor='middle' dy='.3em'%3E🤖%3C/text%3E%3C/svg%3E">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='50' font-size='40' text-anchor='middle' dy='.3em'%3E🌳%3C/text%3E%3C/svg%3E">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='50' font-size='40' text-anchor='middle' dy='.3em'%3E🤖%3C/text%3E%3C/svg%3E">
+             </div>
+             <button class="next-btn" onclick="openDateTimeModal()">Submit (Manual)</button>
         </div>
     </div>
     
@@ -78,15 +97,12 @@
             <div id="step-area">
                 <div id="page-register" class="page active">
                     <h2>Registration Open</h2><p>The registration system is now ready.</p>
-                    <div class="countdown-container"><span id="countdown"></span></div>
-                    <button class="register" id="registerBtn" disabled>Register</button>
+                    <button class="register" id="registerBtn">Register</button>
                 </div>
                 <div id="page-terms" class="page">
                     <h2>Terms and Conditions</h2>
-                    <div id="cloudflare-simulation">
-                        <div class="spinner"></div>
-                        <span style="margin-left: 15px;">Verifying you are human...</span>
-                    </div>
+                    <p>Simulating Cloudflare Turnstile verification...</p>
+                    <iframe id="turnstile-frame" src="about:blank" data-src="https://challenges.cloudflare.com/turnstile/v0/000/index.html" style="width:300px; height:65px; border:1px solid var(--border-color); border-radius:4px; margin: 15px 0;"></iframe>
                     <div class="checkbox-row" style="justify-content: center; margin: 20px 0;">
                           <input name="acceptTermsAndConditions" type="checkbox" id="terms-checkbox">
                           <label for="terms-checkbox" style="color:white; font-family:var(--font-body);">I accept the terms</label>
@@ -94,7 +110,7 @@
                     <button class="next-btn" id="finalConfirm" type="submit" disabled>Confirm Booking</button>
                 </div>
                 <div id="page-success" class="page">
-                    <h2 style="color: var(--accent-green);">🎉 Booking Success!</h2>
+                    <h2 style="color: var(--accent-green);">🎉 BOOKING SUCCESS!</h2>
                     <div class="summary-info">
                         <h3>Your Booking Details</h3>
                         <p>Branch: <span id="final-summary-branch"></span></p>
@@ -112,21 +128,127 @@
     <script>
         const selections = { branch: null, date: null, time: null };
         let startTime;
-        let unavailableBranches = [];
-        let unavailableTimes = [];
 
-        function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-        function populateUnavailableBranches(branches) { unavailableBranches = []; const numUnavailable = getRandomInt(0, 2); const shuffledBranches = [...branches].sort(() => 0.5 - Math.random()); for (let i = 0; i < numUnavailable; i++) { unavailableBranches.push(shuffledBranches[i]); } }
-        function populateUnavailableTimes(times) { unavailableTimes = []; const numUnavailable = getRandomInt(0, 3); const shuffledTimes = [...times].sort(() => 0.5 - Math.random()); for (let i = 0; i < numUnavailable; i++) { unavailableTimes.push(shuffledTimes[i]); } }
-        function showPage(pageId) { document.querySelectorAll('#step-area .page').forEach(p => p.classList.remove('active')); document.getElementById(pageId)?.classList.add('active'); }
+        function showPage(pageId) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(pageId)?.classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
         function launchConfetti() { if (typeof confetti !== 'function') return; const end = Date.now() + (2 * 1000); (function frame() { confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } }); confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } }); if (Date.now() < end) requestAnimationFrame(frame); }()); }
-        function handleSuccess() { showPage('page-success'); const endTime = new Date(); const elapsedTime = ((endTime - startTime) / 1000).toFixed(2); document.getElementById('final-summary-branch').textContent = selections.branch; document.getElementById('final-summary-date').textContent = selections.date; document.getElementById('final-summary-time').textContent = selections.time; document.getElementById('final-summary-time-taken').textContent = elapsedTime; launchConfetti(); }
-        function resetFlow() { Object.keys(selections).forEach(key => selections[key] = null); showPage('page-register'); startCountdown(); }
-        function handleTermsPage() { showPage('page-terms'); const checkbox = document.querySelector("input[name='acceptTermsAndConditions']"); const nextBtn = document.getElementById("finalConfirm"); const cloudflareSim = document.getElementById("cloudflare-simulation"); nextBtn.disabled = true; checkbox.checked = false; cloudflareSim.style.display = 'none'; checkbox.onchange = () => { if (checkbox.checked) { nextBtn.disabled = true; cloudflareSim.style.display = 'flex'; setTimeout(() => { cloudflareSim.style.display = 'none'; if (checkbox.checked) { nextBtn.disabled = false; } }, 2500); } else { nextBtn.disabled = true; } }; }
-        function openBranchModal() { startTime = new Date(); const modal = document.getElementById("branchModal"); const nextBtn = document.getElementById("branchModalNextBtn"); const list = modal.querySelector("#branchList"); modal.style.display = "flex"; nextBtn.disabled = true; list.innerHTML = ""; const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld", "MEGABANGNA", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai", "ICONSIAM"]; populateUnavailableBranches(branches); branches.forEach(b => { const button = document.createElement("button"); button.className = "branch-item"; button.textContent = b; const isUnavailable = unavailableBranches.includes(b); if (isUnavailable) { button.classList.add("is_full"); button.disabled = true; } else { button.onclick = () => { list.querySelectorAll(".branch-item.selected").forEach(el => el.classList.remove("selected")); button.classList.add("selected"); selections.branch = b; nextBtn.disabled = false; }; } list.appendChild(button); }); nextBtn.onclick = () => { if (selections.branch && !unavailableBranches.includes(selections.branch)) { modal.style.display = "none"; openDateTimeModal(); } }; }
-        function openDateTimeModal() { const modal = document.getElementById("datetimeModal"); const nextBtn = document.getElementById("dateTimeNextBtn"); const dateList = modal.querySelector("#dateList"); const timeList = modal.querySelector("#timeList"); modal.style.display = "flex"; nextBtn.disabled = true; dateList.innerHTML = ""; timeList.innerHTML = ""; const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"]; populateUnavailableTimes(times); const checkDateTimeValid = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { nextBtn.disabled = false; } else { nextBtn.disabled = true; } }; Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => { const button = document.createElement("button"); button.className = "MuiPickersDay-root"; button.textContent = d; button.onclick = () => { dateList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.date = d; selections.time = null; timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); checkDateTimeValid(); }; dateList.appendChild(button); }); times.forEach(t => { const button = document.createElement("button"); button.className = "timeButtons"; button.textContent = t; const isUnavailable = unavailableTimes.includes(t); if (isUnavailable) { button.classList.add("disabledTime"); button.disabled = true; } else { button.onclick = () => { timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.time = t; checkDateTimeValid(); }; } timeList.appendChild(button); }); nextBtn.onclick = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { modal.style.display = "none"; handleTermsPage(); } }; }
-        function startCountdown() { const countdownEl = document.getElementById("countdown"); const registerBtn = document.getElementById("registerBtn"); let secondsLeft = 7; registerBtn.disabled = true; registerBtn.classList.remove('enabled'); const timer = setInterval(() => { if (secondsLeft <= 0) { clearInterval(timer); countdownEl.textContent = "OPEN!"; registerBtn.disabled = false; registerBtn.classList.add('enabled'); } else { countdownEl.textContent = `00:00:0${secondsLeft--}`; } }, 1000); }
+        
+        function handleSuccess() {
+            showPage('page-success');
+            const endTime = new Date();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            document.getElementById('final-summary-branch').textContent = selections.branch;
+            document.getElementById('final-summary-date').textContent = selections.date;
+            document.getElementById('final-summary-time').textContent = selections.time;
+            document.getElementById('final-summary-time-taken').textContent = elapsedTime;
+            launchConfetti();
+        }
+
+        function resetFlow() {
+            Object.keys(selections).forEach(key => selections[key] = null);
+            showPage('page-register');
+        }
+
+        function handleTermsPage() {
+            showPage('page-terms');
+            const checkbox = document.getElementById("terms-checkbox");
+            const nextBtn = document.getElementById("finalConfirm");
+            const turnstileFrame = document.getElementById('turnstile-frame');
+            nextBtn.disabled = true;
+            checkbox.checked = false;
+            turnstileFrame.src = turnstileFrame.dataset.src;
+            checkbox.onchange = () => {
+                nextBtn.disabled = !checkbox.checked;
+            };
+        }
+
+        function openBranchModal() {
+            startTime = new Date();
+            const modal = document.getElementById("branchModal");
+            const nextBtn = document.getElementById("branchModalNextBtn");
+            const list = modal.querySelector("#branchList");
+            modal.style.display = "flex";
+            nextBtn.disabled = true;
+            list.innerHTML = "";
+            const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld"];
+            branches.forEach(b => {
+                const button = document.createElement("button");
+                button.className = "branch-item";
+                button.textContent = b;
+                button.onclick = () => {
+                    list.querySelectorAll(".branch-item.selected").forEach(el => el.classList.remove("selected"));
+                    button.classList.add("selected");
+                    selections.branch = b;
+                    nextBtn.disabled = false;
+                };
+                list.appendChild(button);
+            });
+            nextBtn.onclick = () => {
+                if (selections.branch) {
+                    modal.style.display = "none";
+                    showPage('gameCaptchaPage');
+                    // In a real scenario, the bot would bypass this. For manual test, we wait.
+                    setTimeout(() => {
+                        openAwsCaptchaModal();
+                    }, 2000);
+                }
+            };
+        }
+
+        function openAwsCaptchaModal() {
+             showPage('page-register'); // Hide the game captcha page
+             document.getElementById('awsCaptchaModal').style.display = 'flex';
+        }
+
+        function openDateTimeModal() {
+            closeModal('awsCaptchaModal');
+            const modal = document.getElementById("datetimeModal");
+            const nextBtn = document.getElementById("dateTimeNextBtn");
+            const dateList = modal.querySelector("#dateList");
+            const timeList = modal.querySelector("#timeList");
+            modal.style.display = "flex";
+            nextBtn.disabled = true;
+            dateList.innerHTML = "";
+            timeList.innerHTML = "";
+            const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30"];
+            const checkDateTimeValid = () => {
+                if (selections.date && selections.time) nextBtn.disabled = false;
+                else nextBtn.disabled = true;
+            };
+            Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => {
+                const button = document.createElement("button");
+                button.className = "MuiPickersDay-root";
+                button.textContent = d;
+                button.onclick = () => {
+                    dateList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked"));
+                    button.classList.add("clicked");
+                    selections.date = d;
+                    selections.time = null;
+                    timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked"));
+                    checkDateTimeValid();
+                };
+                dateList.appendChild(button);
+            });
+            times.forEach(t => {
+                const button = document.createElement("button");
+                button.className = "timeButtons";
+                button.textContent = t;
+                button.onclick = () => {
+                    timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked"));
+                    button.classList.add("clicked");
+                    selections.time = t;
+                    checkDateTimeValid();
+                };
+                timeList.appendChild(button);
+            });
+            nextBtn.onclick = () => {
+                if (selections.date && selections.time) {
+                    modal.style.display = "none";
+                    handleTermsPage();
+                }
+            };
+        }
+
         function initializePage() {
             const checkBot = () => {
                 if (document.body.dataset.dpbotEnabled === 'true') {
@@ -140,9 +262,17 @@
             };
             setTimeout(checkBot, 200);
         }
+
         document.getElementById("registerBtn").addEventListener("click", openBranchModal);
         document.getElementById("finalConfirm").addEventListener("click", handleSuccess);
         document.getElementById("resetBtn").addEventListener("click", resetFlow);
+        
+        document.getElementById("fakeLineLoginBtn").addEventListener("click", () => {
+            const expiryTime = new Date().getTime() + (24 * 60 * 60 * 1000); // Expires in 24 hours
+            document.cookie = `LIFF_STORE:expires:12345=${expiryTime};path=/`;
+            alert('Simulated LINE Login. Cookie set for 24 hours.');
+        });
+
         document.addEventListener("DOMContentLoaded", initializePage);
     </script>
 </body>
