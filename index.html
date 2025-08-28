@@ -195,7 +195,8 @@
             const ctx = canvas.getContext('2d');
             
             let isDragging = false, rotationX = 0, rotationY = 0, lastMouseX = 0, lastMouseY = 0;
-            const targetRotationX = 0, targetRotationY = 0; 
+            const targetRotationX = 0; 
+            const targetRotationY = 0;
             const rotationThreshold = 0.95; 
             const rotationSensitivity = 0.01; 
 
@@ -210,35 +211,38 @@
 
             function draw() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                // --- Background Sphere ---
+
                 const centerX = canvas.width / 2;
                 const centerY = canvas.height / 2;
                 const radius = Math.min(canvas.width, canvas.height) / 2 - 20;
                 
-                const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
-                gradient.addColorStop(0, '#2d3436');
-                gradient.addColorStop(1, '#0a0f18');
+                const gradX = centerX + Math.sin(rotationY) * 50;
+                const gradY = centerY + Math.sin(rotationX) * 50;
+                const gradient = ctx.createRadialGradient(gradX, gradY, 0, centerX, centerY, radius);
+                gradient.addColorStop(0, '#4a5568');
+                gradient.addColorStop(1, '#1a202c');
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
                 ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
                 ctx.fill();
 
-                // --- Icon/Text (The moving part) ---
                 ctx.save();
                 ctx.translate(centerX, centerY);
 
-                const currentDiff = Math.abs(rotationX - targetRotationX) + Math.abs(rotationY - targetRotationY);
-                const progress = 1 - Math.min(currentDiff / (Math.PI * 2), 1);
+                const diffX = Math.abs(rotationX - targetRotationX);
+                const diffY = Math.abs(rotationY - targetRotationY);
+                const progress = 1 - Math.min((diffX + diffY) / (Math.PI * 1.5), 1);
                 const opacity = 0.3 + (progress * 0.7);
 
-                const isBackface = Math.abs(rotationY % (2 * Math.PI)) > Math.PI / 2 && Math.abs(rotationY % (2 * Math.PI)) < 3 * Math.PI / 2;
-
+                const isBackface = Math.abs(rotationY % (2*Math.PI)) > Math.PI / 2 && Math.abs(rotationY % (2*Math.PI)) < 3 * Math.PI / 2;
+                
+                ctx.rotate(rotationY); 
+                
                 if (isBackface) {
                     ctx.save();
-                    ctx.scale(-1, 1); // Flip horizontally
-                    ctx.rotate(-rotationX); // Apply vertical rotation on the flipped face
-                    ctx.font = 'bold 30px Orbitron';
+                    ctx.scale(-1, 1);
+                    ctx.rotate(-rotationX);
+                    ctx.font = 'bold 40px Orbitron';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillStyle = `rgba(224, 230, 240, 0.7)`;
@@ -246,9 +250,9 @@
                     ctx.restore();
                 } else {
                      if (iconImage) {
-                        const imgSize = radius * 1.2;
+                        const imgSize = radius * 1.4;
                         ctx.globalAlpha = opacity;
-                        ctx.rotate(rotationX); // Apply vertical rotation
+                        ctx.rotate(rotationX);
                         ctx.drawImage(iconImage, -imgSize / 2, -imgSize / 2, imgSize, imgSize);
                         ctx.globalAlpha = 1;
                     } else {
@@ -273,7 +277,8 @@
 
             function resetCaptcha() {
                 isDragging = false;
-                rotationX = 0; rotationY = 0;
+                rotationX = (Math.random() - 0.5) * Math.PI; // Random initial X rotation
+                rotationY = (Math.random() - 0.5) * Math.PI * 2; // Random initial Y rotation
                 status.textContent = "ลากเมาส์บนรูปภาพเพื่อหมุน";
                 status.style.color = 'var(--text-muted)';
                 draw();
@@ -285,7 +290,6 @@
                 lastMouseY = e.clientY;
                 canvas.style.cursor = 'grabbing';
             };
-
             canvas.onmouseup = () => {
                 if (isDragging) {
                     canvas.style.cursor = 'grab';
@@ -300,12 +304,10 @@
                     } else {
                         status.textContent = "Incorrect. Please try again.";
                         status.style.color = 'var(--accent-danger)';
-                        setTimeout(resetCaptcha, 1500);
                     }
                 }
                 isDragging = false;
             };
-
             canvas.onmousemove = (e) => {
                 if (isDragging) {
                     const deltaX = e.clientX - lastMouseX;
@@ -317,7 +319,6 @@
                     draw();
                 }
             };
-
             canvas.onmouseleave = () => { if(isDragging) canvas.onmouseup(); };
             retryBtn.onclick = resetCaptcha;
             
