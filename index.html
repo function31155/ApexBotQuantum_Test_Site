@@ -49,7 +49,7 @@
         #captcha3dModal .modal-title { color: #00e0ff; font-size: 28px; text-shadow: 0 0 12px rgba(0, 224, 255, 0.8); margin-bottom: 10px; }
         #captcha3dModal .modal-content > p { font-size: 16px; color: #b0c4de; margin-bottom: 25px; text-align: center; }
         #captcha3dModal .modal-content > .sub-instruction { font-size: 13px; color: #88a0c0; margin-top: -15px; margin-bottom: 20px; line-height: 1.4; }
-        #captchaCanvas { background: transparent; border-radius: 10px; margin-bottom: 20px; width: 300px; height: 200px; display: block; margin-left: auto; margin-right: auto; }
+        #captchaCanvas { background: linear-gradient(145deg, #2d3436, #1d2127); border: 2px solid #00bfff; box-shadow: 0 0 15px rgba(0, 191, 255, 0.6), inset 0 0 8px rgba(0, 191, 255, 0.3); border-radius: 10px; margin-bottom: 20px; width: 300px; height: 200px; display: block; margin-left: auto; margin-right: auto; }
         #captchaStatus { font-size: 15px; font-weight: bold; height: 25px; margin-bottom: 20px; color: #ff9800; }
         .captcha-actions { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
         .captcha-actions button { background-color: #334155; color: #e0e6f0; padding: 10px 20px; border-radius: 6px; border: 1px solid rgba(0, 191, 255, 0.4); font-size: 15px; transition: all 0.2s ease; }
@@ -75,8 +75,8 @@
     <div id="captcha3dModal" class="modal">
         <div class="modal-content" style="text-align: center;">
             <span class="modal-title">3D Security Verification</span>
-            <p>หมุนกล่องให้ด้านที่มีรูปไอคอนหันหน้าเข้าหาคุณ</p>
-            <p class="sub-instruction">ใช้เมาส์หมุนกล่อง เมื่อด้านที่มีรูปภาพหันเข้าหาคุณโดยตรง ภาพจะสว่างขึ้นที่ความแม่นยำ 95%</p>
+            <p>หมุนภาพตัวละครให้หันหน้าเข้าหาตัวเอง</p>
+            <p class="sub-instruction">ใช้เมาส์หมุนมุมมองรูปภาพตัวละครด้านหน้าจะหันเข้าหาคุณโดยตรง ภาพจะสว่างขึ้นเมื่อวางแนวถูกต้องที่ความแม่นยำ 95%</p>
             <canvas id="captchaCanvas" width="300" height="200" style="cursor: grab;"></canvas>
             <p id="captchaStatus" style="height: 20px;"></p>
             <div class="captcha-actions">
@@ -194,25 +194,17 @@
             const retryBtn = document.getElementById("retryCaptchaBtn");
             const ctx = canvas.getContext('2d');
             
-            let isDragging = false, 
-                rotationX = 0, 
-                rotationY = 0, 
-                lastMouseX = 0, 
-                lastMouseY = 0;
-            
-            // Target rotation for the front face to be visible
+            let isDragging = false, rotationX = 0, rotationY = 0, lastMouseX = 0, lastMouseY = 0;
             const targetRotationX = 0; 
-            const targetRotationY = 0; // The front face is at Y=0
-
-            const rotationThreshold = 0.95; // 95% accuracy
+            const targetRotationY = 0;
+            const rotationThreshold = 0.95; 
             const rotationSensitivity = 0.01;
-            const cubeSize = 80; // Size of the cube faces
 
             if (!iconImage) {
                 iconImage = new Image();
                 iconImage.src = 'icon.png';
                 iconImage.onload = resetCaptcha;
-                iconImage.onerror = () => { iconImage = null; resetCaptcha(); }; // Fallback if image fails
+                iconImage.onerror = () => { iconImage = null; resetCaptcha(); };
             } else {
                 resetCaptcha();
             }
@@ -222,141 +214,72 @@
 
                 const centerX = canvas.width / 2;
                 const centerY = canvas.height / 2;
-
-                // --- Background glow/gradient (dynamic based on rotation) ---
-                const gradRadius = Math.max(canvas.width, canvas.height) / 2;
-                const gradX = centerX + Math.sin(rotationY) * 30; // Slight movement
-                const gradY = centerY + Math.sin(rotationX) * 30; // Slight movement
-                const gradient = ctx.createRadialGradient(gradX, gradY, 0, centerX, centerY, gradRadius);
-                gradient.addColorStop(0, 'rgba(74, 85, 104, 0.2)'); // Lighter center
-                gradient.addColorStop(1, 'rgba(26, 32, 44, 0.8)'); // Darker edges
+                const radius = Math.min(canvas.width, canvas.height) / 2 - 20;
+                
+                const gradX = centerX + Math.sin(rotationY) * 50;
+                const gradY = centerY + Math.sin(rotationX) * 50;
+                const gradient = ctx.createRadialGradient(gradX, gradY, 0, centerX, centerY, radius);
+                gradient.addColorStop(0, '#4a5568');
+                gradient.addColorStop(1, '#1a202c');
                 ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                ctx.fill();
 
-
-                // --- Cube Projection (Simplified) ---
                 ctx.save();
                 ctx.translate(centerX, centerY);
 
-                // Apply overall rotation
-                ctx.rotate(rotationY); // Y-axis rotation first
-                ctx.rotate(rotationX); // X-axis rotation second
+                const diffX = Math.abs(rotationX - targetRotationX);
+                const diffY = Math.abs(rotationY - targetRotationY);
+                const progress = 1 - Math.min((diffX + diffY) / (Math.PI * 1.5), 1);
+                const opacity = 0.3 + (progress * 0.7);
 
-                // Define cube vertices (simplified for 2D projection drawing)
-                const vertices = [
-                    [-cubeSize, -cubeSize, -cubeSize], // 0: back-top-left
-                    [ cubeSize, -cubeSize, -cubeSize], // 1: back-top-right
-                    [-cubeSize,  cubeSize, -cubeSize], // 2: back-bottom-left
-                    [ cubeSize,  cubeSize, -cubeSize], // 3: back-bottom-right
-                    [-cubeSize, -cubeSize,  cubeSize], // 4: front-top-left
-                    [ cubeSize, -cubeSize,  cubeSize], // 5: front-top-right
-                    [-cubeSize,  cubeSize,  cubeSize], // 6: front-bottom-left
-                    [ cubeSize,  cubeSize,  cubeSize]  // 7: front-bottom-right
-                ];
-
-                // Faces (defines which vertices make up each face)
-                const faces = [
-                    { indices: [4, 5, 7, 6], color: '#63b3ed', text: 'Front', image: iconImage }, // Front face (with icon)
-                    { indices: [5, 1, 3, 7], color: '#4299e1', text: 'Right' }, // Right face
-                    { indices: [0, 4, 6, 2], color: '#4299e1', text: 'Left' },  // Left face
-                    { indices: [1, 0, 2, 3], color: '#2b6cb0', text: 'Back' }   // Back face
-                    // You can add top and bottom if needed
-                ];
-
-                const drawFace = (face, zIndex) => {
-                    ctx.beginPath();
-                    // Draw face using projected vertices
-                    const p0 = vertices[face.indices[0]];
-                    ctx.moveTo(p0[0], p0[1]);
-                    for (let i = 1; i < face.indices.length; i++) {
-                        const p = vertices[face.indices[i]];
-                        ctx.lineTo(p[0], p[1]);
-                    }
-                    ctx.closePath();
-
-                    // Calculate opacity based on angle to target face
-                    let currentAngleY = rotationY % (2 * Math.PI);
-                    if (currentAngleY < 0) currentAngleY += 2 * Math.PI;
-
-                    let faceAngleOffset = 0; // Front face is at 0 degrees
-                    if (face.text === 'Right') faceAngleOffset = Math.PI / 2;
-                    else if (face.text === 'Back') faceAngleOffset = Math.PI;
-                    else if (face.text === 'Left') faceAngleOffset = 3 * Math.PI / 2;
-
-                    const angleDiff = Math.abs(normalizeAngle(currentAngleY - faceAngleOffset));
-                    
-                    let opacityFactor = 1 - (angleDiff / (Math.PI / 2)); // Stronger falloff
-                    opacityFactor = Math.max(0.1, Math.min(1, opacityFactor)); // Clamp between 0.1 and 1
-
-                    // Adjust opacity when rotating vertically
-                    const verticalOpacityFactor = Math.cos(rotationX);
-                    opacityFactor *= Math.max(0.3, Math.abs(verticalOpacityFactor)); // Prevent fully disappearing
-
-                    ctx.fillStyle = `rgba(66, 153, 225, ${opacityFactor})`; // Use a base color with dynamic opacity
-                    ctx.fill();
-                    ctx.strokeStyle = `rgba(0, 191, 255, ${opacityFactor * 0.8})`; // Border with dynamic opacity
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-
-                    // Draw image/text on the face
-                    if (face.image && face.text === 'Front') {
-                        ctx.save();
-                        ctx.globalAlpha = opacityFactor; // Apply opacity to image
-                        ctx.drawImage(face.image, -cubeSize + 5, -cubeSize + 5, cubeSize * 2 - 10, cubeSize * 2 - 10);
-                        ctx.restore();
-                    } else if (face.text) {
-                        ctx.save();
-                        ctx.globalAlpha = opacityFactor; // Apply opacity to text
-                        ctx.font = 'bold 20px Orbitron';
+                const isBackface = Math.abs(rotationY % (2*Math.PI)) > Math.PI / 2 && Math.abs(rotationY % (2*Math.PI)) < 3 * Math.PI / 2;
+                
+                ctx.rotate(rotationY); 
+                
+                if (isBackface) {
+                    ctx.save();
+                    ctx.scale(-1, 1);
+                    ctx.rotate(-rotationX);
+                    ctx.font = 'bold 40px Orbitron';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = `rgba(224, 230, 240, 0.7)`;
+                    ctx.fillText('ApexBot', 0, 0);
+                    ctx.restore();
+                } else {
+                     if (iconImage) {
+                        const imgSize = radius * 1.4;
+                        ctx.globalAlpha = opacity;
+                        ctx.rotate(rotationX);
+                        ctx.drawImage(iconImage, -imgSize / 2, -imgSize / 2, imgSize, imgSize);
+                        ctx.globalAlpha = 1;
+                    } else {
+                        ctx.rotate(rotationX);
+                        ctx.font = 'bold 80px Orbitron';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
-                        ctx.fillStyle = `rgba(224, 230, 240, ${opacityFactor})`;
-                        // ctx.fillText(face.text, 0, 0); // For debugging, show face name
-                        ctx.restore();
+                        ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
+                        ctx.fillText('ICON', 0, 0);
                     }
-                };
-
-                // Sort faces by Z-index (distance from viewer) for proper drawing order
-                // This is a simplified Z-sorting for a cube, assuming orthogonal projection
-                faces.sort((a, b) => {
-                    const avgZA = (vertices[a.indices[0]][2] + vertices[a.indices[1]][2] + vertices[a.indices[2]][2] + vertices[a.indices[3]][2]) / 4;
-                    const avgZB = (vertices[b.indices[0]][2] + vertices[b.indices[1]][2] + vertices[b.indices[2]][2] + vertices[b.indices[3]][2]) / 4;
-                    return avgZA - avgZB;
-                });
-
-                faces.forEach(face => drawFace(face));
-
+                }
                 ctx.restore();
             };
-
-            // Normalize angle to be between 0 and 2*PI
-            function normalizeAngle(angle) {
-                return (angle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-            }
             
             function checkCompletion() {
-                const normalizedRotationX = normalizeAngle(rotationX);
-                const normalizedRotationY = normalizeAngle(rotationY);
-                
-                // For Y-axis, we want it near 0 or 2*PI (front face)
-                const diffY = Math.min(Math.abs(normalizedRotationY - targetRotationY), Math.abs(normalizedRotationY - (targetRotationY + 2 * Math.PI)));
-                
-                // For X-axis, we want it near 0 or PI (not upside down)
-                const diffX = Math.min(Math.abs(normalizedRotationX - targetRotationX), Math.abs(normalizedRotationX - (targetRotationX + Math.PI))); // Allow some tilt
-
+                const diffX = Math.abs(rotationX - targetRotationX);
+                const diffY = Math.abs(rotationY - targetRotationY);
                 const totalDiff = (diffX + diffY) / 2;
-                const thresholdRad = (1 - rotationThreshold) * (Math.PI / 4); // Convert percentage to radians
-                
+                const thresholdRad = (1 - rotationThreshold) * (Math.PI / 4);
                 return totalDiff < thresholdRad;
             };
 
             function resetCaptcha() {
                 isDragging = false;
-                // Random initial X rotation: -90 to +90 degrees (prevents starting upside down)
-                rotationX = (Math.random() * (Math.PI / 2)) - (Math.PI / 4); 
-                // Random initial Y rotation: 0 to 360 degrees
-                rotationY = Math.random() * Math.PI * 2; 
-                status.textContent = "ลากเมาส์บนกล่องเพื่อหมุน";
+                rotationX = (Math.random() - 0.5) * Math.PI; 
+                rotationY = (Math.random() - 0.5) * Math.PI * 2; 
+                status.textContent = "ลากเมาส์บนรูปภาพเพื่อหมุน";
                 status.style.color = 'var(--text-muted)';
                 draw();
             };
@@ -373,7 +296,7 @@
                     if (checkCompletion()) {
                         status.textContent = "รอ 2 วินาที...";
                         status.style.color = 'var(--accent-green)';
-                        draw(); // Redraw with higher opacity
+                        draw();
                         setTimeout(() => {
                             closeModal('captcha3dModal');
                             openDateTimeModal();
@@ -391,10 +314,6 @@
                     const deltaY = e.clientY - lastMouseY;
                     rotationY += deltaX * rotationSensitivity;
                     rotationX -= deltaY * rotationSensitivity;
-                    
-                    // Clamp X rotation to prevent flipping over completely (makes it easier to solve)
-                    rotationX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotationX)); 
-
                     lastMouseX = e.clientX;
                     lastMouseY = e.clientY;
                     draw();
