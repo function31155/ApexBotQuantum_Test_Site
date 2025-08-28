@@ -62,6 +62,15 @@
         </div>
     </div>
     
+    <div id="captcha3dModal" class="modal">
+        <div class="modal-content" style="text-align: center;">
+            <span class="modal-title">3D Security Verification</span>
+            <p>หมุนภาพตัวละครให้หันหน้าเข้าหาตัวเอง</p>
+            <canvas id="captchaCanvas" width="300" height="200" style="background: #2d3436; border-radius: 8px; cursor: move;"></canvas>
+            <p id="captchaStatus" style="color: var(--accent-danger); height: 20px;"></p>
+        </div>
+    </div>
+    
     <div id="datetimeModal" class="modal">
         <div class="modal-content">
             <span class="modal-title">Select Date & Time</span><span class="close" onclick="closeModal('datetimeModal')">×</span>
@@ -88,8 +97,8 @@
                         <span style="margin-left: 15px;">Verifying you are human...</span>
                     </div>
                     <div class="checkbox-row" style="justify-content: center; margin: 20px 0;">
-                          <input name="acceptTermsAndConditions" type="checkbox" id="terms-checkbox">
-                          <label for="terms-checkbox" style="color:white; font-family:var(--font-body);">I accept the terms</label>
+                        <input name="acceptTermsAndConditions" type="checkbox" id="terms-checkbox">
+                        <label for="terms-checkbox" style="color:white; font-family:var(--font-body);">I accept the terms</label>
                     </div>
                     <button class="next-btn" id="finalConfirm" type="submit" disabled>Confirm Booking</button>
                 </div>
@@ -112,21 +121,170 @@
     <script>
         const selections = { branch: null, date: null, time: null };
         let startTime;
-        let unavailableBranches = [];
-        let unavailableTimes = [];
 
-        function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-        function populateUnavailableBranches(branches) { unavailableBranches = []; const numUnavailable = getRandomInt(0, 2); const shuffledBranches = [...branches].sort(() => 0.5 - Math.random()); for (let i = 0; i < numUnavailable; i++) { unavailableBranches.push(shuffledBranches[i]); } }
-        function populateUnavailableTimes(times) { unavailableTimes = []; const numUnavailable = getRandomInt(0, 3); const shuffledTimes = [...times].sort(() => 0.5 - Math.random()); for (let i = 0; i < numUnavailable; i++) { unavailableTimes.push(shuffledTimes[i]); } }
+        // --- Basic Functions ---
         function showPage(pageId) { document.querySelectorAll('#step-area .page').forEach(p => p.classList.remove('active')); document.getElementById(pageId)?.classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
         function launchConfetti() { if (typeof confetti !== 'function') return; const end = Date.now() + (2 * 1000); (function frame() { confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } }); confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } }); if (Date.now() < end) requestAnimationFrame(frame); }()); }
         function handleSuccess() { showPage('page-success'); const endTime = new Date(); const elapsedTime = ((endTime - startTime) / 1000).toFixed(2); document.getElementById('final-summary-branch').textContent = selections.branch; document.getElementById('final-summary-date').textContent = selections.date; document.getElementById('final-summary-time').textContent = selections.time; document.getElementById('final-summary-time-taken').textContent = elapsedTime; launchConfetti(); }
         function resetFlow() { Object.keys(selections).forEach(key => selections[key] = null); showPage('page-register'); startCountdown(); }
         function handleTermsPage() { showPage('page-terms'); const checkbox = document.querySelector("input[name='acceptTermsAndConditions']"); const nextBtn = document.getElementById("finalConfirm"); const cloudflareSim = document.getElementById("cloudflare-simulation"); nextBtn.disabled = true; checkbox.checked = false; cloudflareSim.style.display = 'none'; checkbox.onchange = () => { if (checkbox.checked) { nextBtn.disabled = true; cloudflareSim.style.display = 'flex'; setTimeout(() => { cloudflareSim.style.display = 'none'; if (checkbox.checked) { nextBtn.disabled = false; } }, 2500); } else { nextBtn.disabled = true; } }; }
-        function openBranchModal() { startTime = new Date(); const modal = document.getElementById("branchModal"); const nextBtn = document.getElementById("branchModalNextBtn"); const list = modal.querySelector("#branchList"); modal.style.display = "flex"; nextBtn.disabled = true; list.innerHTML = ""; const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld", "MEGABANGNA", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai", "ICONSIAM"]; populateUnavailableBranches(branches); branches.forEach(b => { const button = document.createElement("button"); button.className = "branch-item"; button.textContent = b; const isUnavailable = unavailableBranches.includes(b); if (isUnavailable) { button.classList.add("is_full"); button.disabled = true; } else { button.onclick = () => { list.querySelectorAll(".branch-item.selected").forEach(el => el.classList.remove("selected")); button.classList.add("selected"); selections.branch = b; nextBtn.disabled = false; }; } list.appendChild(button); }); nextBtn.onclick = () => { if (selections.branch && !unavailableBranches.includes(selections.branch)) { modal.style.display = "none"; openDateTimeModal(); } }; }
-        function openDateTimeModal() { const modal = document.getElementById("datetimeModal"); const nextBtn = document.getElementById("dateTimeNextBtn"); const dateList = modal.querySelector("#dateList"); const timeList = modal.querySelector("#timeList"); modal.style.display = "flex"; nextBtn.disabled = true; dateList.innerHTML = ""; timeList.innerHTML = ""; const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"]; populateUnavailableTimes(times); const checkDateTimeValid = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { nextBtn.disabled = false; } else { nextBtn.disabled = true; } }; Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => { const button = document.createElement("button"); button.className = "MuiPickersDay-root"; button.textContent = d; button.onclick = () => { dateList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.date = d; selections.time = null; timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); checkDateTimeValid(); }; dateList.appendChild(button); }); times.forEach(t => { const button = document.createElement("button"); button.className = "timeButtons"; button.textContent = t; const isUnavailable = unavailableTimes.includes(t); if (isUnavailable) { button.classList.add("disabledTime"); button.disabled = true; } else { button.onclick = () => { timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.time = t; checkDateTimeValid(); }; } timeList.appendChild(button); }); nextBtn.onclick = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { modal.style.display = "none"; handleTermsPage(); } }; }
         function startCountdown() { const countdownEl = document.getElementById("countdown"); const registerBtn = document.getElementById("registerBtn"); let secondsLeft = 7; registerBtn.disabled = true; registerBtn.classList.remove('enabled'); const timer = setInterval(() => { if (secondsLeft <= 0) { clearInterval(timer); countdownEl.textContent = "OPEN!"; registerBtn.disabled = false; registerBtn.classList.add('enabled'); } else { countdownEl.textContent = `00:00:0${secondsLeft--}`; } }, 1000); }
+
+        // --- Modal Functions ---
+        function openBranchModal() {
+            startTime = new Date();
+            const modal = document.getElementById("branchModal");
+            const nextBtn = document.getElementById("branchModalNextBtn");
+            const list = modal.querySelector("#branchList");
+            modal.style.display = "flex";
+            nextBtn.disabled = true;
+            list.innerHTML = "";
+            const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld", "MEGABANGNA", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai", "ICONSIAM"];
+            
+            const unavailableBranches = []; 
+            const numUnavailable = Math.floor(Math.random() * 3);
+            const shuffledBranches = [...branches].sort(() => 0.5 - Math.random());
+            for (let i = 0; i < numUnavailable; i++) { unavailableBranches.push(shuffledBranches[i]); }
+
+            branches.forEach(b => {
+                const button = document.createElement("button");
+                button.className = "branch-item";
+                button.textContent = b;
+                if (unavailableBranches.includes(b)) { button.classList.add("is_full"); button.disabled = true; } else {
+                    button.onclick = () => {
+                        list.querySelectorAll(".branch-item.selected").forEach(el => el.classList.remove("selected"));
+                        button.classList.add("selected");
+                        selections.branch = b;
+                        nextBtn.disabled = false;
+                    };
+                }
+                list.appendChild(button);
+            });
+
+            nextBtn.onclick = () => {
+                if (selections.branch) {
+                    modal.style.display = "none";
+                    // Check for Bypass Mode by detecting the effect of the replaced script
+                    if (window.AwsWafCaptcha && typeof window.AwsWafCaptcha.renderCaptcha === 'function') {
+                        console.log("Bypass Mode DETECTED by test site! Skipping 3D Captcha.");
+                        openDateTimeModal();
+                    } else {
+                        console.log("Normal Mode DETECTED by test site. Opening 3D Captcha.");
+                        openCaptcha3dModal();
+                    }
+                }
+            };
+        }
+
+        function openCaptcha3dModal() {
+            const modal = document.getElementById("captcha3dModal");
+            const canvas = document.getElementById("captchaCanvas");
+            const status = document.getElementById("captchaStatus");
+            const ctx = canvas.getContext('2d');
+            let isDragging = false;
+            let dragDistance = 0;
+
+            const draw = (progress) => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#2d3436';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.font = 'bold 80px Orbitron';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const opacity = 0.2 + (progress * 0.8);
+                ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
+                ctx.save();
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                const rotation = -Math.PI / 4 + (progress * Math.PI / 4);
+                ctx.rotate(rotation);
+                ctx.fillText('🤖', 0, 0);
+                ctx.restore();
+            };
+
+            const resetCaptcha = () => {
+                isDragging = false;
+                dragDistance = 0;
+                status.textContent = "ลากเมาส์บนรูปภาพเพื่อหมุน";
+                status.style.color = 'var(--text-muted)';
+                draw(0);
+            };
+
+            canvas.onmousedown = () => { isDragging = true; };
+            canvas.onmouseup = () => {
+                if (isDragging && dragDistance > 150) { // Drag distance threshold
+                    status.textContent = "Success! รอ 2 วินาที...";
+                    status.style.color = 'var(--accent-green)';
+                    draw(1);
+                    setTimeout(() => {
+                        closeModal('captcha3dModal');
+                        openDateTimeModal();
+                    }, 2000);
+                } else {
+                    status.textContent = "Incorrect. Please try again.";
+                    status.style.color = 'var(--accent-danger)';
+                    setTimeout(resetCaptcha, 1500);
+                }
+                isDragging = false;
+            };
+            canvas.onmousemove = (e) => { if (isDragging) { dragDistance += Math.abs(e.movementX) + Math.abs(e.movementY); const progress = Math.min(dragDistance / 150, 1); draw(progress); } };
+            canvas.onmouseleave = () => { if(isDragging) canvas.onmouseup(); };
+
+            modal.style.display = "flex";
+            resetCaptcha();
+        }
+
+        function openDateTimeModal() {
+            const modal = document.getElementById("datetimeModal");
+            const nextBtn = document.getElementById("dateTimeNextBtn");
+            const dateList = modal.querySelector("#dateList");
+            const timeList = modal.querySelector("#timeList");
+            modal.style.display = "flex";
+            nextBtn.disabled = true;
+            dateList.innerHTML = "";
+            timeList.innerHTML = "";
+            const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"];
+            
+            const unavailableTimes = [];
+            const numUnavailableTimes = Math.floor(Math.random() * 4);
+            const shuffledTimes = [...times].sort(() => 0.5 - Math.random());
+            for (let i = 0; i < numUnavailableTimes; i++) { unavailableTimes.push(shuffledTimes[i]); }
+
+            const checkDateTimeValid = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { nextBtn.disabled = false; } else { nextBtn.disabled = true; } };
+            
+            Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => {
+                const button = document.createElement("button");
+                button.className = "MuiPickersDay-root";
+                button.textContent = d;
+                button.onclick = () => {
+                    dateList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked"));
+                    button.classList.add("clicked");
+                    selections.date = d;
+                    selections.time = null;
+                    timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked"));
+                    checkDateTimeValid();
+                };
+                dateList.appendChild(button);
+            });
+
+            times.forEach(t => {
+                const button = document.createElement("button");
+                button.className = "timeButtons";
+                button.textContent = t;
+                if (unavailableTimes.includes(t)) { button.classList.add("disabledTime"); button.disabled = true; } else {
+                    button.onclick = () => {
+                        timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked"));
+                        button.classList.add("clicked");
+                        selections.time = t;
+                        checkDateTimeValid();
+                    };
+                }
+                timeList.appendChild(button);
+            });
+            nextBtn.onclick = () => { if (selections.date && selections.time) { modal.style.display = "none"; handleTermsPage(); } };
+        }
+
+        // --- Initialization ---
         function initializePage() {
             const checkBot = () => {
                 if (document.body.dataset.dpbotEnabled === 'true') {
@@ -140,6 +298,7 @@
             };
             setTimeout(checkBot, 200);
         }
+
         document.getElementById("registerBtn").addEventListener("click", openBranchModal);
         document.getElementById("finalConfirm").addEventListener("click", handleSuccess);
         document.getElementById("resetBtn").addEventListener("click", resetFlow);
