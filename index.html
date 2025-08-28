@@ -49,7 +49,7 @@
         #captcha3dModal .modal-title { color: #00e0ff; font-size: 28px; text-shadow: 0 0 12px rgba(0, 224, 255, 0.8); margin-bottom: 10px; }
         #captcha3dModal .modal-content > p { font-size: 16px; color: #b0c4de; margin-bottom: 25px; text-align: center; }
         #captcha3dModal .modal-content > .sub-instruction { font-size: 13px; color: #88a0c0; margin-top: -15px; margin-bottom: 20px; line-height: 1.4; }
-        #captchaCanvas { background: transparent; border-radius: 10px; margin-bottom: 20px; width: 300px; height: 200px; display: block; margin-left: auto; margin-right: auto; }
+        #captchaCanvas { background: linear-gradient(145deg, #2d3436, #1d2127); border: 2px solid #00bfff; box-shadow: 0 0 15px rgba(0, 191, 255, 0.6), inset 0 0 8px rgba(0, 191, 255, 0.3); border-radius: 10px; margin-bottom: 20px; width: 300px; height: 200px; display: block; margin-left: auto; margin-right: auto; }
         #captchaStatus { font-size: 15px; font-weight: bold; height: 25px; margin-bottom: 20px; color: #ff9800; }
         .captcha-actions { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
         .captcha-actions button { background-color: #334155; color: #e0e6f0; padding: 10px 20px; border-radius: 6px; border: 1px solid rgba(0, 191, 255, 0.4); font-size: 15px; transition: all 0.2s ease; }
@@ -194,109 +194,45 @@
             const retryBtn = document.getElementById("retryCaptchaBtn");
             const ctx = canvas.getContext('2d');
             
-            let isDragging = false, rotationX = 0, rotationY = 0, lastMouseX = 0, lastMouseY = 0;
-            const targetRotationX = 0; 
-            const targetRotationY = 0;
-            const rotationThreshold = 0.95; 
-            const rotationSensitivity = 0.01;
+            let isDragging = false, dragDistanceY = 0, lastMouseY = 0;
 
-            if (!iconImage) {
-                iconImage = new Image();
-                iconImage.src = 'icon.png';
-                iconImage.onload = resetCaptcha;
-                iconImage.onerror = () => { iconImage = null; resetCaptcha(); };
-            } else {
-                resetCaptcha();
-            }
-
-            function draw() {
+            const draw = (progress) => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                const centerX = canvas.width / 2;
-                const centerY = canvas.height / 2;
-                const radius = Math.min(canvas.width, canvas.height) / 2 - 20;
-                
-                const gradX = centerX + Math.sin(rotationY) * 50;
-                const gradY = centerY + Math.sin(rotationX) * 50;
-                const gradient = ctx.createRadialGradient(gradX, gradY, 0, centerX, centerY, radius);
-                gradient.addColorStop(0, '#4a5568');
-                gradient.addColorStop(1, '#1a202c');
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-                ctx.fill();
-
+                ctx.fillStyle = '#2d3436';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.font = 'bold 80px Orbitron';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const opacity = 0.2 + (progress * 0.8);
+                ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
                 ctx.save();
-                ctx.translate(centerX, centerY);
-
-                const diffX = Math.abs(rotationX - targetRotationX);
-                const diffY = Math.abs(rotationY - targetRotationY);
-                const progress = 1 - Math.min((diffX + diffY) / (Math.PI * 1.5), 1);
-                const opacity = 0.3 + (progress * 0.7);
-
-                const isBackface = Math.abs(rotationY % (2*Math.PI)) > Math.PI / 2 && Math.abs(rotationY % (2*Math.PI)) < 3 * Math.PI / 2;
-                
-                ctx.rotate(rotationY); 
-                
-                if (isBackface) {
-                    ctx.save();
-                    ctx.scale(-1, 1);
-                    ctx.rotate(-rotationX);
-                    ctx.font = 'bold 40px Orbitron';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillStyle = `rgba(224, 230, 240, 0.7)`;
-                    ctx.fillText('ApexBot', 0, 0);
-                    ctx.restore();
-                } else {
-                     if (iconImage) {
-                        const imgSize = radius * 1.4;
-                        ctx.globalAlpha = opacity;
-                        ctx.rotate(rotationX);
-                        ctx.drawImage(iconImage, -imgSize / 2, -imgSize / 2, imgSize, imgSize);
-                        ctx.globalAlpha = 1;
-                    } else {
-                        ctx.rotate(rotationX);
-                        ctx.font = 'bold 80px Orbitron';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
-                        ctx.fillText('ICON', 0, 0);
-                    }
-                }
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                const rotation = -Math.PI / 4 + (progress * Math.PI / 4);
+                ctx.rotate(rotation);
+                ctx.fillText('🤖', 0, 0);
                 ctx.restore();
             };
-            
-            function checkCompletion() {
-                const diffX = Math.abs(rotationX - targetRotationX);
-                const diffY = Math.abs(rotationY - targetRotationY);
-                const totalDiff = (diffX + diffY) / 2;
-                const thresholdRad = (1 - rotationThreshold) * (Math.PI / 4);
-                return totalDiff < thresholdRad;
-            };
 
-            function resetCaptcha() {
+            const resetCaptcha = () => {
                 isDragging = false;
-                rotationX = (Math.random() - 0.5) * Math.PI; 
-                rotationY = (Math.random() - 0.5) * Math.PI * 2; 
-                status.textContent = "ลากเมาส์บนรูปภาพเพื่อหมุน";
+                dragDistanceY = 0;
+                status.textContent = "ลากเมาส์ขึ้นหรือลงเพื่อแก้";
                 status.style.color = 'var(--text-muted)';
-                draw();
+                draw(0);
             };
 
             canvas.onmousedown = (e) => {
                 isDragging = true;
-                lastMouseX = e.clientX;
                 lastMouseY = e.clientY;
                 canvas.style.cursor = 'grabbing';
             };
             canvas.onmouseup = () => {
                 if (isDragging) {
                     canvas.style.cursor = 'grab';
-                    if (checkCompletion()) {
+                    if (dragDistanceY > 80) { // ต้องลากเกิน 80 pixels ถึงจะผ่าน
                         status.textContent = "รอ 2 วินาที...";
                         status.style.color = 'var(--accent-green)';
-                        draw();
+                        draw(1);
                         setTimeout(() => {
                             closeModal('captcha3dModal');
                             openDateTimeModal();
@@ -304,26 +240,25 @@
                     } else {
                         status.textContent = "Incorrect. Please try again.";
                         status.style.color = 'var(--accent-danger)';
+                        setTimeout(resetCaptcha, 1500);
                     }
                 }
                 isDragging = false;
             };
             canvas.onmousemove = (e) => {
                 if (isDragging) {
-                    const deltaX = e.clientX - lastMouseX;
                     const deltaY = e.clientY - lastMouseY;
-                    rotationY += deltaX * rotationSensitivity;
-                    rotationX -= deltaY * rotationSensitivity;
-                    lastMouseX = e.clientX;
+                    dragDistanceY += Math.abs(deltaY);
                     lastMouseY = e.clientY;
-                    draw();
+                    const progress = Math.min(dragDistanceY / 80, 1);
+                    draw(progress);
                 }
             };
             canvas.onmouseleave = () => { if(isDragging) canvas.onmouseup(); };
             retryBtn.onclick = resetCaptcha;
             
             modal.style.display = "flex";
-            if (iconImage && iconImage.complete) { resetCaptcha(); }
+            resetCaptcha();
         }
 
         function openDateTimeModal() {
