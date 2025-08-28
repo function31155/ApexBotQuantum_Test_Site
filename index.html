@@ -47,75 +47,16 @@
         @keyframes spin { to { transform: rotate(360deg); } }
 
         /* --- New/Modified styles for Captcha 3D Modal --- */
-        #captcha3dModal .modal-content {
-            padding: 30px; /* เพิ่ม padding */
-            background-color: #1a1e2a; /* พื้นหลังเข้มขึ้น */
-            border: 1px solid rgba(0, 191, 255, 0.5); /* สีขอบ */
-            box-shadow: 0 0 30px rgba(0, 191, 255, 0.3); /* เงาเรืองแสง */
-        }
-        #captcha3dModal .modal-title {
-            color: #00e0ff; /* สีฟ้าสดใส */
-            font-size: 28px; /* ตัวใหญ่ขึ้น */
-            text-shadow: 0 0 12px rgba(0, 224, 255, 0.8);
-            margin-bottom: 10px;
-        }
-        #captcha3dModal .modal-content > p { /* สำหรับ "หมุนภาพตัวละคร..." */
-            font-size: 16px;
-            color: #b0c4de; /* สีเทาฟ้าอ่อน */
-            margin-bottom: 25px;
-            text-align: center;
-        }
-        #captcha3dModal .modal-content > .sub-instruction { /* สำหรับ "ใช้เมาส์หมุนมุมมอง..." */
-            font-size: 13px;
-            color: #88a0c0; /* สีเทาอ่อน */
-            margin-top: -15px;
-            margin-bottom: 20px;
-            line-height: 1.4;
-        }
-        #captchaCanvas {
-            background: linear-gradient(145deg, #2d3436, #1d2127); /* ไล่สีพื้นหลัง Canvas */
-            border: 2px solid #00bfff; /* ขอบฟ้า */
-            box-shadow: 0 0 15px rgba(0, 191, 255, 0.6), inset 0 0 8px rgba(0, 191, 255, 0.3);
-            border-radius: 10px;
-            margin-bottom: 20px;
-            width: 300px; /* กำหนดขนาดคงที่ */
-            height: 200px; /* กำหนดขนาดคงที่ */
-            display: block; /* จัดให้อยู่ตรงกลางได้ง่าย */
-            margin-left: auto;
-            margin-right: auto;
-        }
-        #captchaStatus {
-            font-size: 15px;
-            font-weight: bold;
-            height: 25px; /* กันเนื้อหากระโดด */
-            margin-bottom: 20px;
-            color: #ff9800; /* สีส้มสำหรับสถานะทั่วไป */
-        }
-        .captcha-actions {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 10px;
-        }
-        .captcha-actions button {
-            background-color: #334155;
-            color: #e0e6f0;
-            padding: 10px 20px;
-            border-radius: 6px;
-            border: 1px solid rgba(0, 191, 255, 0.4);
-            font-size: 15px;
-            transition: all 0.2s ease;
-        }
-        .captcha-actions button:hover:not(:disabled) {
-            background-color: #00bfff;
-            color: white;
-            box-shadow: 0 0 10px #00bfff;
-            transform: translateY(-2px);
-        }
-        .captcha-actions button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        #captcha3dModal .modal-content { padding: 30px; background-color: #1a1e2a; border: 1px solid rgba(0, 191, 255, 0.5); box-shadow: 0 0 30px rgba(0, 191, 255, 0.3); }
+        #captcha3dModal .modal-title { color: #00e0ff; font-size: 28px; text-shadow: 0 0 12px rgba(0, 224, 255, 0.8); margin-bottom: 10px; }
+        #captcha3dModal .modal-content > p { font-size: 16px; color: #b0c4de; margin-bottom: 25px; text-align: center; }
+        #captcha3dModal .modal-content > .sub-instruction { font-size: 13px; color: #88a0c0; margin-top: -15px; margin-bottom: 20px; line-height: 1.4; }
+        #captchaCanvas { background: linear-gradient(145deg, #2d3436, #1d2127); border: 2px solid #00bfff; box-shadow: 0 0 15px rgba(0, 191, 255, 0.6), inset 0 0 8px rgba(0, 191, 255, 0.3); border-radius: 10px; margin-bottom: 20px; width: 300px; height: 200px; display: block; margin-left: auto; margin-right: auto; }
+        #captchaStatus { font-size: 15px; font-weight: bold; height: 25px; margin-bottom: 20px; color: #ff9800; }
+        .captcha-actions { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
+        .captcha-actions button { background-color: #334155; color: #e0e6f0; padding: 10px 20px; border-radius: 6px; border: 1px solid rgba(0, 191, 255, 0.4); font-size: 15px; transition: all 0.2s ease; }
+        .captcha-actions button:hover:not(:disabled) { background-color: #00bfff; color: white; box-shadow: 0 0 10px #00bfff; transform: translateY(-2px); }
+        .captcha-actions button:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -138,7 +79,7 @@
             <span class="modal-title">3D Security Verification</span>
             <p>หมุนภาพตัวละครให้หันหน้าเข้าหาตัวเอง</p>
             <p class="sub-instruction">ใช้เมาส์หมุนมุมมองรูปภาพตัวละครด้านหน้าจะหันเข้าหาคุณโดยตรง ภาพจะสว่างขึ้นเมื่อวางแนวถูกต้องที่ความแม่นยำ 95%</p>
-            <canvas id="captchaCanvas" width="300" height="200" style="background: #2d3436; border-radius: 8px; cursor: move;"></canvas>
+            <canvas id="captchaCanvas" width="300" height="200" style="background: #2d3436; border-radius: 8px; cursor: grab;"></canvas>
             <p id="captchaStatus" style="height: 20px;"></p>
             <div class="captcha-actions">
                 <button id="retryCaptchaBtn">C ลองอีกครั้ง</button>
@@ -241,7 +182,6 @@
             nextBtn.onclick = () => {
                 if (selections.branch) {
                     modal.style.display = "none";
-                    // Check for Bypass Mode by detecting the effect of the replaced script
                     if (window.AwsWafCaptcha && typeof window.AwsWafCaptcha.renderCaptcha === 'function') {
                         console.log("Bypass Mode DETECTED by test site! Skipping 3D Captcha.");
                         openDateTimeModal();
@@ -253,32 +193,29 @@
             };
         }
 
-        let iconImage; // สำหรับเก็บรูป icon.png
+        let iconImage; 
         
+        // ** MODIFIED **: ปรับปรุง Logic การทำงานของ Captcha 3D ใหม่ทั้งหมด
         function openCaptcha3dModal() {
             const modal = document.getElementById("captcha3dModal");
             const canvas = document.getElementById("captchaCanvas");
             const status = document.getElementById("captchaStatus");
             const retryBtn = document.getElementById("retryCaptchaBtn");
-            const langToggleBtn = document.getElementById("langToggleBtn"); // ยังไม่ได้ใช้งานจริง แต่เพิ่มไว้ตาม UI
             const ctx = canvas.getContext('2d');
+            
             let isDragging = false;
             let dragStartX = 0;
-            let rotationAngle = 0; // มุมการหมุนปัจจุบัน
-            const targetRotation = Math.PI / 4; // เป้าหมายคือหมุนไป 45 องศา (หันหน้าตรง)
-            const rotationThreshold = 0.95; // ความแม่นยำ 95%
-            const rotationSensitivity = 0.01; // ปรับความเร็วในการหมุน
+            let rotationAngle = 0;
+            const targetRotation = Math.PI / 4; 
+            const rotationThreshold = 0.95; 
+            const rotationSensitivity = 0.01; 
 
-            // โหลดรูปภาพ icon.png
             if (!iconImage) {
                 iconImage = new Image();
-                iconImage.src = 'icon.png'; // สมมติว่า icon.png อยู่ในโฟลเดอร์เดียวกับ index.html
-                iconImage.onload = () => {
-                    resetCaptcha(); // เมื่อโหลดรูปภาพเสร็จ ค่อยวาด Captcha
-                };
+                iconImage.src = 'icon.png';
+                iconImage.onload = resetCaptcha;
                 iconImage.onerror = () => {
                     console.error("Failed to load icon.png");
-                    // หากโหลดไม่ได้ ให้ใช้ข้อความแทน
                     iconImage = null; 
                     resetCaptcha();
                 };
@@ -290,54 +227,49 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#2d3436';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-
                 ctx.save();
                 ctx.translate(canvas.width / 2, canvas.height / 2);
-                ctx.rotate(rotationAngle); // หมุนตามมุมปัจจุบัน
+                ctx.rotate(rotationAngle);
 
                 const currentDiff = Math.abs(rotationAngle % (2 * Math.PI) - targetRotation);
-                const progress = 1 - Math.min(currentDiff / (Math.PI / 2), 1); // ความก้าวหน้า 0-1
-                const opacity = 0.2 + (progress * 0.8); // ความสว่างตามความถูกต้อง
+                const progress = 1 - Math.min(currentDiff / (Math.PI / 2), 1);
+                const opacity = 0.2 + (progress * 0.8);
 
-                if (iconImage) {
-                    // วาดรูป icon.png ที่อยู่ตรงกลางและปรับขนาดให้พอดี
-                    const imgSize = Math.min(canvas.width, canvas.height) * 0.7;
-                    ctx.globalAlpha = opacity;
-                    ctx.drawImage(iconImage, -imgSize / 2, -imgSize / 2, imgSize, imgSize);
-                    ctx.globalAlpha = 1; // รีเซ็ตค่า globalAlpha
-                } else {
-                    // ถ้าโหลดรูปไม่ได้ ให้วาดข้อความ "icon" แทน
-                    ctx.font = 'bold 80px Orbitron';
+                if (Math.abs(rotationAngle) > Math.PI) {
+                    ctx.font = '20px Roboto Mono';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
-                    ctx.fillText('ICON', 0, -20);
+                    const backOpacity = Math.max(0.1, 0.7 - (opacity * 0.8));
+                    ctx.fillStyle = `rgba(150, 150, 150, ${backOpacity})`;
+                    ctx.fillText('ApexBot', 0, 0);
+                } else {
+                    if (iconImage) {
+                        const imgSize = Math.min(canvas.width, canvas.height) * 0.7;
+                        ctx.globalAlpha = opacity;
+                        ctx.drawImage(iconImage, -imgSize / 2, -imgSize / 2, imgSize, imgSize);
+                        ctx.globalAlpha = 1;
+                    } else {
+                        ctx.font = 'bold 80px Orbitron';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
+                        ctx.fillText('ICON', 0, 0);
+                    }
                 }
-
-                // วาดข้อความ ApexBot ด้านหลัง
-                ctx.font = '20px Roboto Mono';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                const backOpacity = Math.max(0.1, 0.7 - (opacity * 0.8)); // จะสว่างขึ้นเมื่อรูปข้างหน้ามืด
-                ctx.fillStyle = `rgba(150, 150, 150, ${backOpacity})`;
-                ctx.fillText('ApexBot', 0, 50); // ตำแหน่งด้านล่างของรูป
-
                 ctx.restore();
             };
 
             const checkCompletion = () => {
-                const angleDifference = Math.abs(rotationAngle % (2 * Math.PI) - targetRotation);
-                // ตรวจสอบทั้งสองทิศทาง (บวก/ลบ 2*PI)
-                const normalizedAngleDiff = Math.min(angleDifference, 2 * Math.PI - angleDifference);
-                
-                const thresholdRad = (1 - rotationThreshold) * (Math.PI / 2); // 5% ของ 90 องศา
-                return normalizedAngleDiff < thresholdRad;
+                const normalizedAngle = (rotationAngle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+                const angleDifference = Math.abs(normalizedAngle - targetRotation);
+                const thresholdRad = (1 - rotationThreshold) * (Math.PI / 2);
+                return angleDifference < thresholdRad;
             };
 
-            const resetCaptcha = () => {
+            function resetCaptcha() {
                 isDragging = false;
                 dragStartX = 0;
-                rotationAngle = 0; // รีเซ็ตมุมการหมุน
+                rotationAngle = 0;
                 status.textContent = "ลากเมาส์บนรูปภาพเพื่อหมุน";
                 status.style.color = 'var(--text-muted)';
                 draw();
@@ -348,13 +280,14 @@
                 dragStartX = e.clientX;
                 canvas.style.cursor = 'grabbing';
             };
+
             canvas.onmouseup = () => {
                 if (isDragging) {
                     canvas.style.cursor = 'grab';
                     if (checkCompletion()) {
                         status.textContent = "รอ 2 วินาที...";
                         status.style.color = 'var(--accent-green)';
-                        draw(); // วาดครั้งสุดท้ายเพื่อแสดงสถานะถูกต้อง
+                        draw();
                         setTimeout(() => {
                             closeModal('captcha3dModal');
                             openDateTimeModal();
@@ -367,6 +300,7 @@
                 }
                 isDragging = false;
             };
+
             canvas.onmousemove = (e) => {
                 if (isDragging) {
                     const deltaX = e.clientX - dragStartX;
@@ -375,17 +309,15 @@
                     draw();
                 }
             };
+
             canvas.onmouseleave = () => {
                 if(isDragging) canvas.onmouseup();
             };
 
-            retryBtn.onclick = resetCaptcha;
-            langToggleBtn.onclick = () => {
-                alert("Language toggle is not implemented in this test version.");
-            };
-
+            retryCaptchaBtn.onclick = resetCaptcha;
+            
             modal.style.display = "flex";
-            if(iconImage && iconImage.complete) { // ตรวจสอบว่ารูปโหลดเสร็จแล้ว
+            if (iconImage && iconImage.complete) {
                 resetCaptcha();
             }
         }
