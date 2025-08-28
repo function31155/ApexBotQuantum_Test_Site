@@ -221,21 +221,16 @@
                 const diffY = Math.abs(rotationY - targetRotationY);
                 const progress = 1 - Math.min((diffX + diffY) / (Math.PI), 1);
                 const opacity = 0.2 + (progress * 0.8);
-
-                const perspective = 300;
-                const z = perspective - Math.sin(rotationX) * 100;
-                const scale = z / perspective;
                 
-                ctx.transform(scale, 0, 0, scale, 0, 0);
                 ctx.rotate(rotationY); 
                 
                 if (Math.abs(rotationY % (2*Math.PI)) > Math.PI / 2 && Math.abs(rotationY % (2*Math.PI)) < 3 * Math.PI / 2) {
                     ctx.save();
-                    ctx.scale(-1, 1);
-                    ctx.font = '20px Roboto Mono';
+                    ctx.scale(-1, 1); // Flip horizontally to show back
+                    ctx.font = 'bold 30px Orbitron';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillStyle = `rgba(150, 150, 150, 0.7)`;
+                    ctx.fillStyle = `rgba(224, 230, 240, 0.7)`;
                     ctx.fillText('ApexBot', 0, 0);
                     ctx.restore();
                 } else {
@@ -310,6 +305,7 @@
             };
             canvas.onmouseleave = () => { if(isDragging) canvas.onmouseup(); };
             retryBtn.onclick = resetCaptcha;
+            
             modal.style.display = "flex";
             if (iconImage && iconImage.complete) { resetCaptcha(); }
         }
