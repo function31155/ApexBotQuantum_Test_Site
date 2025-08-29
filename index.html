@@ -145,6 +145,8 @@
     <script>
         const selections = { branch: null, date: null, time: null };
         let startTime;
+        let iconImage; 
+
         function showPage(pageId) { document.querySelectorAll('#step-area .page').forEach(p => p.classList.remove('active')); document.getElementById(pageId)?.classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
         function launchConfetti() { if (typeof confetti !== 'function') return; const end = Date.now() + (2 * 1000); (function frame() { confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } }); confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } }); if (Date.now() < end) requestAnimationFrame(frame); }()); }
@@ -154,7 +156,21 @@
         function openBranchModal() { startTime = new Date(); const modal = document.getElementById("branchModal"); const nextBtn = document.getElementById("branchModalNextBtn"); const list = modal.querySelector("#branchList"); modal.style.display = "flex"; nextBtn.disabled = true; list.innerHTML = ""; const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld", "MEGABANGNA", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai", "ICONSIAM"]; let unavailableBranches = []; const numUnavailable = Math.floor(Math.random() * 3); const shuffledBranches = [...branches].sort(() => 0.5 - Math.random()); for (let i = 0; i < numUnavailable; i++) { unavailableBranches.push(shuffledBranches[i]); } branches.forEach(b => { const button = document.createElement("button"); button.className = "branch-item"; button.textContent = b; if (unavailableBranches.includes(b)) { button.classList.add("is_full"); button.disabled = true; } else { button.onclick = () => { list.querySelectorAll(".branch-item.selected").forEach(el => el.classList.remove("selected")); button.classList.add("selected"); selections.branch = b; nextBtn.disabled = false; }; } list.appendChild(button); }); nextBtn.onclick = () => { if (selections.branch) { closeModal('branchModal'); openCaptchaModal(); } }; }
         function openDateTimeModal() { const modal = document.getElementById("datetimeModal"); const nextBtn = document.getElementById("dateTimeNextBtn"); const dateList = modal.querySelector("#dateList"); const timeList = modal.querySelector("#timeList"); modal.style.display = "flex"; nextBtn.disabled = true; dateList.innerHTML = ""; timeList.innerHTML = ""; const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"]; let unavailableTimes = []; const numUnavailableTimes = Math.floor(Math.random() * 4); const shuffledTimes = [...times].sort(() => 0.5 - Math.random()); for (let i = 0; i < numUnavailableTimes; i++) { unavailableTimes.push(shuffledTimes[i]); } const checkDateTimeValid = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { nextBtn.disabled = false; } else { nextBtn.disabled = true; } }; Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => { const button = document.createElement("button"); button.className = "MuiPickersDay-root"; button.textContent = d; button.onclick = () => { dateList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.date = d; selections.time = null; timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); checkDateTimeValid(); }; dateList.appendChild(button); }); times.forEach(t => { const button = document.createElement("button"); button.className = "timeButtons"; button.textContent = t; if (unavailableTimes.includes(t)) { button.classList.add("disabledTime"); button.disabled = true; } else { button.onclick = () => { timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.time = t; checkDateTimeValid(); }; } timeList.appendChild(button); }); nextBtn.onclick = () => { if (selections.date && selections.time) { closeModal('datetimeModal'); handleTermsPage(); } }; }
         function startCountdown() { const countdownEl = document.getElementById("countdown"); const registerBtn = document.getElementById("registerBtn"); let secondsLeft = 7; registerBtn.disabled = true; registerBtn.classList.remove('enabled'); const timer = setInterval(() => { if (secondsLeft <= 0) { clearInterval(timer); countdownEl.textContent = "OPEN!"; registerBtn.disabled = false; registerBtn.classList.add('enabled'); } else { countdownEl.textContent = `00:00:0${secondsLeft--}`; } }, 1000); }
-        function initializePage() { const checkBot = () => { if (document.body.dataset.dpbotEnabled === 'true') { document.querySelector('.main-container').style.display = 'flex'; document.getElementById('bot-required-overlay').style.display = 'none'; resetFlow(); } else { document.getElementById('bot-required-overlay').style.display = 'flex'; document.querySelector('.main-container').style.display = 'none'; } }; setTimeout(checkBot, 200); }
+        
+        function initializePage() {
+            const checkBot = () => {
+                if (document.body.dataset.dpbotEnabled === 'true') {
+                    document.querySelector('.main-container').style.display = 'flex';
+                    document.getElementById('bot-required-overlay').style.display = 'none';
+                    resetFlow();
+                } else {
+                    document.getElementById('bot-required-overlay').style.display = 'flex';
+                    document.querySelector('.main-container').style.display = 'none';
+                }
+            };
+            setTimeout(checkBot, 200);
+        }
+
         document.getElementById("registerBtn").addEventListener("click", openBranchModal);
         document.getElementById("finalConfirm").addEventListener("click", handleSuccess);
         document.getElementById("resetBtn").addEventListener("click", resetFlow);
@@ -188,11 +204,16 @@
             const scaleX = Math.cos(rotY);
             ctx.transform(scaleX, Math.sin(rotX) * 0.2, 0, scaleY, 0, 0);
             if (isFrontFacing) {
-                ctx.fillStyle = '#4dd0e1';
-                ctx.font = 'bold 80px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText("🤖", 0, 0);
+                if (iconImage) {
+                    const imgSize = Math.min(width, height) * 0.6;
+                    ctx.drawImage(iconImage, -imgSize/2, -imgSize/2, imgSize, imgSize);
+                } else {
+                    ctx.fillStyle = '#4dd0e1';
+                    ctx.font = 'bold 80px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText("ICON", 0, 0);
+                }
             } else {
                 ctx.save();
                 ctx.transform(-1, 0, 0, 1, 0, 0);
@@ -291,10 +312,15 @@
         }
 
         canvas.addEventListener('pointerdown', handleDragStart);
-        canvas.addEventListener('pointermove', handleDragMove);
-        canvas.addEventListener('pointerup', handleDragEnd);
-        canvas.addEventListener('pointerleave', handleDragEnd);
-        canvas.addEventListener('pointercancel', handleDragEnd);
+        document.addEventListener('pointermove', handleDragMove); // Listen on document
+        document.addEventListener('pointerup', handleDragEnd);   // Listen on document
+        
+        if (!iconImage) {
+            iconImage = new Image();
+            iconImage.src = 'icon.png';
+            iconImage.onload = drawCube;
+            iconImage.onerror = () => { iconImage = null; drawCube(); };
+        }
     </script>
 </body>
 </html>
