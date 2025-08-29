@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Web Test Booking (Advanced Captcha v2) - ApexBot Quantum</title>
+    <title>Web Test Booking (Standalone) - ApexBot Quantum</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto+Mono:wght@400;500&display=swap');
         :root { --bg-dark: #0a0f18; --bg-panel: rgba(18, 28, 48, 0.85); --border-color: rgba(0, 191, 255, 0.3); --accent-cyber: #00bfff; --accent-glow: rgba(0, 191, 255, 0.7); --text-color: #e0e6f0; --text-muted: #88a0c0; --accent-danger: #ff4d6d; --accent-green: #00ffab; --font-header: 'Orbitron', sans-serif; --font-body: 'Roboto Mono', monospace; }
@@ -57,9 +57,7 @@
         .captcha-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 0 5px; }
         .captcha-actions button { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); font-size: 14px; padding: 6px 12px; font-weight: normal; }
         .captcha-actions button:hover { background-color: rgba(0, 191, 255, 0.1); color: var(--text-color); }
-        /* === CSS ADDED: Style for the final success message === */
         #final-captcha-success-msg { color: var(--accent-green); text-align: center; font-weight: bold; font-size: 1.1em; margin-top: 10px; text-shadow: 0 0 8px var(--accent-green); animation: fadeIn 0.5s ease; }
-        /* ====================================================== */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -68,7 +66,7 @@
 </head>
 <body>
     
-    <div id="bot-required-overlay">
+    <div id="bot-required-overlay" style="display: none;">
         Please Enable ApexBot Extension
         <small style="font-size: 1rem; margin-top: 10px;">(And allow access to file URLs if prompted)</small>
     </div>
@@ -108,6 +106,7 @@
             <button class="next-btn" id="captchaNextBtn" style="margin-top: 15px; width: 100%;" disabled>Verify</button>
         </div>
     </div>
+
     <div id="datetimeModal" class="modal">
         <div class="modal-content">
             <span class="modal-title">Select Date & Time</span><span class="close" onclick="closeModal('datetimeModal')">×</span>
@@ -169,23 +168,16 @@
         function openDateTimeModal() { const modal = document.getElementById("datetimeModal"); const nextBtn = document.getElementById("dateTimeNextBtn"); const dateList = modal.querySelector("#dateList"); const timeList = modal.querySelector("#timeList"); modal.style.display = "flex"; nextBtn.disabled = true; dateList.innerHTML = ""; timeList.innerHTML = ""; const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"]; let unavailableTimes = []; const numUnavailableTimes = Math.floor(Math.random() * 4); const shuffledTimes = [...times].sort(() => 0.5 - Math.random()); for (let i = 0; i < numUnavailableTimes; i++) { unavailableTimes.push(shuffledTimes[i]); } const checkDateTimeValid = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { nextBtn.disabled = false; } else { nextBtn.disabled = true; } }; Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => { const button = document.createElement("button"); button.className = "MuiPickersDay-root"; button.textContent = d; button.onclick = () => { dateList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.date = d; selections.time = null; timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); checkDateTimeValid(); }; dateList.appendChild(button); }); times.forEach(t => { const button = document.createElement("button"); button.className = "timeButtons"; button.textContent = t; if (unavailableTimes.includes(t)) { button.classList.add("disabledTime"); button.disabled = true; } else { button.onclick = () => { timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.time = t; checkDateTimeValid(); }; } timeList.appendChild(button); }); nextBtn.onclick = () => { if (selections.date && selections.time) { closeModal('datetimeModal'); handleTermsPage(); } }; }
         function startCountdown() { const countdownEl = document.getElementById("countdown"); const registerBtn = document.getElementById("registerBtn"); let secondsLeft = 7; registerBtn.disabled = true; registerBtn.classList.remove('enabled'); const timer = setInterval(() => { if (secondsLeft <= 0) { clearInterval(timer); countdownEl.textContent = "OPEN!"; registerBtn.disabled = false; registerBtn.classList.add('enabled'); } else { countdownEl.textContent = `00:00:0${secondsLeft--}`; } }, 1000); }
         
-        function initializePage() {
-            const checkBot = () => {
-                if (document.body.dataset.dpbotEnabled === 'true') {
-                    document.querySelector('.main-container').style.display = 'flex';
-                    document.getElementById('bot-required-overlay').style.display = 'none';
-                    resetFlow();
-                } else {
-                    document.getElementById('bot-required-overlay').style.display = 'flex';
-                    document.querySelector('.main-container').style.display = 'none';
-                }
-            };
-            setTimeout(checkBot, 200);
+        // function initializePage() {
+            // No more check, just run the success path directly.
+            document.querySelector('.main-container').style.display = 'flex';
+            document.getElementById('bot-required-overlay').style.display = 'none';
+            resetFlow();
         }
-
-        document.getElementById("registerBtn").addEventListener("click", openBranchModal);
+        // document.getElementById("registerBtn").addEventListener("click", openBranchModal);
         document.getElementById("finalConfirm").addEventListener("click", handleSuccess);
         document.getElementById("resetBtn").addEventListener("click", resetFlow);
+        document.addEventListener("DOMContentLoaded", initializePage);
         
         // --- CAPTCHA LOGIC ---
         const captchaModal = document.getElementById('captchaModal');
@@ -268,7 +260,7 @@
             captchaNextBtn.style.display = 'block';
             loadingBarContainer.style.display = 'none';
             loadingBar.style.width = '0%';
-            finalSuccessMsg.style.display = 'none'; // Hide final message on open
+            finalSuccessMsg.style.display = 'none';
             loadingCaptcha.classList.add('show');
             setTimeout(() => {
                 loadingCaptcha.classList.remove('show');
@@ -277,7 +269,7 @@
             }, 1000);
         }
         
-        // function checkRotation() {
+        function checkRotation() {
             if (isCaptchaSolved) return;
 
             const normalizedYAngle = ((currentYAngle % 360) + 540) % 360 - 180;
@@ -308,7 +300,6 @@
                     }
                 }, 1000);
 
-                // After 2 seconds, show the final "Pass" state
                 setTimeout(() => {
                     clearInterval(countdownInterval);
                     loadingBarContainer.style.display = 'none';
@@ -316,7 +307,6 @@
                     finalSuccessMsg.textContent = 'ยืนยันตัวตนสำเร็จ!';
                     finalSuccessMsg.style.display = 'block';
 
-                    // Wait 1.5 seconds then proceed to the next step
                     setTimeout(() => {
                         closeModal('captchaModal');
                         openDateTimeModal();
@@ -329,7 +319,8 @@
                 captchaStatus.className = 'captcha-failure';
             }
         }
-        // function handleDragStart(e) {
+
+        function handleDragStart(e) {
             if (isCaptchaSolved) return;
             e.preventDefault();
             isDragging = true;
