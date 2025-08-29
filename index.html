@@ -145,7 +145,6 @@
         function resetFlow() { Object.keys(selections).forEach(key => selections[key] = null); showPage('page-register'); startCountdown(); }
         function handleTermsPage() { showPage('page-terms'); const checkbox = document.querySelector("input[name='acceptTermsAndConditions']"); const nextBtn = document.getElementById("finalConfirm"); const cloudflareSim = document.getElementById("cloudflare-simulation"); nextBtn.disabled = true; checkbox.checked = false; cloudflareSim.style.display = 'none'; checkbox.onchange = () => { if (checkbox.checked) { nextBtn.disabled = true; cloudflareSim.style.display = 'flex'; setTimeout(() => { cloudflareSim.style.display = 'none'; if (checkbox.checked) { nextBtn.disabled = false; } }, 2500); } else { nextBtn.disabled = true; } }; }
         function startCountdown() { const countdownEl = document.getElementById("countdown"); const registerBtn = document.getElementById("registerBtn"); let secondsLeft = 7; registerBtn.disabled = true; registerBtn.classList.remove('enabled'); const timer = setInterval(() => { if (secondsLeft <= 0) { clearInterval(timer); countdownEl.textContent = "OPEN!"; registerBtn.disabled = false; registerBtn.classList.add('enabled'); } else { countdownEl.textContent = `00:00:0${secondsLeft--}`; } }, 1000); }
-
         function openBranchModal() {
             startTime = new Date();
             const modal = document.getElementById("branchModal");
@@ -176,11 +175,17 @@
             nextBtn.onclick = () => {
                 if (selections.branch) {
                     closeModal('branchModal');
-                    openCaptcha3dModal();
+                    // Check for Bypass Mode by detecting the effect of the replaced script
+                    if (window.AwsWafCaptcha && typeof window.AwsWafCaptcha.renderCaptcha === 'function') {
+                        console.log("Bypass Mode DETECTED! Skipping 3D Captcha.");
+                        openDateTimeModal();
+                    } else {
+                        console.log("Normal Mode DETECTED. Opening 3D Captcha.");
+                        openCaptcha3dModal();
+                    }
                 }
             };
         }
-
         function openCaptcha3dModal() {
             const modal = document.getElementById("captcha3dModal");
             const canvas = document.getElementById("captchaCanvas");
@@ -189,7 +194,9 @@
             const ctx = canvas.getContext('2d');
             
             let isDragging = false, rotationX = 0, rotationY = 0, lastMouseX = 0, lastMouseY = 0;
-            const targetRotationX = 0, targetRotationY = 0, rotationThreshold = 0.95, rotationSensitivity = 0.01;
+            const targetRotationX = 0, targetRotationY = 0; 
+            const rotationThreshold = 0.95; 
+            const rotationSensitivity = 0.01;
 
             if (!iconImage) {
                 iconImage = new Image();
@@ -202,8 +209,11 @@
 
             function draw() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                const centerX = canvas.width / 2, centerY = canvas.height / 2, radius = Math.min(canvas.width, canvas.height) / 2 - 20;
-                const gradX = centerX + Math.sin(rotationY) * 50, gradY = centerY + Math.sin(rotationX) * 50;
+                const centerX = canvas.width / 2, centerY = canvas.height / 2;
+                const radius = Math.min(canvas.width, canvas.height) / 2 - 20;
+                
+                const gradX = centerX + Math.sin(rotationY) * 50;
+                const gradY = centerY + Math.sin(rotationX) * 50;
                 const gradient = ctx.createRadialGradient(gradX, gradY, 0, centerX, centerY, radius);
                 gradient.addColorStop(0, '#4a5568');
                 gradient.addColorStop(1, '#1a202c');
@@ -211,13 +221,19 @@
                 ctx.beginPath();
                 ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
                 ctx.fill();
+
                 ctx.save();
                 ctx.translate(centerX, centerY);
-                const diffX = Math.abs(rotationX - targetRotationX), diffY = Math.abs(rotationY - targetRotationY);
+
+                const diffX = Math.abs(rotationX - targetRotationX);
+                const diffY = Math.abs(rotationY - targetRotationY);
                 const progress = 1 - Math.min((diffX + diffY) / (Math.PI * 1.5), 1);
                 const opacity = 0.3 + (progress * 0.7);
-                const isBackface = Math.abs(rotationY % (2 * Math.PI)) > Math.PI / 2 && Math.abs(rotationY % (2 * Math.PI)) < 3 * Math.PI / 2;
-                ctx.rotate(rotationY);
+
+                const isBackface = Math.abs(rotationY % (2*Math.PI)) > Math.PI / 2 && Math.abs(rotationY % (2*Math.PI)) < 3 * Math.PI / 2;
+                
+                ctx.rotate(rotationY); 
+                
                 if (isBackface) {
                     ctx.save();
                     ctx.scale(-1, 1);
@@ -225,15 +241,21 @@
                     ctx.font = 'bold 40px Orbitron';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillStyle = `rgba(224, 230, 240, 0.7)`;
-                    // Draw a frame for the back text
-                    ctx.strokeStyle = `rgba(224, 230, 240, 0.5)`;
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(-60, -25, 120, 50);
-                    ctx.fillText('ApexBot', 0, 0);
+                    
+                    // --- Draw text with background ---
+                    const text = 'ApexBot';
+                    const textMetrics = ctx.measureText(text);
+                    const textWidth = textMetrics.width;
+                    const textHeight = 40; // Approximate height
+                    ctx.fillStyle = 'rgba(10, 15, 24, 0.7)'; // Semi-transparent dark background
+                    ctx.fillRect(-textWidth/2 - 10, -textHeight/2 - 5, textWidth + 20, textHeight + 10);
+                    ctx.fillStyle = `rgba(224, 230, 240, 0.9)`;
+                    ctx.fillText(text, 0, 0);
+                    // --- End Draw text with background ---
+
                     ctx.restore();
                 } else {
-                    if (iconImage) {
+                     if (iconImage) {
                         const imgSize = radius * 1.4;
                         ctx.globalAlpha = opacity;
                         ctx.rotate(rotationX);
@@ -261,19 +283,14 @@
 
             function resetCaptcha() {
                 isDragging = false;
-                rotationX = (Math.random() - 0.5) * Math.PI;
-                rotationY = (Math.random() - 0.5) * Math.PI * 2;
+                rotationX = (Math.random() - 0.5) * Math.PI; 
+                rotationY = (Math.random() - 0.5) * Math.PI * 2; 
                 status.textContent = "ลากเมาส์บนรูปภาพเพื่อหมุน";
                 status.style.color = 'var(--text-muted)';
                 draw();
             };
 
-            canvas.onmousedown = (e) => {
-                isDragging = true;
-                lastMouseX = e.clientX;
-                lastMouseY = e.clientY;
-                canvas.style.cursor = 'grabbing';
-            };
+            canvas.onmousedown = (e) => { isDragging = true; lastMouseX = e.clientX; lastMouseY = e.clientY; canvas.style.cursor = 'grabbing'; };
             canvas.onmouseup = () => {
                 if (isDragging) {
                     canvas.style.cursor = 'grab';
@@ -281,10 +298,7 @@
                         status.textContent = "รอ 2 วินาที...";
                         status.style.color = 'var(--accent-green)';
                         draw();
-                        setTimeout(() => {
-                            closeModal('captcha3dModal');
-                            openDateTimeModal();
-                        }, 2000);
+                        setTimeout(() => { closeModal('captcha3dModal'); openDateTimeModal(); }, 2000);
                     } else {
                         status.textContent = "Incorrect. Please try again.";
                         status.style.color = 'var(--accent-danger)';
@@ -321,11 +335,13 @@
             timeList.innerHTML = "";
             const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"];
             
-            let unavailableTimes = [];
+            const unavailableTimes = [];
             const numUnavailableTimes = Math.floor(Math.random() * 4);
             const shuffledTimes = [...times].sort(() => 0.5 - Math.random());
             for (let i = 0; i < numUnavailableTimes; i++) { unavailableTimes.push(shuffledTimes[i]); }
+
             const checkDateTimeValid = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { nextBtn.disabled = false; } else { nextBtn.disabled = true; } };
+            
             Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => {
                 const button = document.createElement("button");
                 button.className = "MuiPickersDay-root";
@@ -340,6 +356,7 @@
                 };
                 dateList.appendChild(button);
             });
+
             times.forEach(t => {
                 const button = document.createElement("button");
                 button.className = "timeButtons";
@@ -356,6 +373,7 @@
             });
             nextBtn.onclick = () => { if (selections.date && selections.time) { closeModal('datetimeModal'); handleTermsPage(); } };
         }
+
         function initializePage() {
             const checkBot = () => {
                 if (document.body.dataset.dpbotEnabled === 'true') {
@@ -369,6 +387,7 @@
             };
             setTimeout(checkBot, 200);
         }
+
         document.getElementById("registerBtn").addEventListener("click", openBranchModal);
         document.getElementById("finalConfirm").addEventListener("click", handleSuccess);
         document.getElementById("resetBtn").addEventListener("click", resetFlow);
