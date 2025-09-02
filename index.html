@@ -189,7 +189,7 @@
         function launchConfetti() { if (typeof confetti !== 'function') return; const end = Date.now() + (2 * 1000); (function frame() { confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } }); confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } }); if (Date.now() < end) requestAnimationFrame(frame); }()); }
         function handleSuccess() { showPage('page-success'); const endTime = new Date(); const elapsedTime = ((endTime - startTime) / 1000).toFixed(2); document.getElementById('final-summary-branch').textContent = selections.branch; document.getElementById('final-summary-date').textContent = selections.date; document.getElementById('final-summary-time').textContent = selections.time; document.getElementById('final-summary-time-taken').textContent = elapsedTime; launchConfetti(); }
         function resetFlow() { Object.keys(selections).forEach(key => selections[key] = null); showPage('page-register'); startCountdown(); }
-        function handleTermsPage() { showPage('page-terms'); const checkbox = document.querySelector("input[name='acceptTermsAndConditions']"); const nextBtn = document.getElementById("finalConfirm"); const cloudflareSim = document.getElementById("cloudflare-simulation"); nextBtn.disabled = true; checkbox.checked = false; cloudflareSim.style.display = 'none'; checkbox.onchange = () => { if (checkbox.checked) { nextBtn.disabled = true; cloudflareSim.style.display = 'flex'; setTimeout(() => { cloudflareSim.style.display = 'none'; if (checkbox.checked) { nextBtn.disabled = false; } }, 2500); } else { nextBtn.disabled = true; } }; }
+        function handleTermsPage() { showPage('page-terms'); const checkbox = document.querySelector("input[name='acceptTermsAndConditions']"); const nextBtn = document.getElementById("finalConfirm"); const cloudflareSim = document.getElementById("cloudflare-simulation"); nextBtn.disabled = true; checkbox.checked = false; cloudflareSim.style.display = 'none'; setTimeout(() => { // Add a delay before enabling, so user sees "Verifying" checkbox.onchange = () => { if (checkbox.checked) { nextBtn.disabled = true; cloudflareSim.style.display = 'flex'; setTimeout(() => { cloudflareSim.style.display = 'none'; if (checkbox.checked) { nextBtn.disabled = false; } }, 2500); } else { nextBtn.disabled = true; } }; }, 200); // 200ms delay }
         function openBranchModal() { startTime = new Date(); const modal = document.getElementById("branchModal"); const nextBtn = document.getElementById("branchModalNextBtn"); const list = modal.querySelector("#branchList"); modal.style.display = "flex"; nextBtn.disabled = true; list.innerHTML = ""; const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld", "MEGABANGNA", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai", "ICONSIAM"]; let unavailableBranches = []; const numUnavailable = Math.floor(Math.random() * 3); const shuffledBranches = [...branches].sort(() => 0.5 - Math.random()); for (let i = 0; i < numUnavailable; i++) { unavailableBranches.push(shuffledBranches[i]); } branches.forEach(b => { const button = document.createElement("button"); button.className = "branch-item"; button.textContent = b; if (unavailableBranches.includes(b)) { button.classList.add("is_full"); button.disabled = true; } else { button.onclick = () => { list.querySelectorAll(".branch-item.selected").forEach(el => el.classList.remove("selected")); button.classList.add("selected"); selections.branch = b; nextBtn.disabled = false; }; } list.appendChild(button); }); nextBtn.onclick = () => { if (selections.branch) { closeModal('branchModal'); openCaptchaModal(); } }; }
         function openDateTimeModal() { const modal = document.getElementById("datetimeModal"); const nextBtn = document.getElementById("dateTimeNextBtn"); const dateList = modal.querySelector("#dateList"); const timeList = modal.querySelector("#timeList"); modal.style.display = "flex"; nextBtn.disabled = true; dateList.innerHTML = ""; timeList.innerHTML = ""; const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"]; let unavailableTimes = []; const numUnavailableTimes = Math.floor(Math.random() * 4); const shuffledTimes = [...times].sort(() => 0.5 - Math.random()); for (let i = 0; i < numUnavailableTimes; i++) { unavailableTimes.push(shuffledTimes[i]); } const checkDateTimeValid = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { nextBtn.disabled = false; } else { nextBtn.disabled = true; } }; Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => { const button = document.createElement("button"); button.className = "MuiPickersDay-root"; button.textContent = d; button.onclick = () => { dateList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.date = d; selections.time = null; timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); checkDateTimeValid(); }; dateList.appendChild(button); }); times.forEach(t => { const button = document.createElement("button"); button.className = "timeButtons"; button.textContent = t; if (unavailableTimes.includes(t)) { button.classList.add("disabledTime"); button.disabled = true; } else { button.onclick = () => { timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.time = t; checkDateTimeValid(); }; } timeList.appendChild(button); }); nextBtn.onclick = () => { if (selections.date && selections.time) { closeModal('datetimeModal'); handleTermsPage(); } }; }
         function startCountdown() { const countdownEl = document.getElementById("countdown"); const registerBtn = document.getElementById("registerBtn"); let secondsLeft = 7; registerBtn.disabled = true; registerBtn.classList.remove('enabled'); const timer = setInterval(() => { if (secondsLeft <= 0) { clearInterval(timer); countdownEl.textContent = "OPEN!"; registerBtn.disabled = false; registerBtn.classList.add('enabled'); } else { countdownEl.textContent = `00:00:0${secondsLeft--}`; } }, 1000); }
@@ -221,10 +221,12 @@
         let currentTarget = possibleTargets[0];
 
         const scene = new THREE.Scene();
+        // --- ⬇️ EDITED CODE: Adjust camera position for better framing ⬇️ ---
         const camera = new THREE.PerspectiveCamera(75, 280 / 280, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
         renderer.setSize(280, 280);
-        camera.position.z = 5;
+        camera.position.z = 4; // เดิม 5, ลดลงมาเพื่อให้กล้องเข้ามาใกล้โมเดลมากขึ้น
+        // --- ⬆️ END EDITED CODE ⬆️ ---
 
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
@@ -238,21 +240,18 @@
             function (gltf) {
                 model = gltf.scene;
                 
-                // --- ⬇️ KEY SECTION: CENTERING THE PIVOT POINT ⬇️ ---
-                // 1. Create a bounding box to measure the model's size.
+                // --- KEY SECTION: CENTERING THE PIVOT POINT (Unchanged from last version, it's already correct) ---
                 const box = new THREE.Box3().setFromObject(model);
-                // 2. Find the geometric center of that box.
                 const center = box.getCenter(new THREE.Vector3());
-                // 3. Move the model's position so its center is now at the scene's origin (0,0,0).
-                //    This ensures all rotations happen around the true center.
                 model.position.sub(center);
-                // --- ⬆️ PIVOT IS NOW CENTERED ⬆️ ---
 
-                // Scale model to fit the view
+                // --- ⬇️ EDITED CODE: Adjust scale factor for better fit ⬇️ ---
                 const size = box.getSize(new THREE.Vector3());
                 const maxDim = Math.max(size.x, size.y, size.z);
-                const scale = 4 / maxDim;
+                const scaleFactor = 3.2; // เดิม 4, ลดลงมาเพื่อให้โมเดลใหญ่ขึ้นและพอดีกรอบ
+                const scale = scaleFactor / maxDim; 
                 model.scale.set(scale, scale, scale);
+                // --- ⬆️ END EDITED CODE ⬆️ ---
 
                 scene.add(model);
                 animate();
