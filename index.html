@@ -95,8 +95,8 @@
     <div id="captchaModal" class="modal">
         <div class="modal-content">
             <div class="captcha-instructions">
-                <h3>หมุนเพื่อตรวจสอบโมเดล</h3>
-                <p>ใช้เมาส์หมุนตรวจสอบโมเดล 3D ได้อย่างอิสระ จากนั้นกดยืนยันเพื่อไปยังขั้นตอนต่อไป</p>
+                <h3>หมุนภาพตัวละครให้หันหน้าเข้าหาตัวเอง</h3>
+                <p>ใช้เมาส์หมุนมุมมอง เพื่อตรวจสอบโมเดล 3D ได้อย่างอิสระ จากนั้นกดยืนยันเพื่อไปยังขั้นตอนต่อไป</p>
             </div>
             <div id="captcha-canvas-container">
                 <canvas id="captcha-canvas"></canvas>
@@ -268,7 +268,7 @@
             if (controls) controls.reset();
         });
 
-        document.getElementById('captchaConfirmBtn')?.addEventListener('click', () => {
+        document.getElementById('captchaConfirmBtn')?.addEventListener('click', => {
             closeModal('captchaModal');
             openDateTimeModal();
         });
