@@ -222,6 +222,8 @@
         function openDateTimeModal() { 
             const dateList = document.getElementById("dateList"); 
             const timeList = document.getElementById("timeList"); 
+            const dateTimeNextBtn = document.getElementById("dateTimeNextBtn");
+            dateTimeNextBtn.disabled = true;
             dateList.innerHTML = ""; 
             timeList.innerHTML = ""; 
             const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"]; 
@@ -328,10 +330,15 @@
         document.getElementById("registerBtn").addEventListener("click", openBranchModal);
         document.getElementById("finalConfirm").addEventListener("click", handleSuccess);
         document.getElementById("resetBtn").addEventListener("click", resetFlow);
+        
         // Modal Close Buttons
         document.querySelector("#branchModal .close").addEventListener("click", () => closeModal("branchModal"));
         document.querySelector("#datetimeModal .close").addEventListener("click", () => closeModal("datetimeModal"));
+        
         // Dynamic Content Click Listeners (Event Delegation)
+        document.getElementById("branchModalNextBtn").addEventListener("click", () => {
+            if(selections.branch) { closeModal('branchModal'); openCaptchaModal(); }
+        });
         document.getElementById("branchList").addEventListener("click", (e) => {
             if (e.target && e.target.classList.contains('branch-item') && !e.target.disabled) {
                 document.querySelectorAll("#branchList .branch-item.selected").forEach(el => el.classList.remove("selected"));
@@ -339,9 +346,6 @@
                 selections.branch = e.target.textContent;
                 document.getElementById("branchModalNextBtn").disabled = false;
             }
-        });
-        document.getElementById("branchModalNextBtn").addEventListener("click", () => {
-            if(selections.branch) { closeModal('branchModal'); openCaptchaModal(); }
         });
         
         const dateTimeNextBtn = document.getElementById("dateTimeNextBtn");
