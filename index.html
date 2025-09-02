@@ -215,39 +215,45 @@
         let verificationPassed = false;
         let model;
 
-        // --- MODIFIED: Define possible target rotations ---
         const possibleTargets = [
             { name: "หันหน้าตรง", y: 0 }
         ];
         let currentTarget = possibleTargets[0];
 
-        // --- Three.js Setup ---
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, 280 / 280, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
         renderer.setSize(280, 280);
         camera.position.z = 5;
 
-        // --- Lighting ---
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         directionalLight.position.set(0, 1, 2);
         scene.add(directionalLight);
 
-        // --- GLTF Loader ---
         const loader = new GLTFLoader();
         loader.load(
             'apex.glb',
             function (gltf) {
                 model = gltf.scene;
+                
+                // --- ⬇️ KEY SECTION: CENTERING THE PIVOT POINT ⬇️ ---
+                // 1. Create a bounding box to measure the model's size.
                 const box = new THREE.Box3().setFromObject(model);
+                // 2. Find the geometric center of that box.
                 const center = box.getCenter(new THREE.Vector3());
+                // 3. Move the model's position so its center is now at the scene's origin (0,0,0).
+                //    This ensures all rotations happen around the true center.
+                model.position.sub(center);
+                // --- ⬆️ PIVOT IS NOW CENTERED ⬆️ ---
+
+                // Scale model to fit the view
                 const size = box.getSize(new THREE.Vector3());
                 const maxDim = Math.max(size.x, size.y, size.z);
                 const scale = 4 / maxDim;
-                model.position.sub(center);
                 model.scale.set(scale, scale, scale);
+
                 scene.add(model);
                 animate();
             },
@@ -259,17 +265,14 @@
             }
         );
 
-        // --- Animation Loop ---
         function animate() {
             requestAnimationFrame(animate);
             renderer.render(scene, camera);
         }
 
-        // --- MODIFIED: Simplified setInitialRotation ---
         function setInitialRotation() {
             if (!model) return;
             
-            // Set the target (always the first one now)
             currentTarget = possibleTargets[0];
             captchaTargetInstruction.textContent = currentTarget.name;
 
@@ -296,7 +299,6 @@
             captchaModal.style.display = 'flex';
         }
 
-        // --- MODIFIED: Function to check against the (now fixed) target ---
         function checkRotation() {
             if (verificationPassed || !model) return;
 
@@ -306,10 +308,9 @@
 
             const currentY = normalizeAngle(model.rotation.y);
             const currentX = normalizeAngle(model.rotation.x);
-            const targetY = normalizeAngle(currentTarget.y); // This will always be 0 now
+            const targetY = normalizeAngle(currentTarget.y);
 
             const tolerance = 0.35; // Radians (approx 20 degrees)
-
             const isCorrectlyRotated = Math.abs(currentY - targetY) < tolerance && Math.abs(currentX) < tolerance;
 
             if (isCorrectlyRotated) {
@@ -361,6 +362,7 @@
             const deltaX = clientX - lastX;
             const deltaY = clientY - lastY;
             
+            // Allow both left/right and up/down rotation
             model.rotation.y += (deltaX * rotationSensitivity) * (Math.PI / 180);
             model.rotation.x += (deltaY * rotationSensitivity) * (Math.PI / 180);
 
@@ -375,7 +377,6 @@
             checkRotation();
         }
         
-        // Event Listeners for CAPTCHA
         canvas.addEventListener('pointerdown', handleDragStart);
         document.addEventListener('pointermove', handleDragMove); 
         document.addEventListener('pointerup', handleDragEnd);   
