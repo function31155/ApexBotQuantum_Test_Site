@@ -99,7 +99,7 @@
 
     <div id="branchModal" class="modal">
         <div class="modal-content">
-            <span class="modal-title">Select Branch</span><span class="close" onclick="closeModal('branchModal')">×</span>
+            <span class="modal-title">Select Branch</span><span class="close">×</span>
             <div id="branchList" class="branchButtons"></div>
             <button class="next-btn" id="branchModalNextBtn" disabled style="margin-top: 20px;">Next</button>
         </div>
@@ -130,7 +130,7 @@
 
     <div id="datetimeModal" class="modal">
         <div class="modal-content">
-            <span class="modal-title">Select Date & Time</span><span class="close" onclick="closeModal('datetimeModal')">×</span>
+            <span class="modal-title">Select Date & Time</span><span class="close">×</span>
             <div id="dateList"></div>
             <div id="timeList"></div>
             <div class="datePicketButSection" style="margin-top: 20px;">
@@ -180,25 +180,92 @@
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-        // --- Page Logic (unchanged) ---
+        // --- Global State ---
         const selections = { branch: null, date: null, time: null };
         let startTime;
         let captchaProgressIntervalId = null;
+        
+        // --- Page Navigation ---
         function showPage(pageId) { document.querySelectorAll('#step-area .page').forEach(p => p.classList.remove('active')); document.getElementById(pageId)?.classList.add('active'); }
+        function showModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+        
+        // --- Flow Control ---
         function launchConfetti() { if (typeof confetti !== 'function') return; const end = Date.now() + (2 * 1000); (function frame() { confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } }); confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } }); if (Date.now() < end) requestAnimationFrame(frame); }()); }
         function handleSuccess() { showPage('page-success'); const endTime = new Date(); const elapsedTime = ((endTime - startTime) / 1000).toFixed(2); document.getElementById('final-summary-branch').textContent = selections.branch; document.getElementById('final-summary-date').textContent = selections.date; document.getElementById('final-summary-time').textContent = selections.time; document.getElementById('final-summary-time-taken').textContent = elapsedTime; launchConfetti(); }
         function resetFlow() { Object.keys(selections).forEach(key => selections[key] = null); showPage('page-register'); startCountdown(); }
         function handleTermsPage() { showPage('page-terms'); const checkbox = document.querySelector("input[name='acceptTermsAndConditions']"); const nextBtn = document.getElementById("finalConfirm"); const cloudflareSim = document.getElementById("cloudflare-simulation"); nextBtn.disabled = true; checkbox.checked = false; cloudflareSim.style.display = 'none'; checkbox.onchange = () => { if (checkbox.checked) { nextBtn.disabled = true; cloudflareSim.style.display = 'flex'; setTimeout(() => { cloudflareSim.style.display = 'none'; if (checkbox.checked) { nextBtn.disabled = false; } }, 2500); } else { nextBtn.disabled = true; } }; }
-        function openBranchModal() { startTime = new Date(); const modal = document.getElementById("branchModal"); const nextBtn = document.getElementById("branchModalNextBtn"); const list = modal.querySelector("#branchList"); modal.style.display = "flex"; nextBtn.disabled = true; list.innerHTML = ""; const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld", "MEGABANGNA", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai", "ICONSIAM"]; let unavailableBranches = []; const numUnavailable = Math.floor(Math.random() * 3); const shuffledBranches = [...branches].sort(() => 0.5 - Math.random()); for (let i = 0; i < numUnavailable; i++) { unavailableBranches.push(shuffledBranches[i]); } branches.forEach(b => { const button = document.createElement("button"); button.className = "branch-item"; button.textContent = b; if (unavailableBranches.includes(b)) { button.classList.add("is_full"); button.disabled = true; } else { button.onclick = () => { list.querySelectorAll(".branch-item.selected").forEach(el => el.classList.remove("selected")); button.classList.add("selected"); selections.branch = b; nextBtn.disabled = false; }; } list.appendChild(button); }); nextBtn.onclick = () => { if (selections.branch) { closeModal('branchModal'); openCaptchaModal(); } }; }
-        function openDateTimeModal() { const modal = document.getElementById("datetimeModal"); const nextBtn = document.getElementById("dateTimeNextBtn"); const dateList = modal.querySelector("#dateList"); const timeList = modal.querySelector("#timeList"); modal.style.display = "flex"; nextBtn.disabled = true; dateList.innerHTML = ""; timeList.innerHTML = ""; const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"]; let unavailableTimes = []; const numUnavailableTimes = Math.floor(Math.random() * 4); const shuffledTimes = [...times].sort(() => 0.5 - Math.random()); for (let i = 0; i < numUnavailableTimes; i++) { unavailableTimes.push(shuffledTimes[i]); } const checkDateTimeValid = () => { if (selections.date && selections.time && !unavailableTimes.includes(selections.time)) { nextBtn.disabled = false; } else { nextBtn.disabled = true; } }; Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => { const button = document.createElement("button"); button.className = "MuiPickersDay-root"; button.textContent = d; button.onclick = () => { dateList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.date = d; selections.time = null; timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); checkDateTimeValid(); }; dateList.appendChild(button); }); times.forEach(t => { const button = document.createElement("button"); button.className = "timeButtons"; button.textContent = t; if (unavailableTimes.includes(t)) { button.classList.add("disabledTime"); button.disabled = true; } else { button.onclick = () => { timeList.querySelectorAll(".clicked").forEach(b => b.classList.remove("clicked")); button.classList.add("clicked"); selections.time = t; checkDateTimeValid(); }; } timeList.appendChild(button); }); nextBtn.onclick = () => { if (selections.date && selections.time) { closeModal('datetimeModal'); handleTermsPage(); } }; }
-        function startCountdown() { const countdownEl = document.getElementById("countdown"); const registerBtn = document.getElementById("registerBtn"); let secondsLeft = 7; registerBtn.disabled = true; registerBtn.classList.remove('enabled'); const timer = setInterval(() => { if (secondsLeft <= 0) { clearInterval(timer); countdownEl.textContent = "OPEN!"; registerBtn.disabled = false; registerBtn.classList.add('enabled'); } else { countdownEl.textContent = `00:00:0${secondsLeft--}`; } }, 1000); }
-        function initializePage() { const checkBot = () => { if (document.body.dataset.dpbotEnabled === 'true') { document.querySelector('.main-container').style.display = 'flex'; document.getElementById('bot-required-overlay').style.display = 'none'; resetFlow(); } else { document.getElementById('bot-required-overlay').style.display = 'flex'; document.querySelector('.main-container').style.display = 'none'; } }; setTimeout(checkBot, 200); }
-        document.getElementById("registerBtn").addEventListener("click", openBranchModal);
-        document.getElementById("finalConfirm").addEventListener("click", handleSuccess);
-        document.getElementById("resetBtn").addEventListener("click", resetFlow);
-        document.addEventListener("DOMContentLoaded", initializePage);
         
+        // --- Modal Population ---
+        function openBranchModal() { 
+            startTime = new Date(); 
+            const list = document.getElementById("branchList"); 
+            list.innerHTML = ""; 
+            const branches = ["Terminal 21", "Central Ladprao", "Siam Center", "Fashion Island", "Centralworld", "MEGABANGNA", "Siam Square", "Emsphere", "Central Pattaya", "Seacon Square", "Central Westgate", "Central Chiangmai", "ICONSIAM"]; 
+            let unavailableBranches = []; 
+            const numUnavailable = Math.floor(Math.random() * 3); 
+            const shuffledBranches = [...branches].sort(() => 0.5 - Math.random()); 
+            for (let i = 0; i < numUnavailable; i++) { unavailableBranches.push(shuffledBranches[i]); } 
+            branches.forEach(b => { 
+                const button = document.createElement("button"); 
+                button.className = "branch-item"; 
+                button.textContent = b; 
+                if (unavailableBranches.includes(b)) { 
+                    button.classList.add("is_full"); 
+                    button.disabled = true; 
+                }
+                list.appendChild(button); 
+            }); 
+            showModal('branchModal'); 
+        }
+
+        function openDateTimeModal() { 
+            const dateList = document.getElementById("dateList"); 
+            const timeList = document.getElementById("timeList"); 
+            dateList.innerHTML = ""; 
+            timeList.innerHTML = ""; 
+            const times = ["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"]; 
+            let unavailableTimes = []; 
+            const numUnavailableTimes = Math.floor(Math.random() * 4); 
+            const shuffledTimes = [...times].sort(() => 0.5 - Math.random()); 
+            for (let i = 0; i < numUnavailableTimes; i++) { unavailableTimes.push(shuffledTimes[i]); } 
+            Array.from({ length: 31 }, (_, i) => i + 1).forEach(d => { 
+                const button = document.createElement("button"); 
+                button.className = "MuiPickersDay-root"; 
+                button.dataset.date = d;
+                button.textContent = d; 
+                dateList.appendChild(button); 
+            }); 
+            times.forEach(t => { 
+                const button = document.createElement("button"); 
+                button.className = "timeButtons"; 
+                button.dataset.time = t;
+                button.textContent = t; 
+                if (unavailableTimes.includes(t)) { 
+                    button.classList.add("disabledTime"); 
+                    button.disabled = true; 
+                } 
+                timeList.appendChild(button); 
+            }); 
+            showModal('datetimeModal'); 
+        }
+        
+        function startCountdown() { const countdownEl = document.getElementById("countdown"); const registerBtn = document.getElementById("registerBtn"); let secondsLeft = 7; registerBtn.disabled = true; registerBtn.classList.remove('enabled'); const timer = setInterval(() => { if (secondsLeft <= 0) { clearInterval(timer); countdownEl.textContent = "OPEN!"; registerBtn.disabled = false; registerBtn.classList.add('enabled'); } else { countdownEl.textContent = `00:00:0${secondsLeft--}`; } }, 1000); }
+        
+        function initializePage() { 
+            const checkBot = () => { 
+                if (document.body.dataset.dpbotEnabled === 'true') { 
+                    document.querySelector('.main-container').style.display = 'flex'; 
+                    document.getElementById('bot-required-overlay').style.display = 'none'; 
+                    resetFlow(); 
+                } else { 
+                    document.getElementById('bot-required-overlay').style.display = 'flex'; 
+                    document.querySelector('.main-container').style.display = 'none'; 
+                } 
+            }; 
+            setTimeout(checkBot, 200); 
+        }
+
         // --- THREE.JS CAPTCHA LOGIC ---
         const captchaModal = document.getElementById('captchaModal');
         const canvas = document.getElementById('captcha-canvas');
@@ -208,45 +275,36 @@
         const captchaLangBtn = document.getElementById('captchaLangBtn');
         const captchaCanvasContainer = document.getElementById('captcha-canvas-container');
         const captchaTargetInstruction = document.getElementById('captcha-target-instruction');
-
         let isDragging = false; 
         let lastX, lastY;
         const rotationSensitivity = 0.5;
         let verificationPassed = false;
         let model;
-
-        // --- Three.js Setup ---
+        const possibleTargets = [ { name: "หันหน้าตรง", y: 0 } ];
+        let currentTarget = possibleTargets[0];
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, 280 / 280, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
         renderer.setSize(280, 280);
-
-        // --- Lighting ---
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         directionalLight.position.set(0, 1, 2);
         scene.add(directionalLight);
-
-        // --- GLTF Loader ---
         const loader = new GLTFLoader();
         loader.load(
             'apex.glb',
             function (gltf) {
                 model = gltf.scene;
-                
                 const box = new THREE.Box3().setFromObject(model);
                 const center = box.getCenter(new THREE.Vector3());
                 const size = box.getSize(new THREE.Vector3());
-                
                 const maxDim = Math.max(size.x, size.y, size.z);
                 const fov = camera.fov * (Math.PI / 180);
                 let cameraZ = Math.abs(maxDim / (2 * Math.tan(fov / 2)));
                 camera.position.z = cameraZ * 1.5; 
                 camera.updateProjectionMatrix();
-
                 model.position.sub(center);
-                
                 scene.add(model);
                 animate();
             },
@@ -257,104 +315,62 @@
                 captchaStatusText.className = 'captcha-status-text captcha-failure';
             }
         );
-
-        function animate() {
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
-        }
-
-        function setInitialRotation() {
-            if (!model) return;
-            currentTarget = possibleTargets[0];
-            captchaTargetInstruction.textContent = currentTarget.name;
-            model.rotation.y = currentTarget.y + (Math.PI / 2) + (Math.random() * Math.PI); 
-            model.rotation.x = (Math.random() * Math.PI / 2) - (Math.PI / 4); 
-            verificationPassed = false;
-            captchaProgressBar.style.width = '0%';
-        }
-
-        function openCaptchaModal() {
-            if (!model) { 
-                const loadingCaptcha = document.getElementById('loadingCaptcha');
-                loadingCaptcha.classList.add('show');
-                return;
-            }
-            const loadingCaptcha = document.getElementById('loadingCaptcha');
-            loadingCaptcha.classList.remove('show');
-            setInitialRotation();
-            captchaStatusText.textContent = '';
-            captchaStatusText.className = 'captcha-status-text';
-            captchaCanvasContainer.classList.remove('captcha-success-glow');
-            captchaModal.style.display = 'flex';
-        }
-
-        function checkRotation() {
-            if (verificationPassed || !model) return;
-            const normalizeAngle = (angle) => { return angle - 2 * Math.PI * Math.floor((angle + Math.PI) / (2 * Math.PI)); }
-            const currentY = normalizeAngle(model.rotation.y);
-            const currentX = normalizeAngle(model.rotation.x);
-            const targetY = normalizeAngle(currentTarget.y);
-            const tolerance = 0.35;
-            const isCorrectlyRotated = Math.abs(currentY - targetY) < tolerance && Math.abs(currentX) < tolerance;
-            if (isCorrectlyRotated) {
-                verificationPassed = true;
-                captchaStatusText.textContent = 'รอ 2 วินาที...';
-                captchaStatusText.className = 'captcha-status-text captcha-waiting';
-                captchaCanvasContainer.classList.add('captcha-success-glow');
-                let progress = 0;
-                clearInterval(captchaProgressIntervalId);
-                captchaProgressIntervalId = setInterval(() => {
-                    progress += 5;
-                    captchaProgressBar.style.width = `${progress}%`;
-                    if (progress >= 100) {
-                        clearInterval(captchaProgressIntervalId);
-                        closeModal('captchaModal');
-                        openDateTimeModal();
-                    }
-                }, 100);
-            } else {
-                captchaStatusText.textContent = 'Try Again';
-                captchaStatusText.className = 'captcha-status-text captcha-failure';
-                captchaCanvasContainer.classList.remove('captcha-success-glow');
-                captchaProgressBar.style.width = '0%';
-            }
-        }
-
-        function handleDragStart(e) {
-            e.preventDefault();
-            if (!model) return;
-            isDragging = true;
-            lastX = e.clientX || e.touches[0].clientX;
-            lastY = e.clientY || e.touches[0].clientY;
-            captchaStatusText.textContent = ''; 
-            captchaStatusText.className = 'captcha-status-text';
-            captchaCanvasContainer.style.cursor = 'grabbing';
-            clearInterval(captchaProgressIntervalId); 
-            captchaProgressBar.style.width = '0%';
-            verificationPassed = false; 
-            captchaCanvasContainer.classList.remove('captcha-success-glow');
-        }
+        function animate() { requestAnimationFrame(animate); renderer.render(scene, camera); }
+        function setInitialRotation() { if (!model) return; currentTarget = possibleTargets[0]; captchaTargetInstruction.textContent = currentTarget.name; model.rotation.y = currentTarget.y + (Math.PI / 2) + (Math.random() * Math.PI); model.rotation.x = (Math.random() * Math.PI / 2) - (Math.PI / 4); verificationPassed = false; captchaProgressBar.style.width = '0%'; }
+        function openCaptchaModal() { if (!model) { document.getElementById('loadingCaptcha').classList.add('show'); return; } document.getElementById('loadingCaptcha').classList.remove('show'); setInitialRotation(); captchaStatusText.textContent = ''; captchaStatusText.className = 'captcha-status-text'; captchaCanvasContainer.classList.remove('captcha-success-glow'); showModal('captchaModal'); }
+        function checkRotation() { if (verificationPassed || !model) return; const normalizeAngle = (angle) => { return angle - 2 * Math.PI * Math.floor((angle + Math.PI) / (2 * Math.PI)); } const currentY = normalizeAngle(model.rotation.y); const currentX = normalizeAngle(model.rotation.x); const targetY = normalizeAngle(currentTarget.y); const tolerance = 0.35; const isCorrectlyRotated = Math.abs(currentY - targetY) < tolerance && Math.abs(currentX) < tolerance; if (isCorrectlyRotated) { verificationPassed = true; captchaStatusText.textContent = 'รอ 2 วินาที...'; captchaStatusText.className = 'captcha-status-text captcha-waiting'; captchaCanvasContainer.classList.add('captcha-success-glow'); let progress = 0; clearInterval(captchaProgressIntervalId); captchaProgressIntervalId = setInterval(() => { progress += 5; captchaProgressBar.style.width = `${progress}%`; if (progress >= 100) { clearInterval(captchaProgressIntervalId); closeModal('captchaModal'); openDateTimeModal(); } }, 100); } else { captchaStatusText.textContent = 'Try Again'; captchaStatusText.className = 'captcha-status-text captcha-failure'; captchaCanvasContainer.classList.remove('captcha-success-glow'); captchaProgressBar.style.width = '0%'; } }
+        function handleDragStart(e) { e.preventDefault(); if (!model) return; isDragging = true; lastX = e.clientX || e.touches[0].clientX; lastY = e.clientY || e.touches[0].clientY; captchaStatusText.textContent = ''; captchaStatusText.className = 'captcha-status-text'; captchaCanvasContainer.style.cursor = 'grabbing'; clearInterval(captchaProgressIntervalId); captchaProgressBar.style.width = '0%'; verificationPassed = false; captchaCanvasContainer.classList.remove('captcha-success-glow'); }
+        function handleDragMove(e) { if (!isDragging || verificationPassed || !model) return; e.preventDefault(); const clientX = e.clientX || e.touches[0].clientX; const clientY = e.clientY || e.touches[0].clientY; const deltaX = clientX - lastX; const deltaY = clientY - lastY; model.rotation.y += (deltaX * rotationSensitivity) * (Math.PI / 180); model.rotation.x += (deltaY * rotationSensitivity) * (Math.PI / 180); lastX = clientX; lastY = clientY; }
+        function handleDragEnd() { if (!isDragging || !model) return; isDragging = false; captchaCanvasContainer.style.cursor = 'grab'; checkRotation(); }
         
-        function handleDragMove(e) {
-            if (!isDragging || verificationPassed || !model) return; 
-            e.preventDefault();
-            const clientX = e.clientX || e.touches[0].clientX;
-            const clientY = e.clientY || e.touches[0].clientY;
-            const deltaX = clientX - lastX;
-            const deltaY = clientY - lastY;
-            model.rotation.y += (deltaX * rotationSensitivity) * (Math.PI / 180);
-            model.rotation.x += (deltaY * rotationSensitivity) * (Math.PI / 180);
-            lastX = clientX;
-            lastY = clientY;
-        }
-
-        function handleDragEnd() {
-            if (!isDragging || !model) return;
-            isDragging = false;
-            captchaCanvasContainer.style.cursor = 'grab';
-            checkRotation();
-        }
+        // --- Event Listeners ---
+        document.addEventListener("DOMContentLoaded", initializePage);
+        document.getElementById("registerBtn").addEventListener("click", openBranchModal);
+        document.getElementById("finalConfirm").addEventListener("click", handleSuccess);
+        document.getElementById("resetBtn").addEventListener("click", resetFlow);
+        // Modal Close Buttons
+        document.querySelector("#branchModal .close").addEventListener("click", () => closeModal("branchModal"));
+        document.querySelector("#datetimeModal .close").addEventListener("click", () => closeModal("datetimeModal"));
+        // Dynamic Content Click Listeners (Event Delegation)
+        document.getElementById("branchList").addEventListener("click", (e) => {
+            if (e.target && e.target.classList.contains('branch-item') && !e.target.disabled) {
+                document.querySelectorAll("#branchList .branch-item.selected").forEach(el => el.classList.remove("selected"));
+                e.target.classList.add("selected");
+                selections.branch = e.target.textContent;
+                document.getElementById("branchModalNextBtn").disabled = false;
+            }
+        });
+        document.getElementById("branchModalNextBtn").addEventListener("click", () => {
+            if(selections.branch) { closeModal('branchModal'); openCaptchaModal(); }
+        });
         
+        const dateTimeNextBtn = document.getElementById("dateTimeNextBtn");
+        const checkDateTimeValid = () => {
+            dateTimeNextBtn.disabled = !(selections.date && selections.time);
+        };
+        document.getElementById("dateList").addEventListener("click", (e) => {
+            if (e.target && e.target.classList.contains('MuiPickersDay-root') && !e.target.disabled) {
+                document.querySelectorAll("#dateList .clicked").forEach(b => b.classList.remove("clicked"));
+                e.target.classList.add("clicked");
+                selections.date = e.target.dataset.date;
+                selections.time = null; // Reset time selection
+                document.querySelectorAll("#timeList .clicked").forEach(b => b.classList.remove("clicked"));
+                checkDateTimeValid();
+            }
+        });
+        document.getElementById("timeList").addEventListener("click", (e) => {
+            if (e.target && e.target.classList.contains('timeButtons') && !e.target.disabled) {
+                document.querySelectorAll("#timeList .clicked").forEach(b => b.classList.remove("clicked"));
+                e.target.classList.add("clicked");
+                selections.time = e.target.dataset.time;
+                checkDateTimeValid();
+            }
+        });
+        dateTimeNextBtn.addEventListener("click", () => {
+            if(selections.date && selections.time) { closeModal('datetimeModal'); handleTermsPage(); }
+        });
+
+        // Captcha Listeners
         canvas.addEventListener('pointerdown', handleDragStart);
         document.addEventListener('pointermove', handleDragMove); 
         document.addEventListener('pointerup', handleDragEnd);   
