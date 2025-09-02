@@ -41,14 +41,32 @@
         #cloudflare-simulation { display: none; align-items: center; justify-content: center; padding: 20px; background-color: rgba(10, 15, 24, 0.8); border-radius: 4px; margin: 20px 0; border: 1px solid var(--border-color); }
         .spinner { width: 24px; height: 24px; border: 3px solid rgba(255, 255, 255, 0.3); border-top-color: var(--accent-cyber); border-radius: 50%; animation: spin 1s linear infinite; }
         #bot-required-overlay { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--accent-danger); font-size: 24px; font-weight: bold; text-align: center; font-family: var(--font-header); }
-        #captchaModal .modal-content { max-width: 380px; }
-        #captcha-canvas-container { width: 280px; height: 280px; margin: 20px auto; position: relative; background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.2) 80%); border-radius: 15px; box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5); cursor: grab; }
+        #captchaModal .modal-content { max-width: 380px; padding-bottom: 15px; } /* Adjust padding for new buttons */
+
+        /* CAPTCHA UI Specific Styles */
+        .captcha-progress-bar-container { height: 8px; background-color: rgba(0, 191, 255, 0.1); border-radius: 4px; margin-bottom: 15px; overflow: hidden; border: 1px solid var(--border-color); }
+        .captcha-progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #00bfff, #00ffab); transition: width 0.3s ease-in-out; border-radius: 4px; }
+        .captcha-instructions { text-align: center; margin-bottom: 15px; }
+        .captcha-instructions h3 { font-family: var(--font-body); font-size: 18px; color: var(--accent-cyber); margin: 0; text-shadow: none; letter-spacing: 0; text-transform: none; }
+        .captcha-instructions p { font-size: 13px; margin-top: 5px; line-height: 1.4; }
+        .captcha-status-text { font-size: 1.1em; font-weight: bold; margin: 15px 0; height: 25px; transition: color 0.3s ease; color: var(--text-muted); }
+        .captcha-status-text.captcha-success { color: var(--accent-green); text-shadow: 0 0 10px var(--accent-green); }
+        .captcha-status-text.captcha-failure { color: var(--accent-danger); text-shadow: 0 0 10px var(--accent-danger); }
+        .captcha-status-text.captcha-waiting { color: #f39c12; text-shadow: 0 0 8px #f39c12; }
+
+
+        #captcha-canvas-container { width: 280px; height: 280px; margin: 20px auto; position: relative; background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.2) 80%); border-radius: 15px; box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5); cursor: grab; overflow: hidden; /* Ensure 3D doesn't spill */ border: 1px solid var(--border-color); }
         #captcha-canvas-container:active { cursor: grabbing; }
         canvas#captcha-canvas { display: block; width: 100%; height: 100%; border-radius: 15px; }
-        #captcha-status { margin-top: 15px; font-size: 1.2em; font-weight: bold; height: 25px; transition: color 0.3s ease; }
-        .captcha-success { color: var(--accent-green); text-shadow: 0 0 10px var(--accent-green); }
-        .captcha-failure { color: var(--accent-danger); text-shadow: 0 0 10px var(--accent-danger); }
-        .captcha-success-glow { box-shadow: 0 0 20px var(--accent-green); }
+        .captcha-success-glow { box-shadow: 0 0 20px var(--accent-green), inset 0 0 10px rgba(10, 15, 24, 0.5); }
+        
+        .captcha-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+        .captcha-controls button { width: 100px; padding: 8px 12px; font-size: 14px; }
+        .captcha-controls .try-again-btn { background-color: #555; color: white; }
+        .captcha-controls .try-again-btn:hover { background-color: #666; }
+        .captcha-controls .lang-btn { background-color: #444; color: #ccc; }
+        .captcha-controls .lang-btn:hover { background-color: #555; }
+
         #loadingCaptcha { position: fixed; inset: 0; background-color: var(--bg-dark); display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; font-family: var(--font-header); font-size: 1.5em; letter-spacing: 2px; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; z-index: 1001; }
         #loadingCaptcha.show { opacity: 1; visibility: visible; }
         .loading-spinner { width: 40px; height: 40px; border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: var(--accent-cyber); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
@@ -83,15 +101,23 @@
     
     <div id="captchaModal" class="modal">
         <div class="modal-content">
-            <span class="modal-title">Identity Verification</span>
-            <p id="captcha-description" style="color: var(--text-muted); margin-bottom: 20px; line-height: 1.6;">ใช้เมาส์หมุนมุมมองเพื่อให้ตัวละครหันหน้ามาตรงๆ</p>
-            <div id="captcha-canvas-container"><canvas id="captcha-canvas" width="280" height="280"></canvas></div>
-            <div id="captcha-status"></div>
-            <div class="loading-bar-container" style="display: none;" id="loading-bar-container">
-                <div class="loading-bar" id="loading-bar"></div>
+            <div class="captcha-progress-bar-container">
+                <div class="captcha-progress-bar" id="captchaProgressBar"></div>
             </div>
-            <div id="loading-text" style="display: none;">Holding for 2 seconds...</div>
-            <button class="next-btn" id="captchaNextBtn" style="margin-top: 20px;" disabled>Verify</button>
+            <div class="captcha-instructions">
+                <h3>หมุนภาพตัวละครให้หันหน้าเข้าหาตัวเอง</h3>
+                <p>ใช้เมาส์หมุนมุมมองจนกว่าภาพตัวละครจะหันหน้ามาโดยตรง ภาพจะสว่างขึ้นเมื่อวางแนวถูกต้องการันตีความแม่นยำ 95%</p>
+                <div id="captcha-status-text" class="captcha-status-text"></div>
+            </div>
+            
+            <div id="captcha-canvas-container">
+                <canvas id="captcha-canvas" width="280" height="280"></canvas>
+            </div>
+            
+            <div class="captcha-controls">
+                <button class="try-again-btn" id="captchaTryAgainBtn">C ลองอีกครั้ง</button>
+                <button class="lang-btn" id="captchaLangBtn">EN</button>
+            </div>
         </div>
     </div>
 
@@ -145,6 +171,8 @@
     <script>
         const selections = { branch: null, date: null, time: null };
         let startTime;
+        let captchaTimeoutId = null;
+        let captchaProgressIntervalId = null;
         
         function showPage(pageId) { document.querySelectorAll('#step-area .page').forEach(p => p.classList.remove('active')); document.getElementById(pageId)?.classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
@@ -179,112 +207,181 @@
         const captchaModal = document.getElementById('captchaModal');
         const canvas = document.getElementById('captcha-canvas');
         const ctx = canvas.getContext('2d');
-        const captchaStatus = document.getElementById('captcha-status');
-        const captchaNextBtn = document.getElementById('captchaNextBtn');
-        const loadingBarContainer = document.getElementById('loading-bar-container');
-        const loadingBar = document.getElementById('loading-bar');
-        const loadingText = document.getElementById('loading-text');
+        const captchaStatusText = document.getElementById('captcha-status-text');
+        const captchaProgressBar = document.getElementById('captchaProgressBar');
+        const captchaTryAgainBtn = document.getElementById('captchaTryAgainBtn');
+        const captchaLangBtn = document.getElementById('captchaLangBtn');
+        const captchaCanvasContainer = document.getElementById('captcha-canvas-container');
+
         let isDragging = false; 
         let lastX, lastY;
         let currentXAngle = 0; 
         let currentYAngle = 0; 
         const rotationSensitivity = 0.5;
+        let verificationPassed = false;
 
         let iconImage = new Image();
         iconImage.src = 'icon.png'; // Make sure icon.png is in the same folder
-        iconImage.onload = () => drawCube();
-        iconImage.onerror = () => { iconImage = null; drawCube(); };
+        iconImage.onload = () => drawCaptchaScene();
+        iconImage.onerror = () => { iconImage = null; drawCaptchaScene(); };
 
-        function drawCube() {
+        // 3D Cube Vertices and Faces (simplified)
+        const vertices = [
+            [-0.5, -0.5, -0.5], [ 0.5, -0.5, -0.5],
+            [ 0.5,  0.5, -0.5], [-0.5,  0.5, -0.5],
+            [-0.5, -0.5,  0.5], [ 0.5, -0.5,  0.5],
+            [ 0.5,  0.5,  0.5], [-0.5,  0.5,  0.5]
+        ];
+        const faces = [
+            [0, 1, 2, 3], [1, 5, 6, 2],
+            [5, 4, 7, 6], [4, 0, 3, 7],
+            [3, 2, 6, 7], [4, 5, 1, 0]
+        ];
+        const faceColors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3']; // Red, Pink, Purple, Deep Purple, Indigo, Blue
+
+        function rotateX(p, angle) {
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
+            return [p[0], p[1] * cos - p[2] * sin, p[1] * sin + p[2] * cos];
+        }
+
+        function rotateY(p, angle) {
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
+            return [p[0] * cos + p[2] * sin, p[1], -p[0] * sin + p[2] * cos];
+        }
+
+        function rotateZ(p, angle) {
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
+            return [p[0] * cos - p[1] * sin, p[0] * sin + p[1] * cos, p[2]];
+        }
+
+        function drawCaptchaScene() {
             const width = canvas.width;
             const height = canvas.height;
+            ctx.clearRect(0, 0, width, height);
+
+            const rotatedVertices = vertices.map(v => {
+                let p = v;
+                p = rotateX(p, currentXAngle * Math.PI / 180);
+                p = rotateY(p, currentYAngle * Math.PI / 180);
+                return p;
+            });
+
+            // Project 3D to 2D
+            const scale = width / 2;
+            const projectedVertices = rotatedVertices.map(v => [
+                v[0] * scale + width / 2,
+                v[1] * scale + height / 2,
+                v[2] // Keep Z for depth sorting
+            ]);
+
+            // Sort faces by average Z-depth to draw from back to front
+            const sortedFaces = faces
+                .map((face, index) => {
+                    const avgZ = face.reduce((sum, vIndex) => sum + rotatedVertices[vIndex][2], 0) / face.length;
+                    return { face, color: faceColors[index % faceColors.length], avgZ };
+                })
+                .sort((a, b) => a.avgZ - b.avgZ);
+
+            sortedFaces.forEach(({ face, color }) => {
+                ctx.beginPath();
+                ctx.moveTo(projectedVertices[face[0]][0], projectedVertices[face[0]][1]);
+                for (let i = 1; i < face.length; i++) {
+                    ctx.lineTo(projectedVertices[face[i]][0], projectedVertices[face[i]][1]);
+                }
+                ctx.closePath();
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+
+            // Draw the image on the front face (simplified)
             const normalizedYAngle = ((currentYAngle % 360) + 540) % 360 - 180;
             const isFrontFacing = Math.abs(normalizedYAngle) <= 90;
-            ctx.clearRect(0, 0, width, height);
-            ctx.save();
-            ctx.translate(width / 2, height / 2);
-            
-            const rotX = currentXAngle * Math.PI / 180;
-            const scaleY = Math.cos(rotX);
-            const rotY = currentYAngle * Math.PI / 180;
-            const scaleX = Math.cos(rotY);
-
-            ctx.transform(scaleX, Math.sin(rotX) * 0.2, 0, scaleY, 0, 0);
 
             if (isFrontFacing) {
+                // Determine the front face vertices (simplified: assume it's face index 0 for now after rotation)
+                // This part needs more robust 3D math for exact front face detection and image mapping.
+                // For simplicity, we'll draw it roughly in the center if it's generally facing front.
+                ctx.save();
+                ctx.translate(width / 2, height / 2); // Center of canvas
+                ctx.scale(Math.abs(Math.cos(currentYAngle * Math.PI / 180)), Math.abs(Math.cos(currentXAngle * Math.PI / 180)));
+                
                 if (iconImage && iconImage.complete) {
                     const imgSize = Math.min(width, height) * 0.6;
                     ctx.drawImage(iconImage, -imgSize/2, -imgSize/2, imgSize, imgSize);
                 } else {
-                    ctx.fillStyle = '#4dd0e1';
+                    ctx.fillStyle = '#eee';
                     ctx.font = 'bold 80px sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText("ICON", 0, 0);
                 }
-            } else {
-                ctx.save();
-                ctx.transform(-1, 0, 0, 1, 0, 0);
-                ctx.fillStyle = '#e0e0e0';
-                ctx.font = 'bold 40px Orbitron';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText("ApexBot", 0, 0);
                 ctx.restore();
             }
-            ctx.restore();
         }
 
+
         function setInitialRotation() {
-            currentYAngle = (Math.random() * 180) + 90;
-            currentXAngle = Math.random() * 60 - 30;
-            drawCube();
+            currentYAngle = (Math.random() * 180) + 90; // Start with back or side facing
+            currentXAngle = Math.random() * 60 - 30; // Slight tilt
+            verificationPassed = false;
+            captchaProgressBar.style.width = '0%';
+            drawCaptchaScene();
         }
 
         function openCaptchaModal() {
             const loadingCaptcha = document.getElementById('loadingCaptcha');
             setInitialRotation();
-            captchaStatus.textContent = '';
-            captchaStatus.className = '';
-            captchaNextBtn.disabled = true;
-            loadingBarContainer.style.display = 'none';
-            loadingText.style.display = 'none';
-            document.getElementById('captcha-canvas-container').classList.remove('captcha-success-glow');
+            captchaStatusText.textContent = '';
+            captchaStatusText.className = 'captcha-status-text';
+            captchaCanvasContainer.classList.remove('captcha-success-glow');
+            
             loadingCaptcha.classList.add('show');
             setTimeout(() => {
                 loadingCaptcha.classList.remove('show');
                 captchaModal.style.display = 'flex';
-                drawCube();
+                drawCaptchaScene();
             }, 1000);
         }
 
         function checkRotation() {
+            if (verificationPassed) return; // Already passed
+
             const normalizedYAngle = ((currentYAngle % 360) + 540) % 360 - 180;
             const normalizedXAngle = ((currentXAngle % 360) + 540) % 360 - 180;
-            const tolerance = 20;
-            const canvasContainer = document.getElementById('captcha-canvas-container');
-            if (Math.abs(normalizedYAngle) <= tolerance && Math.abs(normalizedXAngle) <= tolerance) {
-                captchaStatus.textContent = 'Verification Passed!';
-                captchaStatus.className = 'captcha-success';
-                captchaNextBtn.disabled = false;
-                canvasContainer.classList.add('captcha-success-glow');
-                loadingBarContainer.style.display = 'block';
-                loadingText.style.display = 'block';
-                loadingBar.style.width = '0%';
+            const tolerance = 20; // degrees
+
+            const isCorrectlyRotated = Math.abs(normalizedYAngle) <= tolerance && Math.abs(normalizedXAngle) <= tolerance;
+
+            if (isCorrectlyRotated) {
+                verificationPassed = true;
+                captchaStatusText.textContent = 'รอ 2 วินาที...';
+                captchaStatusText.className = 'captcha-status-text captcha-waiting';
+                captchaCanvasContainer.classList.add('captcha-success-glow');
+                
                 let progress = 0;
-                const interval = setInterval(() => {
-                    if (progress >= 100) clearInterval(interval);
-                    else loadingBar.style.width = `${progress += 5}%`;
+                clearInterval(captchaProgressIntervalId); // Clear any existing interval
+                captchaProgressIntervalId = setInterval(() => {
+                    progress += 5; // 5% every 100ms means 100% in 2 seconds (20 * 5)
+                    captchaProgressBar.style.width = `${progress}%`;
+                    if (progress >= 100) {
+                        clearInterval(captchaProgressIntervalId);
+                        closeModal('captchaModal');
+                        openDateTimeModal();
+                    }
                 }, 100);
-                setTimeout(() => {
-                    closeModal('captchaModal');
-                    openDateTimeModal();
-                }, 2000);
+
             } else {
-                captchaStatus.textContent = 'Try Again';
-                captchaStatus.className = 'captcha-failure';
-                captchaNextBtn.disabled = true;
-                canvasContainer.classList.remove('captcha-success-glow');
+                captchaStatusText.textContent = 'Try Again';
+                captchaStatusText.className = 'captcha-status-text captcha-failure';
+                captchaCanvasContainer.classList.remove('captcha-success-glow');
+                // Optionally reset progress bar if it was partially filled from a previous close attempt
+                captchaProgressBar.style.width = '0%'; 
             }
         }
 
@@ -293,13 +390,17 @@
             isDragging = true;
             lastX = e.clientX || e.touches[0].clientX;
             lastY = e.clientY || e.touches[0].clientY;
-            captchaStatus.textContent = '';
-            captchaStatus.className = '';
-            document.getElementById('captcha-canvas-container').style.cursor = 'grabbing';
+            captchaStatusText.textContent = ''; // Clear status on drag start
+            captchaStatusText.className = 'captcha-status-text';
+            captchaCanvasContainer.style.cursor = 'grabbing';
+            clearInterval(captchaProgressIntervalId); // Stop progress bar if dragging again
+            captchaProgressBar.style.width = '0%';
+            verificationPassed = false; // Reset verification status
+            captchaCanvasContainer.classList.remove('captcha-success-glow');
         }
 
         function handleDragMove(e) {
-            if (!isDragging) return;
+            if (!isDragging || verificationPassed) return; // Don't drag if already passed
             e.preventDefault();
             const clientX = e.clientX || e.touches[0].clientX;
             const clientY = e.clientY || e.touches[0].clientY;
@@ -309,19 +410,22 @@
             currentXAngle -= deltaY * rotationSensitivity;
             lastX = clientX;
             lastY = clientY;
-            drawCube();
+            drawCaptchaScene();
         }
 
         function handleDragEnd() {
             if (!isDragging) return;
             isDragging = false;
-            document.getElementById('captcha-canvas-container').style.cursor = 'grab';
+            captchaCanvasContainer.style.cursor = 'grab';
             checkRotation();
         }
-
+        
+        // Event Listeners for CAPTCHA
         canvas.addEventListener('pointerdown', handleDragStart);
-        document.addEventListener('pointermove', handleDragMove);
-        document.addEventListener('pointerup', handleDragEnd);
+        document.addEventListener('pointermove', handleDragMove); // Listen on document to handle drags outside canvas
+        document.addEventListener('pointerup', handleDragEnd);   // Listen on document to handle drags outside canvas
+        captchaTryAgainBtn.addEventListener('click', setInitialRotation); // 'C ลองอีกครั้ง' button
+        captchaLangBtn.addEventListener('click', () => alert('Language toggle not implemented in this demo.')); // 'EN' button
     </script>
 </body>
 </html>
