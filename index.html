@@ -203,7 +203,7 @@
         document.getElementById("resetBtn").addEventListener("click", resetFlow);
         document.addEventListener("DOMContentLoaded", initializePage);
         
-        // --- NEW CAPTCHA LOGIC ---
+        // --- CAPTCHA LOGIC ---
         const captchaModal = document.getElementById('captchaModal');
         const canvas = document.getElementById('captcha-canvas');
         const ctx = canvas.getContext('2d');
@@ -225,19 +225,26 @@
         iconImage.onload = () => drawCaptchaScene();
         iconImage.onerror = () => { iconImage = null; drawCaptchaScene(); };
 
-        // 3D Cube Vertices and Faces (simplified)
+        // Modified Vertices and Faces for a thinner object
+        // Use a smaller Z-range for thinner object
+        const thickness = 0.05; // Adjust this value for desired thinness
         const vertices = [
-            [-0.5, -0.5, -0.5], [ 0.5, -0.5, -0.5],
-            [ 0.5,  0.5, -0.5], [-0.5,  0.5, -0.5],
-            [-0.5, -0.5,  0.5], [ 0.5, -0.5,  0.5],
-            [ 0.5,  0.5,  0.5], [-0.5,  0.5,  0.5]
+            [-0.5, -0.5, -thickness], [ 0.5, -0.5, -thickness], // Front face Z-
+            [ 0.5,  0.5, -thickness], [-0.5,  0.5, -thickness],
+            [-0.5, -0.5,  thickness], [ 0.5, -0.5,  thickness], // Back face Z+
+            [ 0.5,  0.5,  thickness], [-0.5,  0.5,  thickness]
         ];
+        // Faces (order matters for back-to-front rendering if using fill)
         const faces = [
-            [0, 1, 2, 3], [1, 5, 6, 2],
-            [5, 4, 7, 6], [4, 0, 3, 7],
-            [3, 2, 6, 7], [4, 5, 1, 0]
+            [0, 1, 2, 3], // Front
+            [4, 5, 6, 7], // Back
+            [0, 4, 7, 3], // Left
+            [1, 5, 6, 2], // Right
+            [0, 1, 5, 4], // Bottom
+            [3, 2, 6, 7]  // Top
         ];
-        const faceColors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3']; // Red, Pink, Purple, Deep Purple, Indigo, Blue
+        // Only give border/fill to side faces if needed, otherwise keep them transparent
+        // We'll handle front/back drawing separately.
 
         function rotateX(p, angle) {
             const cos = Math.cos(angle);
@@ -261,67 +268,118 @@
             const width = canvas.width;
             const height = canvas.height;
             ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'; // Slight background fill to show object presence
+            ctx.fillRect(0,0,width,height);
 
-            const rotatedVertices = vertices.map(v => {
+
+            // Calculate rotation matrices
+            const rotX = currentXAngle * Math.PI / 180;
+            const rotY = currentYAngle * Math.PI / 180;
+
+            const transformedVertices = vertices.map(v => {
                 let p = v;
-                p = rotateX(p, currentXAngle * Math.PI / 180);
-                p = rotateY(p, currentYAngle * Math.PI / 180);
+                p = rotateX(p, rotX);
+                p = rotateY(p, rotY);
                 return p;
             });
 
-            // Project 3D to 2D
-            const scale = width / 2;
-            const projectedVertices = rotatedVertices.map(v => [
+            // Projection parameters
+            const scale = width * 0.8; // Larger scale to fill more canvas
+            const projectedVertices = transformedVertices.map(v => [
                 v[0] * scale + width / 2,
                 v[1] * scale + height / 2,
                 v[2] // Keep Z for depth sorting
             ]);
 
-            // Sort faces by average Z-depth to draw from back to front
-            const sortedFaces = faces
-                .map((face, index) => {
-                    const avgZ = face.reduce((sum, vIndex) => sum + rotatedVertices[vIndex][2], 0) / face.length;
-                    return { face, color: faceColors[index % faceColors.length], avgZ };
+            // Determine which face is front/back
+            const avgZFrontFace = transformedVertices[0][2] + transformedVertices[1][2] + transformedVertices[2][2] + transformedVertices[3][2];
+            const avgZBackFace = transformedVertices[4][2] + transformedVertices[5][2] + transformedVertices[6][2] + transformedVertices[7][2];
+            
+            const isFrontFacingCurrent = (avgZFrontFace / 4) < (avgZBackFace / 4); // Is original front face currently closer to camera?
+
+            // Draw side faces with a very subtle fill/stroke
+            const sideFaces = [
+                [0, 4, 7, 3], // Left
+                [1, 5, 6, 2], // Right
+                [0, 1, 5, 4], // Bottom
+                [3, 2, 6, 7]  // Top
+            ];
+            
+            // Draw order (back to front) for faces that are not image/text
+            // Filter out front/back faces (indices 0 and 1 in original 'faces' array)
+            const sortedSideFaces = sideFaces
+                .map((faceIndices, originalIndex) => {
+                    const avgZ = faceIndices.reduce((sum, vIndex) => sum + transformedVertices[vIndex][2], 0) / faceIndices.length;
+                    return { face: faceIndices, avgZ };
                 })
                 .sort((a, b) => a.avgZ - b.avgZ);
 
-            sortedFaces.forEach(({ face, color }) => {
+            sortedSideFaces.forEach(({ face }) => {
                 ctx.beginPath();
                 ctx.moveTo(projectedVertices[face[0]][0], projectedVertices[face[0]][1]);
                 for (let i = 1; i < face.length; i++) {
                     ctx.lineTo(projectedVertices[face[i]][0], projectedVertices[face[i]][1]);
                 }
                 ctx.closePath();
-                ctx.fillStyle = color;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.05)'; // Very subtle fill for sides
                 ctx.fill();
-                ctx.strokeStyle = '#333';
-                ctx.lineWidth = 2;
+                ctx.strokeStyle = 'rgba(0, 191, 255, 0.1)'; // Subtle border
+                ctx.lineWidth = 1;
                 ctx.stroke();
             });
 
-            // Draw the image on the front face (simplified)
-            const normalizedYAngle = ((currentYAngle % 360) + 540) % 360 - 180;
-            const isFrontFacing = Math.abs(normalizedYAngle) <= 90;
+            // Now draw the front and back faces (image/text)
+            // Determine the order based on which is closer
+            const frontFaceIndices = [0, 1, 2, 3]; // Original front face
+            const backFaceIndices = [4, 5, 6, 7];   // Original back face
 
-            if (isFrontFacing) {
-                // Determine the front face vertices (simplified: assume it's face index 0 for now after rotation)
-                // This part needs more robust 3D math for exact front face detection and image mapping.
-                // For simplicity, we'll draw it roughly in the center if it's generally facing front.
+            const drawFaceContent = (faceIndices, isFront) => {
                 ctx.save();
-                ctx.translate(width / 2, height / 2); // Center of canvas
-                ctx.scale(Math.abs(Math.cos(currentYAngle * Math.PI / 180)), Math.abs(Math.cos(currentXAngle * Math.PI / 180)));
+                // Translate to center of face for drawing
+                const centerX = (projectedVertices[faceIndices[0]][0] + projectedVertices[faceIndices[1]][0] + projectedVertices[faceIndices[2]][0] + projectedVertices[faceIndices[3]][0]) / 4;
+                const centerY = (projectedVertices[faceIndices[0]][1] + projectedVertices[faceIndices[1]][1] + projectedVertices[faceIndices[2]][1] + projectedVertices[faceIndices[3]][1]) / 4;
                 
-                if (iconImage && iconImage.complete) {
-                    const imgSize = Math.min(width, height) * 0.6;
-                    ctx.drawImage(iconImage, -imgSize/2, -imgSize/2, imgSize, imgSize);
-                } else {
-                    ctx.fillStyle = '#eee';
-                    ctx.font = 'bold 80px sans-serif';
+                ctx.translate(centerX, centerY);
+
+                // Calculate the "tilt" of the face
+                const angleInfluence = Math.abs(currentYAngle % 180); // 0 at front/back, 90 at side
+                let opacity = 1 - (angleInfluence / 90) * 0.5; // More transparent as it turns sideways
+                if (opacity < 0.2) opacity = 0.2; // Min opacity
+
+                if (isFront) { // Drawing image
+                    if (iconImage && iconImage.complete) {
+                        const imgSize = Math.min(width, height) * 0.7; // Scale image a bit larger
+                        ctx.globalAlpha = opacity;
+                        ctx.drawImage(iconImage, -imgSize/2, -imgSize/2, imgSize, imgSize);
+                    } else {
+                        ctx.fillStyle = `rgba(238, 238, 238, ${opacity})`;
+                        ctx.font = 'bold 80px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText("ICON", 0, 0);
+                    }
+                } else { // Drawing "ApexBot" text
+                    ctx.globalAlpha = opacity;
+                    ctx.fillStyle = `rgba(224, 224, 224, ${opacity})`;
+                    ctx.font = 'bold 40px Orbitron';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.fillText("ICON", 0, 0);
+                    // Rotate text to match object if it's the back face
+                    // This part is simplified; true 3D text rotation is complex.
+                    // For now, it will just appear centered on the rotated back face.
+                    ctx.fillText("ApexBot", 0, 0);
                 }
                 ctx.restore();
+            };
+
+            if (isFrontFacingCurrent) {
+                // Draw front face (icon) then back face (text)
+                drawFaceContent(frontFaceIndices, true);
+                drawFaceContent(backFaceIndices, false);
+            } else {
+                // Draw back face (text) then front face (icon)
+                drawFaceContent(backFaceIndices, false);
+                drawFaceContent(frontFaceIndices, true);
             }
         }
 
@@ -352,6 +410,7 @@
         function checkRotation() {
             if (verificationPassed) return; // Already passed
 
+            // Calculate the angle relative to the "front" (0 degrees Y, 0 degrees X)
             const normalizedYAngle = ((currentYAngle % 360) + 540) % 360 - 180;
             const normalizedXAngle = ((currentXAngle % 360) + 540) % 360 - 180;
             const tolerance = 20; // degrees
@@ -380,7 +439,6 @@
                 captchaStatusText.textContent = 'Try Again';
                 captchaStatusText.className = 'captcha-status-text captcha-failure';
                 captchaCanvasContainer.classList.remove('captcha-success-glow');
-                // Optionally reset progress bar if it was partially filled from a previous close attempt
                 captchaProgressBar.style.width = '0%'; 
             }
         }
@@ -390,20 +448,20 @@
             isDragging = true;
             lastX = e.clientX || e.touches[0].clientX;
             lastY = e.clientY || e.touches[0].clientY;
-            captchaStatusText.textContent = ''; // Clear status on drag start
+            captchaStatusText.textContent = ''; 
             captchaStatusText.className = 'captcha-status-text';
             captchaCanvasContainer.style.cursor = 'grabbing';
-            clearInterval(captchaProgressIntervalId); // Stop progress bar if dragging again
+            clearInterval(captchaProgressIntervalId); 
             captchaProgressBar.style.width = '0%';
-            verificationPassed = false; // Reset verification status
+            verificationPassed = false; 
             captchaCanvasContainer.classList.remove('captcha-success-glow');
         }
 
         function handleDragMove(e) {
-            if (!isDragging || verificationPassed) return; // Don't drag if already passed
+            if (!isDragging || verificationPassed) return; 
             e.preventDefault();
             const clientX = e.clientX || e.touches[0].clientX;
-            const clientY = e.clientY || e.touches[0].clientY;
+            const clientY = e.touches[0].clientY;
             const deltaX = clientX - lastX;
             const deltaY = clientY - lastY;
             currentYAngle += deltaX * rotationSensitivity;
@@ -422,10 +480,10 @@
         
         // Event Listeners for CAPTCHA
         canvas.addEventListener('pointerdown', handleDragStart);
-        document.addEventListener('pointermove', handleDragMove); // Listen on document to handle drags outside canvas
-        document.addEventListener('pointerup', handleDragEnd);   // Listen on document to handle drags outside canvas
-        captchaTryAgainBtn.addEventListener('click', setInitialRotation); // 'C ลองอีกครั้ง' button
-        captchaLangBtn.addEventListener('click', () => alert('Language toggle not implemented in this demo.')); // 'EN' button
+        document.addEventListener('pointermove', handleDragMove); 
+        document.addEventListener('pointerup', handleDragEnd);   
+        captchaTryAgainBtn.addEventListener('click', setInitialRotation); 
+        captchaLangBtn.addEventListener('click', () => alert('Language toggle not implemented in this demo.')); 
     </script>
 </body>
 </html>
