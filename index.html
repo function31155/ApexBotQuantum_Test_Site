@@ -229,6 +229,7 @@
 
                 const box = new THREE.Box3().setFromObject(model);
                 const center = box.getCenter(new THREE.Vector3());
+                center.y += 0.7; // 🎯 This is the pivot adjustment
                 model.position.sub(center);
 
                 const size = box.getSize(new THREE.Vector3());
