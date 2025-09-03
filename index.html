@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Web Test Booking - ApexBot Quantum (Bot Compatible)</title>
+    <title>Web Test Booking - ApexBot Quantum (Hybrid)</title>
     
     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
     <script type="importmap">
@@ -16,6 +16,7 @@
     </script>
     
     <style>
+        /* CSS is unchanged */
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto+Mono:wght@400;500&display=swap');
         :root { --bg-dark: #0a0f18; --bg-panel: rgba(18, 28, 48, 0.85); --border-color: rgba(0, 191, 255, 0.3); --accent-cyber: #00bfff; --accent-glow: rgba(0, 191, 255, 0.7); --text-color: #e0e6f0; --text-muted: #88a0c0; --accent-danger: #ff4d6d; --accent-green: #00ffab; --font-header: 'Orbitron', sans-serif; --font-body: 'Roboto Mono', monospace; }
         body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: var(--bg-dark); margin: 0; font-family: var(--font-body); padding: 0; background-image: linear-gradient(rgba(0, 191, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 191, 255, 0.05) 1px, transparent 1px); background-size: 30px 30px; animation: pan-background 60s linear infinite; }
@@ -167,8 +168,9 @@
         // --- Import Libraries ---
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        // --- Page Logic (unchanged from original) ---
+        // --- Page Logic ---
         const selections = { branch: null, date: null, time: null };
         let startTime;
         function showPage(pageId) { document.querySelectorAll('#step-area .page').forEach(p => p.classList.remove('active')); document.getElementById(pageId)?.classList.add('active'); }
@@ -187,84 +189,27 @@
         document.getElementById("resetBtn").addEventListener("click", resetFlow);
         document.addEventListener("DOMContentLoaded", initializePage);
         
-        // 🎯 --- START: BOT-COMPATIBLE 3D CAPTCHA LOGIC --- 🎯
-        const captchaModal = document.getElementById('captchaModal');
-        const canvas = document.getElementById('captcha-canvas');
-        const captchaStatusText = document.getElementById('captcha-status-text');
-        const captchaProgressBar = document.getElementById('captchaProgressBar');
-        const captchaTryAgainBtn = document.getElementById('captchaTryAgainBtn');
-
-        let isDragging = false, lastX, lastY, verificationPassed = false, model;
-        const rotationSensitivity = 0.5;
+        // --- HYBRID 3D CAPTCHA LOGIC (for Bot & Human) ---
+        let captchaInitialized = false;
+        let scene, camera, renderer, controls, model;
+        let verificationPassed = false;
         let captchaProgressIntervalId = null;
-        
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, 300 / 300, 0.1, 1000);
-        camera.position.z = 4;
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
-        renderer.setSize(300, 300);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-        scene.add(ambientLight);
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(0, 1, 2);
-        scene.add(directionalLight);
-
-        const loader = new GLTFLoader();
-        loader.load('apex.glb', (gltf) => {
-            model = gltf.scene;
-            const box = new THREE.Box3().setFromObject(model);
-            const center = box.getCenter(new THREE.Vector3());
-            // This is the manual pivot adjustment
-            center.y += 0.7; 
-            model.position.sub(center);
-
-            const size = box.getSize(new THREE.Vector3());
-            const maxDim = Math.max(size.x, size.y, size.z);
-            const scale = 3.2 / maxDim; // Using Perspective camera scale
-            model.scale.set(scale, scale, scale);
-            scene.add(model);
-        }, undefined, (error) => console.error(error));
-
-        function animate() {
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        function setInitialRotation() {
-            if (!model) return;
-            model.rotation.y = (Math.PI / 2) + (Math.random() * Math.PI); 
-            model.rotation.x = (Math.random() * Math.PI / 2) - (Math.PI / 4); 
-            verificationPassed = false;
-            if(captchaProgressBar) captchaProgressBar.style.width = '0%';
-            if(captchaStatusText) {
-                captchaStatusText.textContent = '';
-                captchaStatusText.className = 'captcha-status-text';
-            }
-        }
-
-        function openCaptchaModal() {
-            const loadingCaptcha = document.getElementById('loadingCaptcha');
-            const checkModel = () => {
-                if(model) {
-                    loadingCaptcha.classList.remove('show');
-                    setInitialRotation();
-                    captchaModal.style.display = 'flex';
-                } else {
-                    loadingCaptcha.classList.add('show');
-                    setTimeout(checkModel, 200);
-                }
-            };
-            checkModel();
-        }
+        // Bot-compatible manual drag properties
+        let isDragging = false, lastX, lastY;
+        const rotationSensitivity = 0.5;
 
         function checkRotation() {
             if (verificationPassed || !model) return;
+            const captchaStatusText = document.getElementById('captcha-status-text');
+            const captchaProgressBar = document.getElementById('captchaProgressBar');
+
+            const euler = new THREE.Euler().setFromQuaternion(model.quaternion, 'YXZ');
             const normalizeAngle = (angle) => angle - 2 * Math.PI * Math.floor((angle + Math.PI) / (2 * Math.PI));
-            const currentY = normalizeAngle(model.rotation.y);
-            const currentX = normalizeAngle(model.rotation.x);
-            const tolerance = 0.35; // Approx 20 degrees
+            const currentY = normalizeAngle(euler.y);
+            const currentX = normalizeAngle(euler.x);
+            const tolerance = 0.4;
+
             if (Math.abs(currentY) < tolerance && Math.abs(currentX) < tolerance) {
                 verificationPassed = true;
                 captchaStatusText.textContent = 'รอ 2 วินาที...';
@@ -283,6 +228,85 @@
             }
         }
 
+        function initCaptcha() {
+            if (captchaInitialized) return;
+
+            const canvas = document.getElementById('captcha-canvas');
+            if (!canvas) return;
+
+            scene = new THREE.Scene();
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+            renderer.setSize(300, 300);
+
+            camera = new THREE.PerspectiveCamera(75, 300 / 300, 0.1, 1000);
+            camera.position.z = 4;
+            
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.enablePan = false;
+            controls.enableZoom = false;
+            controls.target.set(0, 0.2, 0);
+
+            controls.addEventListener('change', () => {
+                if(model) {
+                    model.quaternion.copy(camera.quaternion).invert();
+                    checkRotation();
+                }
+            });
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(0, 1, 2);
+            scene.add(directionalLight);
+            
+            const loader = new GLTFLoader();
+            const loadingOverlay = document.getElementById('loadingCaptcha');
+            loadingOverlay.classList.add('show');
+
+            loader.load('apex.glb', function (gltf) {
+                model = new THREE.Group(); // Use a group to handle rotation logic for bot
+                const loadedModel = gltf.scene;
+
+                const box = new THREE.Box3().setFromObject(loadedModel);
+                const center = box.getCenter(new THREE.Vector3());
+                center.y += 0.2;
+                loadedModel.position.sub(center);
+
+                const size = box.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scale = 3.2 / maxDim;
+                loadedModel.scale.set(scale, scale, scale);
+                
+                model.add(loadedModel);
+                scene.add(model);
+                
+                loadingOverlay.classList.remove('show');
+            });
+
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            animate();
+            captchaInitialized = true;
+        }
+
+        function openCaptchaModal() {
+            const modal = document.getElementById("captchaModal");
+            modal.style.display = "flex";
+            verificationPassed = false;
+             const captchaStatusText = document.getElementById('captcha-status-text');
+            const captchaProgressBar = document.getElementById('captchaProgressBar');
+            if(captchaStatusText) captchaStatusText.textContent = '';
+            if(captchaProgressBar) captchaProgressBar.style.width = '0%';
+            initCaptcha();
+            if(controls) controls.reset();
+        }
+
+        // Bot-compatible manual drag handlers
         function handleDragStart(e) {
             e.preventDefault();
             if (!model || verificationPassed) return;
@@ -290,7 +314,6 @@
             lastX = e.clientX || e.touches[0].clientX;
             lastY = e.clientY || e.touches[0].clientY;
         }
-        
         function handleDragMove(e) {
             if (!isDragging || verificationPassed || !model) return; 
             e.preventDefault();
@@ -298,23 +321,35 @@
             const clientY = e.clientY || e.touches[0].clientY;
             const deltaX = clientX - lastX;
             const deltaY = clientY - lastY;
-            model.rotation.y += (deltaX * rotationSensitivity) * (Math.PI / 180);
-            model.rotation.x += (deltaY * rotationSensitivity) * (Math.PI / 180);
+            
+            // Apply manual rotation for the bot
+            const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+            euler.setFromQuaternion(model.quaternion);
+            euler.y -= deltaX * (rotationSensitivity / 100);
+            euler.x -= deltaY * (rotationSensitivity / 100);
+            model.setRotationFromEuler(euler);
+            
             lastX = clientX;
             lastY = clientY;
+            checkRotation();
         }
-
         function handleDragEnd() {
             if (!isDragging || !model) return;
             isDragging = false;
-            checkRotation();
         }
-        
-        canvas.addEventListener('pointerdown', handleDragStart);
+
+        const canvas = document.getElementById('captcha-canvas');
+        canvas?.addEventListener('pointerdown', handleDragStart);
         document.addEventListener('pointermove', handleDragMove); 
         document.addEventListener('pointerup', handleDragEnd);   
-        captchaTryAgainBtn.addEventListener('click', setInitialRotation); 
-        // 🎯 --- END: BOT-COMPATIBLE 3D CAPTCHA LOGIC --- 🎯
+        document.getElementById('captchaTryAgainBtn')?.addEventListener('click', () => {
+            if (controls) controls.reset();
+        });
+        document.getElementById('captchaConfirmBtn')?.addEventListener('click', () => {
+            closeModal('captchaModal');
+            openDateTimeModal();
+        });
+
     </script>
 </body>
 </html>
