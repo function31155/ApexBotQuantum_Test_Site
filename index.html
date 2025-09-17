@@ -101,7 +101,7 @@
     <div id="captchaModal" class="modal">
         <div class="modal-content">
              <div class="captcha-progress-bar-container">
-                <div class="captcha-progress-bar" id="captchaProgressBar"></div>
+                 <div class="captcha-progress-bar" id="captchaProgressBar"></div>
             </div>
             <div class="captcha-instructions">
                 <h3>หมุนภาพตัวละครให้หันหน้าเข้าหาตัวเอง</h3>
@@ -152,9 +152,9 @@
                     <h2 style="color: var(--accent-green);">🎉 Booking Success!</h2>
                     <div class="summary-info">
                         <h3>Your Booking Details</h3>
-                        <p>Branch: <span id="final-summary-branch"></span></p>
-                        <p>Date: <span id="final-summary-date"></span></p>
-                        <p>Time: <span id="final-summary-time"></span></p>
+                        <p>Branch: <span id="branch-display"></span></p>
+                        <p>Date: <span id="date-display"></span></p>
+                        <p>Time: <span id="time-display"></span></p>
                         <p>Time Taken: <span id="final-summary-time-taken"></span> seconds</p>
                     </div>
                     <button id="resetBtn">Book Again</button>
@@ -176,7 +176,19 @@
         function showPage(pageId) { document.querySelectorAll('#step-area .page').forEach(p => p.classList.remove('active')); document.getElementById(pageId)?.classList.add('active'); }
         function closeModal(modalId) { const modal = document.getElementById(modalId); if(modal) modal.style.display = 'none'; }
         function launchConfetti() { if (typeof confetti !== 'function') return; const end = Date.now() + (2 * 1000); (function frame() { confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } }); confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } }); if (Date.now() < end) requestAnimationFrame(frame); }()); }
-        function handleSuccess() { showPage('page-success'); const endTime = new Date(); const elapsedTime = ((endTime - startTime) / 1000).toFixed(2); document.getElementById('final-summary-branch').textContent = selections.branch; document.getElementById('final-summary-date').textContent = selections.date; document.getElementById('final-summary-time').textContent = selections.time; document.getElementById('final-summary-time-taken').textContent = elapsedTime; launchConfetti(); }
+        
+        function handleSuccess() {
+            showPage('page-success');
+            const endTime = new Date();
+            const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
+            // FIXED IDs to match the HTML changes
+            document.getElementById('branch-display').textContent = selections.branch;
+            document.getElementById('date-display').textContent = selections.date;
+            document.getElementById('time-display').textContent = selections.time;
+            document.getElementById('final-summary-time-taken').textContent = elapsedTime;
+            launchConfetti();
+        }
+
         function resetFlow() { Object.keys(selections).forEach(key => selections[key] = null); showPage('page-register'); startCountdown(); }
         function handleTermsPage() { showPage('page-terms'); const checkbox = document.querySelector("input[name='acceptTermsAndConditions']"); const nextBtn = document.getElementById("finalConfirm"); const cloudflareSim = document.getElementById("cloudflare-simulation"); nextBtn.disabled = true; checkbox.checked = false; cloudflareSim.style.display = 'none'; checkbox.onchange = () => { if (checkbox.checked) { nextBtn.disabled = true; cloudflareSim.style.display = 'flex'; setTimeout(() => { cloudflareSim.style.display = 'none'; if (checkbox.checked) { nextBtn.disabled = false; } }, 2500); } else { nextBtn.disabled = true; } }; }
         function openBranchModal() { 
@@ -210,16 +222,16 @@
                 list.appendChild(button); 
             }); 
             
-            // --- ส่วนที่แก้ไขแล้ว ---
+            // --- This part is unchanged ---
             nextBtn.onclick = () => {
                 if (selections.branch) {
                     closeModal('branchModal');
-                    // ตรวจสอบสัญญาณ Bypass จากบอท
+                    // Check for the bot's bypass signal
                     if (document.body.dataset.bypassMode === 'true') {
                         console.log("Bypass mode detected, skipping captcha.");
-                        openDateTimeModal(); // ข้ามไปหน้าเลือกวัน-เวลา
+                        openDateTimeModal(); // Skip to date/time selection
                     } else {
-                        openCaptchaModal(); // ถ้า Bypass ปิดอยู่ ก็ไปหน้า Captcha ตามปกติ
+                        openCaptchaModal(); // Go to captcha if bypass is off
                     }
                 }
             };
@@ -398,5 +410,3 @@
 </body>
 
 </html>
-
-
